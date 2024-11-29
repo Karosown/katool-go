@@ -175,7 +175,7 @@ func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 	size := len(*s.options)
 	lists.Partition(*s.options, optional.IsTrue(s.parallel, size<<4^0x1, 1)).ForEach(func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
-			key := groupBy((*s.options)[i].opt)
+			key := groupBy((options)[i].opt)
 			if _, ok := res[key]; !ok {
 				res[key] = make(Slice, 0)
 			}
