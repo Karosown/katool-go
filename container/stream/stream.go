@@ -12,6 +12,16 @@ type Stream[T any, Slice ~[]T] struct {
 	//parallel bool
 }
 
+func NewStream(source *[]any) *Stream[any, []any] {
+	resOptions := make(Options[any], 0)
+	for i := 0; i < len(*source); i++ {
+		resOptions = append(resOptions, Option[any]{opt: (*source)[i]})
+	}
+	return &Stream[any, []any]{
+		options: &resOptions,
+		source:  source,
+	}
+}
 func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	resOptions := make(Options[T], 0)
 	for i := 0; i < len(*source); i++ {
@@ -49,7 +59,16 @@ func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 	//}
 	//return ToStream(&resSource)
 }
-
+func (s *Stream[T, Slice]) FlatMap(fn func(i T) *Stream[any, []any]) *Stream[any, []any] {
+	size := len(*s.options)
+	resSource := make([]any, 0)
+	for i := 0; i < size; i++ {
+		runCall := fn((*s.options)[i].opt)
+		list := runCall.ToList()
+		resSource = append(resSource, list...)
+	}
+	return ToStream(&resSource)
+}
 func (s *Stream[T, Slice]) Distinct(hash algorithm.HashComputeFunction[T]) *Stream[T, Slice] {
 	//if !s.parallel {
 	res := make(Slice, 0)

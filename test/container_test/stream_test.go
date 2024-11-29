@@ -3,6 +3,7 @@ package container_test
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/duke-git/lancet/v2/maputil"
@@ -551,6 +552,19 @@ func Test_OrderBy(t *testing.T) {
 	users := userList[:]
 	by := stream.ToStream(&users).OrderBy(true, func(user user) algorithm.HashType {
 		return algorithm.HashType(user.Name)
+	}).ToList()
+	println(by)
+}
+
+func Test_FlatMap(t *testing.T) {
+	users := userList[:]
+	by := stream.ToStream(&users).FlatMap(func(user user) *stream.Stream[any, []any] {
+		split := strings.Split(user.Name, "")
+		res := make([]any, len(split))
+		for i, v := range split {
+			res[i] = v
+		}
+		return stream.NewStream(&res)
 	}).ToList()
 	println(by)
 }
