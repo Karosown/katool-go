@@ -12,17 +12,24 @@ import (
 )
 
 func Test_Partition(t *testing.T) {
-	sum := lists.Partition(userList[:], 15).Stream().Map(func(i []user) any {
-		return stream.ToStream(&i).Map(func(user user) any {
-			properties, _ := convert.CopyProperties(user, &userVo{})
-			return *properties
-		}).ToList()
-	}).Reduce("", func(cntValue any, nxt any) any {
-		anies := nxt.([]any)
-		return stream.ToStream(&anies).Reduce(cntValue, func(sumValue any, nxt any) any {
-			return sumValue.(string) + nxt.(userVo).Name
+	sum := convert.PatitonToStreamp(lists.Partition(userList[:], 15)).
+		Parallel().
+		Map(func(i []user) any {
+			return stream.ToStream(&i).Map(func(user user) any {
+				properties, _ := convert.CopyProperties(user, &userVo{})
+				return *properties
+			}).ToList()
+		}).
+		Reduce("", func(cntValue any, nxt any) any {
+			anies := nxt.([]any)
+			return stream.ToStream(&anies).Reduce(cntValue, func(sumValue any, nxt any) any {
+				return sumValue.(string) + nxt.(userVo).Name
+			}, func(sum1, sum2 any) any {
+				return sum1.(string) + sum2.(string)
+			})
+		}, func(sum1, sum2 any) any {
+			return sum1.(string) + sum2.(string)
 		})
-	})
 	println(sum.(string))
 }
 

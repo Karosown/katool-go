@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	lynxSync "github.com/Tangerg/lynx/pkg/sync"
-	"github.com/karosown/katool/container/stream"
 )
 
 type Batch[T any, RT ~[]T] struct {
@@ -50,8 +49,4 @@ func (b Batch[T, RT]) ForEach(solve func(automicDatas []T) error, async bool, li
 	}
 	err := errors.Join(errs...)
 	return err
-}
-
-func (b Batch[T, RT]) Stream() *stream.Stream[RT, []RT] {
-	return stream.ToStream(&b.SplitData)
 }

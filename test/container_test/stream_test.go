@@ -490,14 +490,18 @@ func TestOfStream(t *testing.T) {
 
 	arr := []int{1, 3, 2, 3, 3, 3, 3}
 
-	distinct := stream.ToStream(&arr).Filter(func(i int) bool {
-		return i > 1
-	}).Map(func(item int) any {
+	distinct := stream.ToStream(&arr).
+		Parallel().
+		Filter(func(i int) bool {
+			return i > 1
+		}).Map(func(item int) any {
 		return strconv.Itoa(item) + "w "
 	}).Distinct(algorithm.HASH_WITH_JSON_SUM)
 
 	fmt.Println(distinct.Reduce("", func(cntValue any, nxt any) any {
 		return cntValue.(string) + nxt.(string)
+	}, func(sum1, sum2 any) any {
+		return sum1.(string) + sum2.(string)
 	}))
 	list := distinct.ToOptionList()
 	list.ForEach(func(s any) {
@@ -521,12 +525,16 @@ func Test_Map(t *testing.T) {
 	userStream := stream.ToStream(&ul)
 	println(userStream.Count())
 	// 排序
-	stream.ToStream(&ul).Sort(func(a user, b user) bool { return a.Id > b.Id }).ForEach(func(item user) { println(convert.ConvertToString(item.Id) + " " + item.Name) })
+	stream.ToStream(&ul).
+		Parallel().
+		Sort(func(a user, b user) bool { return a.Id > b.Id }).ForEach(func(item user) { println(convert.ConvertToString(item.Id) + " " + item.Name) })
 	// 求和
-	totalMoney := userStream.Reduce(int64(0), func(cntValue any, nxt user) any { return cntValue.(int64) + int64(nxt.Money) })
+	totalMoney := userStream.Reduce(int64(0), func(cntValue any, nxt user) any { return cntValue.(int64) + int64(nxt.Money) }, func(sum1, sum2 any) any {
+		return sum1.(int64) + sum2.(int64)
+	})
 	println(totalMoney.(int64))
 	// 过滤
-	userStream.Filter(func(item user) bool { return item.Sex != 0 }).ToOptionList().ForEach(func(item user) { println(item.Name) })
+	userStream.Filter(func(item user) bool { return item.Sex != 0 }).Distinct(algorithm.HASH_WITH_JSON_MD5).ToOptionList().ForEach(func(item user) { println(item.Name) })
 	// 转换
 	s := userStream.Map(func(item user) any {
 		properties, err := convert.CopyProperties(&item, &userVo{})
@@ -550,21 +558,23 @@ func Test_GroupBy(t *testing.T) {
 
 func Test_OrderBy(t *testing.T) {
 	users := userList[:]
-	by := stream.ToStream(&users).OrderBy(true, func(user user) algorithm.HashType {
-		return algorithm.HashType(user.Name)
+	by := stream.ToStream(&users).OrderBy(true, func(u any) algorithm.HashType {
+		return algorithm.HashType(u.(user).Name)
 	}).ToList()
 	println(by)
 }
 
 func Test_FlatMap(t *testing.T) {
 	users := userList[:]
-	by := stream.ToStream(&users).FlatMap(func(user user) *stream.Stream[any, []any] {
+	stream.ToStream(&users).Parallel().FlatMap(func(user user) *stream.Stream[any, []any] {
 		split := strings.Split(user.Name, "")
 		res := make([]any, len(split))
 		for i, v := range split {
 			res[i] = v
 		}
 		return stream.NewStream(&res)
-	}).ToList()
-	println(by)
+	}).ForEach(func(item any) {
+		println(item.(string))
+	})
+
 }

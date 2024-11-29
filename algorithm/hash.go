@@ -6,7 +6,7 @@ import (
 )
 
 type HashType string
-type HashComputeFunction[T any] func(T) HashType
+type HashComputeFunction func(any2 any) HashType
 
 func HASH_WITH_JSON(cnt any) HashType {
 	marshal, err := json.Marshal(cnt)
