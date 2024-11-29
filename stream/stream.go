@@ -78,9 +78,9 @@ func (s *Stream[T, Slice]) Collect(call func(data Options[T], sourceData Slice) 
 	return res
 }
 
-func (s *Options[T]) ForEach(fn func(item T)) {
-	for i := 0; i < len(*s); i++ {
-		fn((*s)[i].opt)
+func (s Options[T]) ForEach(fn func(item T)) {
+	for i := 0; i < len(s); i++ {
+		fn((s)[i].opt)
 	}
 }
 
