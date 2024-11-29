@@ -81,12 +81,23 @@ func Test_Map(t *testing.T) {
 			Id:    2,
 		},
 	}
+	// 计数
 	userStream := stream.ToStream(&userList)
 	println(userStream.Count())
+	// 排序
+	stream.ToStream(&userList).Sort(func(a User, b User) bool { return a.Id > b.Id }).ToOptionList().ForEach(func(item User) {
+		println(convert.ConvertToString(item.Id) + "" + item.Name)
+	})
+	// 求和
 	totalMoney := userStream.Reduce(int64(0), func(cntValue any, nxt User) any {
 		return cntValue.(int64) + int64(nxt.Money)
 	})
 	println(totalMoney.(int64))
+	// 过滤
+	userStream.Filter(func(item User) bool { return item.Sex != 0 }).ToOptionList().ForEach(func(item User) {
+		println(item.Name)
+	})
+	// 转换
 	s := userStream.Map(func(item User) any {
 		properties, err := convert.CopyProperties(&item, &UserVo{})
 		if err != nil {

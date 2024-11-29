@@ -1,5 +1,9 @@
 package stream
 
+import (
+	"sort"
+)
+
 type Option[T any] struct {
 	opt T
 }
@@ -73,14 +77,26 @@ func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, it
 	}
 	return res
 }
+func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
+	sort.SliceStable(*s.options, func(i, j int) bool {
+		return orderBy((*s.options)[i].opt, (*s.options)[j].opt)
+	})
+	return s
+}
 func (s *Stream[T, Slice]) Collect(call func(data Options[T], sourceData Slice) any) any {
 	res := call(*s.options, *s.source)
 	return res
 }
 
+// you can't change the options data with you use the function,if you want to change the options data,use the Stream.ForEach
 func (s Options[T]) ForEach(fn func(item T)) {
 	for i := 0; i < len(s); i++ {
 		fn((s)[i].opt)
+	}
+}
+func (s *Stream[T, Slice]) ForEach(fn func(item T)) {
+	for i := 0; i < len(*s.options); i++ {
+		fn((*s.options)[i].opt)
 	}
 }
 
