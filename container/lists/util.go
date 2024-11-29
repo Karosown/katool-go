@@ -5,24 +5,25 @@ import (
 	"sync"
 
 	lynxSync "github.com/Tangerg/lynx/pkg/sync"
+	"github.com/karosown/katool/container/stream"
 )
 
-type Batch[T any] struct {
-	SplitData [][]T
+type Batch[T any, RT ~[]T] struct {
+	SplitData []RT
 }
 
-func Pation[T any](datas []T, size int) Batch[T] {
+func Partition[T any](datas []T, size int) Batch[T, []T] {
 	splitData := make([][]T, 0)
 	for i := 0; i < len(datas); i += size {
 		splitData = append(splitData, datas[i:min(i+size, len(datas))])
 	}
 
-	return Batch[T]{
+	return Batch[T, []T]{
 		SplitData: splitData,
 	}
 }
 
-func (b Batch[T]) ForEach(solve func(automicDatas []T) error, async bool, limiter *lynxSync.Limiter) error {
+func (b Batch[T, RT]) ForEach(solve func(automicDatas []T) error, async bool, limiter *lynxSync.Limiter) error {
 	errs := make([]error, 0)
 	if async {
 		countDownLatch := &sync.WaitGroup{}
@@ -49,4 +50,8 @@ func (b Batch[T]) ForEach(solve func(automicDatas []T) error, async bool, limite
 	}
 	err := errors.Join(errs...)
 	return err
+}
+
+func (b Batch[T, RT]) Stream() *stream.Stream[RT, []RT] {
+	return stream.ToStream(&b.SplitData)
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"katool/log"
+	"github.com/karosown/katool/log"
 )
 
 type BackData any

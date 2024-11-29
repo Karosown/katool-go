@@ -5,11 +5,11 @@ import (
 	"path"
 	"testing"
 
+	"github.com/karosown/katool/log"
+	remote "github.com/karosown/katool/net/http"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"katool/log"
-	remote "katool/net/http"
 )
 
 func newLogger(c *Config) *zap.SugaredLogger {

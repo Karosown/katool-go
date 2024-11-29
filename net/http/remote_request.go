@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"katool/log"
+	"github.com/karosown/katool/log"
 )
 
 type ReqApi interface {

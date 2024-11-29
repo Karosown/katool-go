@@ -3,7 +3,7 @@ package stream
 import (
 	"sort"
 
-	"katool/algorithm"
+	"github.com/karosown/katool/algorithm"
 )
 
 type Option[T any] struct {
