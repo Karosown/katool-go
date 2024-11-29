@@ -50,7 +50,7 @@ func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 	//return ToStream(&resSource)
 }
 
-func (s *Stream[T, Slice]) Distinct(hash func(cnt T) algorithm.HashType) *Stream[T, Slice] {
+func (s *Stream[T, Slice]) Distinct(hash algorithm.HashComputeFunction[T]) *Stream[T, Slice] {
 	//if !s.parallel {
 	res := make(Slice, 0)
 	size := len(*s.options)
@@ -124,6 +124,17 @@ func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 		res[key] = append(res[key], (*s.source)[i])
 	}
 	return res
+}
+
+func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunction[T]) *Stream[T, Slice] {
+	sort.SliceStable(*s.options, func(i, j int) bool {
+		if desc {
+			return orderBy((*s.options)[i].opt) > orderBy((*s.options)[j].opt)
+		} else {
+			return orderBy((*s.options)[i].opt) < orderBy((*s.options)[j].opt)
+		}
+	})
+	return s
 }
 
 func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
