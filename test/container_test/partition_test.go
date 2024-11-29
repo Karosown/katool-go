@@ -37,7 +37,7 @@ func Test_ForEach(t *testing.T) {
 
 	i := atomic.Uint32{}
 
-	lists.Partition(userList[:], 15).ForEach(func(automicDatas []user) error {
+	lists.Partition(userList[:], 15).ForEach(func(pos int, automicDatas []user) error {
 		i.Add(1)
 		fmt.Println("分批处理" + convert.ConvertToString(i.Load()))
 		stream.ToStream(&automicDatas).ForEach(func(data user) {

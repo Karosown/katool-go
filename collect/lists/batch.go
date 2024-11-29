@@ -22,26 +22,26 @@ func Partition[T any](datas []T, size int) Batch[T, []T] {
 	}
 }
 
-func (b Batch[T, RT]) ForEach(solve func(automicDatas []T) error, async bool, limiter *lynxSync.Limiter) error {
+func (b Batch[T, RT]) ForEach(solve func(pos int, automicDatas []T) error, async bool, limiter *lynxSync.Limiter) error {
 	errs := make([]error, 0)
 	if async {
 		countDownLatch := &sync.WaitGroup{}
 		countDownLatch.Add(len(b.SplitData))
-		for _, data := range b.SplitData {
+		for i, data := range b.SplitData {
 			limiter.Acquire()
-			go func(datas []T) {
+			go func(datas []T, pos int) {
 				defer countDownLatch.Done()
-				err := solve(datas)
+				err := solve(pos, datas)
 				if err != nil {
 					errs = append(errs, err)
 				}
 				defer limiter.Release()
-			}(data)
+			}(data, i)
 		}
 		countDownLatch.Wait()
 	} else {
-		for _, data := range b.SplitData {
-			err := solve(data)
+		for i, data := range b.SplitData {
+			err := solve(i, data)
 			if err != nil {
 				errs = append(errs, err)
 			}
