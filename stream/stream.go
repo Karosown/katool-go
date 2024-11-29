@@ -58,14 +58,25 @@ func (s *Stream[T, Slice]) Distinct(hash func(cnt T) algorithm.HashType) *Stream
 	//if !s.parallel {
 	res := make(Slice, 0)
 	size := len(*s.options)
-	sort.SliceStable(*s.options, func(i, j int) bool {
-		return hash((*s.options)[i].opt) < hash((*s.options)[j].opt)
-	})
-	for i := 0; i < size; i++ {
-		if i == 0 {
-			res = append(res, (*s.options)[i].opt)
-		} else if hash((*s.options)[i-1].opt) != hash((*s.options)[i].opt) {
-			res = append(res, (*s.options)[i].opt)
+	if size < 1e10+5 {
+		sort.SliceStable(*s.options, func(i, j int) bool {
+			return hash((*s.options)[i].opt) < hash((*s.options)[j].opt)
+		})
+		for i := 0; i < size; i++ {
+			if i == 0 {
+				res = append(res, (*s.options)[i].opt)
+			} else if hash((*s.options)[i-1].opt) != hash((*s.options)[i].opt) {
+				res = append(res, (*s.options)[i].opt)
+			}
+		}
+	} else {
+		//  if large data, use map
+		m := make(map[algorithm.HashType]bool, 0)
+		for i := 0; i < size; i++ {
+			if _, ok := m[hash((*s.options)[i].opt)]; !ok {
+				m[hash((*s.options)[i].opt)] = true
+				res = append(res, (*s.options)[i].opt)
+			}
 		}
 	}
 	return ToStream(&res)
