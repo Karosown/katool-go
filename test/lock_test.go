@@ -3,9 +3,9 @@ package test
 import (
 	"testing"
 
+	"katool/container/stream"
 	"katool/convert"
 	"katool/lock"
-	"katool/stream"
 )
 
 func TestLockSupport(t *testing.T) {

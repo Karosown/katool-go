@@ -7,8 +7,8 @@ import (
 
 	"github.com/duke-git/lancet/v2/maputil"
 	"katool/algorithm"
+	"katool/container/stream"
 	"katool/convert"
-	"katool/stream"
 )
 
 func TestOfStream(t *testing.T) {
