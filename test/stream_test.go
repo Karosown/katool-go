@@ -6,23 +6,21 @@ import (
 	"testing"
 
 	"github.com/duke-git/lancet/v2/maputil"
-	"go.uber.org/zap"
+	"katool/algorithm"
 	"katool/convert"
-	remote "katool/net/http"
 	"katool/stream"
 )
 
 func TestOfStream(t *testing.T) {
 
-	arr := []int{1, 2, 3, 3, 3, 3}
+	arr := []int{1, 3, 2, 3, 3, 3, 3}
 
 	distinct := stream.ToStream(&arr).Filter(func(i int) bool {
 		return i > 1
 	}).Map(func(item int) any {
 		return strconv.Itoa(item) + "w "
-	}).Distinct(func(cnt, nxt any) bool {
-		return cnt.(string) == nxt.(string)
-	})
+	}).Distinct(algorithm.HASH_WITH_JSON)
+
 	fmt.Println(distinct.Reduce("", func(cntValue any, nxt any) any {
 		return cntValue.(string) + nxt.(string)
 	}))
@@ -40,9 +38,6 @@ func TestOfStream(t *testing.T) {
 	maputil.ForEach(toMap, func(key any, value any) {
 		fmt.Printf("key: %v, value: %v\n", key, value)
 	})
-	req := remote.OAuth2Req{}
-	logger := zap.SugaredLogger{}
-	req.SetLogger(&logger)
 }
 
 func Test_Map(t *testing.T) {
