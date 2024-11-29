@@ -22,7 +22,7 @@ func Test_Partition(t *testing.T) {
 		Sex  int    `json:"sex"`
 		Id   int    `json:"id"`
 	}
-	userList := []User{
+	userList := [...]User{
 		{
 			Name:  "张三",
 			Age:   18,
@@ -481,7 +481,7 @@ func Test_Partition(t *testing.T) {
 			Id:    2,
 		},
 	}
-	sum := lists.Partition(userList, 15).Stream().Map(func(i []User) any {
+	sum := lists.Partition(userList[:], 15).Stream().Map(func(i []User) any {
 		return stream.ToStream(&i).Map(func(user User) any {
 			properties, _ := convert.CopyProperties(user, &UserVo{})
 			return *properties
