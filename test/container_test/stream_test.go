@@ -25,81 +25,6 @@ type userVo struct {
 	Id   int    `json:"id"`
 }
 
-func TestOfStream(t *testing.T) {
-
-	arr := []int{1, 3, 2, 3, 3, 3, 3}
-
-	distinct := stream.ToStream(&arr).Filter(func(i int) bool {
-		return i > 1
-	}).Map(func(item int) any {
-		return strconv.Itoa(item) + "w "
-	}).Distinct(algorithm.HASH_WITH_JSON_SUM)
-
-	fmt.Println(distinct.Reduce("", func(cntValue any, nxt any) any {
-		return cntValue.(string) + nxt.(string)
-	}))
-	list := distinct.ToOptionList()
-	list.ForEach(func(s any) {
-		fmt.Println(s)
-	})
-
-	toMap := stream.ToStream(&arr).ToMap(func(index int, item int) any {
-		return index
-	}, func(index int, item int) any {
-		return item
-	})
-
-	maputil.ForEach(toMap, func(key any, value any) {
-		fmt.Printf("key: %v, value: %v\n", key, value)
-	})
-}
-
-func Test_Map(t *testing.T) {
-	userList := []user{
-		{
-			Name:  "张三",
-			Age:   18,
-			Sex:   0,
-			Money: 23456789,
-		},
-		{
-			Name:  "李四",
-			Age:   28,
-			Sex:   1,
-			Money: 23456789,
-			Id:    1,
-		},
-		{
-			Name:  "王五",
-			Age:   38,
-			Sex:   0,
-			Money: 23456789,
-			Id:    2,
-		},
-	}
-	// 计数
-	userStream := stream.ToStream(&userList)
-	println(userStream.Count())
-	// 排序
-	stream.ToStream(&userList).Sort(func(a user, b user) bool { return a.Id > b.Id }).ForEach(func(item user) { println(convert.ConvertToString(item.Id) + " " + item.Name) })
-	// 求和
-	totalMoney := userStream.Reduce(int64(0), func(cntValue any, nxt user) any { return cntValue.(int64) + int64(nxt.Money) })
-	println(totalMoney.(int64))
-	// 过滤
-	userStream.Filter(func(item user) bool { return item.Sex != 0 }).ToOptionList().ForEach(func(item user) { println(item.Name) })
-	// 转换
-	s := userStream.Map(func(item user) any {
-		properties, err := convert.CopyProperties(&item, &userVo{})
-		if err != nil {
-			panic(err)
-		}
-		return properties
-	}).ToOptionList()
-	s.ForEach(func(s any) {
-		fmt.Println(s)
-	})
-}
-
 var userList = [...]user{
 	{
 		Name:  "张三",
@@ -558,6 +483,60 @@ var userList = [...]user{
 		Money: 23456789,
 		Id:    2,
 	},
+}
+
+func TestOfStream(t *testing.T) {
+
+	arr := []int{1, 3, 2, 3, 3, 3, 3}
+
+	distinct := stream.ToStream(&arr).Filter(func(i int) bool {
+		return i > 1
+	}).Map(func(item int) any {
+		return strconv.Itoa(item) + "w "
+	}).Distinct(algorithm.HASH_WITH_JSON_SUM)
+
+	fmt.Println(distinct.Reduce("", func(cntValue any, nxt any) any {
+		return cntValue.(string) + nxt.(string)
+	}))
+	list := distinct.ToOptionList()
+	list.ForEach(func(s any) {
+		fmt.Println(s)
+	})
+
+	toMap := stream.ToStream(&arr).ToMap(func(index int, item int) any {
+		return index
+	}, func(index int, item int) any {
+		return item
+	})
+
+	maputil.ForEach(toMap, func(key any, value any) {
+		fmt.Printf("key: %v, value: %v\n", key, value)
+	})
+}
+
+func Test_Map(t *testing.T) {
+	ul := userList[:]
+	// 计数
+	userStream := stream.ToStream(&ul)
+	println(userStream.Count())
+	// 排序
+	stream.ToStream(&ul).Sort(func(a user, b user) bool { return a.Id > b.Id }).ForEach(func(item user) { println(convert.ConvertToString(item.Id) + " " + item.Name) })
+	// 求和
+	totalMoney := userStream.Reduce(int64(0), func(cntValue any, nxt user) any { return cntValue.(int64) + int64(nxt.Money) })
+	println(totalMoney.(int64))
+	// 过滤
+	userStream.Filter(func(item user) bool { return item.Sex != 0 }).ToOptionList().ForEach(func(item user) { println(item.Name) })
+	// 转换
+	s := userStream.Map(func(item user) any {
+		properties, err := convert.CopyProperties(&item, &userVo{})
+		if err != nil {
+			panic(err)
+		}
+		return properties
+	}).ToOptionList()
+	s.ForEach(func(s any) {
+		fmt.Println(s)
+	})
 }
 
 func Test_GroupBy(t *testing.T) {
