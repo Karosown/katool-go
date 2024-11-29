@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 
-	remote "katool/net/http"
+	remote "github.com/karosown/katool/net/http"
 )
 
 type XMLEnDeCodeFormat struct {

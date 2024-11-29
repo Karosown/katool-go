@@ -3,8 +3,8 @@ package remote
 import (
 	"fmt"
 
-	"katool/file/file_serialize"
-	remote "katool/net/http"
+	"github.com/karosown/katool/file/file_serialize"
+	remote "github.com/karosown/katool/net/http"
 )
 
 type TextEnDecodeFormat struct {

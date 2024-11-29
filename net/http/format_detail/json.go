@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	remote "katool/net/http"
+	remote "github.com/karosown/katool/net/http"
 )
 
 type JSONEnDeCodeFormat struct {

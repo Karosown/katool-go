@@ -5,7 +5,7 @@ import (
 	"compress/gzip"
 	"io"
 
-	remote "katool/net/http"
+	remote "github.com/karosown/katool/net/http"
 )
 
 type GzipEnDecodeFormat struct {

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	remote "katool/net/http"
+	remote "github.com/karosown/katool/net/http"
 )
 
 type RemoteMultiMultiFileDeCodeFormat struct {
