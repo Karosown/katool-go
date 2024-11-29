@@ -19,7 +19,7 @@ func TestOfStream(t *testing.T) {
 		return i > 1
 	}).Map(func(item int) any {
 		return strconv.Itoa(item) + "w "
-	}).Distinct(algorithm.HASH_WITH_JSON)
+	}).Distinct(algorithm.HASH_WITH_JSON_SUM)
 
 	fmt.Println(distinct.Reduce("", func(cntValue any, nxt any) any {
 		return cntValue.(string) + nxt.(string)
