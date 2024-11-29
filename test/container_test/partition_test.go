@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	lynx "github.com/Tangerg/lynx/pkg/sync"
-	"github.com/karosown/katool/container/lists"
+	"github.com/karosown/katool/collect/lists"
 	"github.com/karosown/katool/container/stream"
 	"github.com/karosown/katool/convert"
 )
