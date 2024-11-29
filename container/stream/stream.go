@@ -6,10 +6,6 @@ import (
 	"github.com/karosown/katool/algorithm"
 )
 
-type Option[T any] struct {
-	opt T
-}
-type Options[T any] []Option[T]
 type Stream[T any, Slice ~[]T] struct {
 	options *Options[T]
 	source  *Slice
@@ -117,6 +113,19 @@ func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, it
 	}
 	return res
 }
+
+func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
+	res := make(map[any]Slice, 0)
+	for i := 0; i < len(*s.options); i++ {
+		key := groupBy((*s.options)[i].opt)
+		if _, ok := res[key]; !ok {
+			res[key] = make(Slice, 0)
+		}
+		res[key] = append(res[key], (*s.source)[i])
+	}
+	return res
+}
+
 func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 	sort.SliceStable(*s.options, func(i, j int) bool {
 		return orderBy((*s.options)[i].opt, (*s.options)[j].opt)
@@ -128,21 +137,6 @@ func (s *Stream[T, Slice]) Collect(call func(data Options[T], sourceData Slice) 
 	return res
 }
 
-// you can't change the options data with you use the function,if you want to change the options data,use the Stream.ForEach
-func (s Options[T]) ForEach(fn func(item T)) Options[T] {
-	for i := 0; i < len(s); i++ {
-		fn((s)[i].opt)
-	}
-	return s
-}
-
-func (s Options[T]) Stream() *Stream[T, []T] {
-	res := make([]T, 0)
-	for i := 0; i < len(s); i++ {
-		res = append(res, s[i].opt)
-	}
-	return ToStream(&res)
-}
 func (s *Stream[T, Slice]) ForEach(fn func(item T)) {
 	for i := 0; i < len(*s.options); i++ {
 		fn((*s.options)[i].opt)

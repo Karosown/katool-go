@@ -98,3 +98,483 @@ func Test_Map(t *testing.T) {
 		fmt.Println(s)
 	})
 }
+
+func Test_GroupBy(t *testing.T) {
+	type User struct {
+		Name  string `json:"name"`
+		Age   int    `json:"age"`
+		Sex   int    `json:"sex"`
+		Money int    `json:"money"`
+		Id    int    `json:"id"`
+	}
+	type UserVo struct {
+		Name string `json:"name"`
+		Age  int    `json:"age"`
+		Sex  int    `json:"sex"`
+		Id   int    `json:"id"`
+	}
+	userList := [...]User{
+		{
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		}, {
+			Name:  "张三",
+			Age:   18,
+			Sex:   0,
+			Money: 23456789,
+		},
+		{
+			Name:  "李四",
+			Age:   28,
+			Sex:   1,
+			Money: 23456789,
+			Id:    1,
+		},
+		{
+			Name:  "王五",
+			Age:   38,
+			Sex:   0,
+			Money: 23456789,
+			Id:    2,
+		},
+	}
+	users := userList[:]
+	by := stream.ToStream(&users).GroupBy(func(user User) any {
+		return user.Name
+	})
+	println(by)
+}
