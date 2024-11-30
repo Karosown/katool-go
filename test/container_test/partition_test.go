@@ -2,7 +2,6 @@ package container_test
 
 import (
 	"fmt"
-	"sync/atomic"
 	"testing"
 
 	lynx "github.com/Tangerg/lynx/pkg/sync"
@@ -34,13 +33,9 @@ func Test_Partition(t *testing.T) {
 }
 
 func Test_ForEach(t *testing.T) {
-
-	i := atomic.Uint32{}
-
 	lists.Partition(userList[:], 15).ForEach(func(pos int, automicDatas []user) error {
-		i.Add(1)
-		fmt.Println("分批处理" + convert.ConvertToString(i.Load()))
-		stream.ToStream(&automicDatas).ForEach(func(data user) {
+		fmt.Println("分批处理 第" + convert.ConvertToString(pos) + "批")
+		stream.ToStream(&automicDatas).Parallel().ForEach(func(data user) {
 			fmt.Println(data)
 		})
 		return nil

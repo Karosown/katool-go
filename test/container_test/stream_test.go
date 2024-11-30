@@ -508,7 +508,7 @@ func TestOfStream(t *testing.T) {
 		fmt.Println(s)
 	})
 
-	toMap := stream.ToStream(&arr).ToMap(func(index int, item int) any {
+	toMap := stream.ToStream(&arr).Parallel().ToMap(func(index int, item int) any {
 		return index
 	}, func(index int, item int) any {
 		return item

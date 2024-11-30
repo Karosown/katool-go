@@ -101,18 +101,25 @@ func (s *Stream[T, Slice]) Distinct(hash algorithm.HashComputeFunction) *Stream[
 	//}
 	//return nil
 }
-func (s *Stream[T, Slice]) Reduce(begin any, singleSolve func(cntValue any, nxt T) any, parallelResultSolve func(sum1, sum2 any) any) any {
+func (s *Stream[T, Slice]) Reduce(begin any, atomicSolveFunction func(cntValue any, nxt T) any, parallelResultSolve func(sum1, sum2 any) any) any {
+	if atomicSolveFunction == nil {
+		panic("atomicSolveFunction must not nil")
+	}
 	size := len(*s.options)
 	beginType := reflect.TypeOf(begin)
 	lock := &sync.Mutex{}
 	lists.Partition(*s.options, optional.IsTrue(s.parallel, size<<4^0x1, 1)).ForEach(func(pos int, options []Option[T]) error {
 		currentBegin := reflect.New(beginType).Elem().Interface()
 		for i := 0; i < len(options); i++ {
-			currentBegin = singleSolve(currentBegin, options[i].opt)
+			currentBegin = atomicSolveFunction(currentBegin, options[i].opt)
 		}
 		lock.Lock()
 		defer lock.Unlock()
+		if s.parallel && parallelResultSolve == nil {
+			panic("parallelResultSolve must not be nil where parallelResult")
+		}
 		begin = parallelResultSolve(begin, currentBegin)
+
 		return nil
 	}, s.parallel, lynx.NewLimiter(optional.IsTrue(s.parallel, algorithm.NumOfTwoMultiply(size), 1)))
 	return begin
