@@ -591,15 +591,15 @@ func Test_OrderBy_Round(t *testing.T) {
 	}
 	var unParallel []int
 	computed := util.BeginEndTimeComputed(func() {
-		unParallel = stream.ToStream(&users).OrderBy(false, func(u any) algorithm.HashType {
-			return algorithm.HashType(convert.ConvertToString(u.(int)))
+		unParallel = stream.ToStream(&users).OrderById(false, func(u any) algorithm.IdType {
+			return algorithm.IdType((u.(int)))
 		}).ToList()
 	})
 	println(computed)
 	var parallel []int
 	computed = util.BeginEndTimeComputed(func() {
-		parallel = stream.ToStream(&users).Parallel().OrderBy(false, func(u any) algorithm.HashType {
-			return algorithm.HashType(convert.ConvertToString(u.(int)))
+		parallel = stream.ToStream(&users).Parallel().OrderById(false, func(u any) algorithm.IdType {
+			return algorithm.IdType((u.(int)))
 		}).ToList()
 	})
 	println(computed)

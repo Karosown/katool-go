@@ -6,9 +6,6 @@ import (
 	"reflect"
 	"strconv"
 	"time"
-
-	"github.com/karosown/katool/collect/lists"
-	"github.com/karosown/katool/container/stream"
 )
 
 func Convert[T any, R any](datas []T, vacuumMachine func(agent T) R) []R {
@@ -128,8 +125,4 @@ func ConvertToString(source any) string {
 		str = string(newValue)
 	}
 	return str
-}
-
-func PatitonToStream[T any, RT ~[]T](pattion lists.Batch[T, RT]) *stream.Stream[RT, []RT] {
-	return stream.ToStream(&pattion.SplitData)
 }

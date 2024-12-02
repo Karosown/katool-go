@@ -5,13 +5,14 @@ import (
 	"testing"
 
 	lynx "github.com/Tangerg/lynx/pkg/sync"
+	"github.com/karosown/katool/collect"
 	"github.com/karosown/katool/collect/lists"
 	"github.com/karosown/katool/container/stream"
 	"github.com/karosown/katool/convert"
 )
 
 func Test_Partition(t *testing.T) {
-	sum := convert.PatitonToStream(lists.Partition(userList[:], 15)).
+	sum := collect.PatitonToStream(lists.Partition(userList[:], 15)).
 		Parallel().
 		Map(func(i []user) any {
 			return stream.ToStream(&i).Map(func(user user) any {

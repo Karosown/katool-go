@@ -89,7 +89,8 @@ func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 }
 func goRun[T any](datas []T, parallel bool, solve func(pos int, automicDatas []T) error) {
 	size := len(datas)
-	err := lists.Partition(datas, optional.IsTrue(parallel, (size>>2)^1, 1)).ForEach(solve, parallel, lynx.NewLimiter(optional.IsTrue(parallel, algorithm.NumOfTwoMultiply(size), 1)))
+	page := optional.IsTrue((size>>2) == 0, 1, (size >> 2))
+	err := lists.Partition(datas, optional.IsTrue(parallel, page, 1)).ForEach(solve, parallel, lynx.NewLimiter(optional.IsTrue(parallel, algorithm.NumOfTwoMultiply(size), 1)))
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -99,7 +100,7 @@ func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 	resSource := make([]any, 0)
 	size := len(*s.options)
 	resChan := make(chan any, size)
-	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			runCall := fn(options[i].opt)
 			resChan <- runCall
@@ -107,7 +108,7 @@ func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 		return nil
 	})
 	//if !s.parallel {
-	for i := 0; i < size; i++ {
+	for i := 0; i < cap(resChan); i++ {
 		resSource = append(resSource, <-resChan)
 	}
 	return ToStream(&resSource)
@@ -116,7 +117,7 @@ func (s *Stream[T, Slice]) FlatMap(fn func(i T) *Stream[any, []any]) *Stream[any
 	size := len(*s.options)
 	resSource := make([]any, 0)
 	resChan := make(chan []any, size)
-	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			runCall := fn(options[i].opt)
 			resChan <- runCall.ToList()
@@ -168,7 +169,7 @@ func (s *Stream[T, Slice]) Reduce(begin any, atomicSolveFunction func(cntValue a
 	//size := len(*s.options)
 	beginType := reflect.TypeOf(begin)
 	lock := &sync.Mutex{}
-	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		if s.parallel {
 			currentBegin := reflect.New(beginType).Elem().Interface()
 			for i := 0; i < len(options); i++ {
@@ -194,7 +195,7 @@ func (s *Stream[T, Slice]) Filter(fn func(i T) bool) *Stream[T, Slice] {
 	res := make(Slice, 0)
 	size := len(*s.options)
 	resChan := make(chan T, size)
-	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			if fn((options)[i].opt) {
 				resChan <- (options)[i].opt
@@ -214,7 +215,7 @@ func (s *Stream[T, Slice]) ToList() []T {
 	res := make([]T, 0)
 	size := len(*s.options)
 	resChan := make(chan T, size)
-	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			resChan <- (options)[i].opt
 		}
@@ -228,7 +229,7 @@ func (s *Stream[T, Slice]) ToList() []T {
 func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, item T) any) map[any]any {
 	ress := sync.Map{}
 	size := len(*s.options)
-	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			ress.Store(k(pos*optional.IsTrue(s.parallel, size<<4^0x1, 1)+i, (options)[i].opt), v(pos*optional.IsTrue(s.parallel, size<<4^0x1, 1)+i, (options)[i].opt))
 		}
@@ -245,7 +246,7 @@ func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, it
 func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 	res := make(map[any]Slice, 0)
 	//size := len(*s.options)
-	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			key := groupBy((options)[i].opt)
 			if _, ok := res[key]; !ok {
@@ -261,10 +262,12 @@ func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunction) *Stream[T, Slice] {
 	if !s.parallel {
 		sort.SliceStable(*s.options, func(i, j int) bool {
+			a := orderBy((*s.options)[i].opt)
+			b := orderBy((*s.options)[j].opt)
 			if desc {
-				return orderBy((*s.options)[i].opt) > orderBy((*s.options)[j].opt)
+				return a > b
 			} else {
-				return orderBy((*s.options)[i].opt) < orderBy((*s.options)[j].opt)
+				return a < b
 			}
 		})
 		return s
@@ -273,22 +276,120 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 	//size := len(*s.options)
 	data := make([]Options[T], 0)
 	// opt opt opt opt -> opts opts
-	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		data = append(data, options)
 		return nil
 	})
 	optionsStream := NewOptionsStream[T, Options[T]](&data)
-	optionsStream.parallel = s.parallel
-	res := optionsStream.Map(func(options Options[any]) any {
+	optionsStream.parallel = false
+	sortedMap := optionsStream.Map(func(options Options[any]) any {
 		sort.SliceStable(options, func(i, j int) bool {
+			a := orderBy(options[i].opt)
+			b := orderBy(options[j].opt)
 			if desc {
-				return orderBy((options)[i].opt) > orderBy((options)[j].opt)
+				return a > b
 			} else {
-				return orderBy((options)[i].opt) < orderBy((options)[j].opt)
+				return a < b
 			}
 		})
 		return options
-	}).Map(func(v any) any {
+	})
+	sortedMap.parallel = false
+	res := sortedMap.Map(func(v any) any {
+		i := v.(Options[any])
+		ress := NewOptionStream(&i).Map(func(item Option[any]) any {
+			return item.opt
+		}).ToList()
+		return ress
+	}).ToList()
+	re := make([]any, 0)
+	mergeSorted := ToStream(&res).Reduce(re, func(cntValue any, nxt any) any {
+		ts := cntValue.([]any)
+		nxts := nxt.([]any)
+		if len(nxts) == 0 {
+			return ts
+		}
+		lenRe := len(ts)
+		lenNxt := len(nxts)
+		ress := make([]any, 0)
+		l := 0
+		r := 0
+		for l < lenRe && r < lenNxt {
+			current := nxts[r].(T)
+			total := ts[l].(T)
+			if orderBy(total) > orderBy(current) {
+				if desc {
+					ress = append(ress, total)
+					l++
+				} else {
+					ress = append(ress, current)
+					r++
+				}
+			} else {
+				if desc {
+					ress = append(ress, current)
+					r++
+				} else {
+					ress = append(ress, total)
+					l++
+				}
+			}
+		}
+
+		if r < lenNxt {
+			ress = append(ress, nxts[r:lenNxt]...)
+		}
+		if l < lenRe {
+			ress = append(ress, ts[l:lenRe]...)
+		}
+		return ress
+	}, nil).([]any)
+	result := make(Slice, 0)
+	for i := 0; i < len(mergeSorted); i++ {
+		result = append(result, mergeSorted[i].(T))
+	}
+	//stream := ToStream(&result)
+	stream := ToStream(&result)
+	return stream
+}
+
+func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunction) *Stream[T, Slice] {
+	if !s.parallel {
+		sort.SliceStable(*s.options, func(i, j int) bool {
+			a := orderBy((*s.options)[i].opt)
+			b := orderBy((*s.options)[j].opt)
+			if desc {
+				return a > b
+			} else {
+				return a < b
+			}
+		})
+		return s
+	}
+
+	//size := len(*s.options)
+	data := make([]Options[T], 0)
+	// opt opt opt opt -> opts opts
+	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
+		data = append(data, options)
+		return nil
+	})
+	optionsStream := NewOptionsStream[T, Options[T]](&data)
+	optionsStream.parallel = false
+	sortedMap := optionsStream.Map(func(options Options[any]) any {
+		sort.SliceStable(options, func(i, j int) bool {
+			a := orderBy(options[i].opt)
+			b := orderBy(options[j].opt)
+			if desc {
+				return a > b
+			} else {
+				return a < b
+			}
+		})
+		return options
+	})
+	sortedMap.parallel = false
+	res := sortedMap.Map(func(v any) any {
 		i := v.(Options[any])
 		ress := NewOptionStream(&i).Map(func(item Option[any]) any {
 			return item.opt
@@ -359,7 +460,7 @@ func (s *Stream[T, Slice]) Collect(call func(data Options[T], sourceData Slice) 
 
 func (s *Stream[T, Slice]) ForEach(fn func(item T)) {
 	//size := len(*s.options)
-	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			fn((options)[i].opt)
 		}
