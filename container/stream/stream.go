@@ -37,7 +37,17 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 		source:  source,
 	}
 }
-
+func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
+	resOptions := make(Options[T], 0)
+	for i := 0; i < len(*source); i++ {
+		resOptions = append(resOptions, Option[T]{opt: (*source)[i]})
+	}
+	return &Stream[T, Slice]{
+		options:  &resOptions,
+		source:   source,
+		parallel: true,
+	}
+}
 func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 	resSource := make([]any, 0)
 	size := len(*s.options)
