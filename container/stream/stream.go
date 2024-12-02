@@ -128,8 +128,9 @@ func (s *Stream[T, Slice]) Reduce(begin any, atomicSolveFunction func(cntValue a
 		if s.parallel && parallelResultSolve == nil {
 			panic("parallelResultSolve must not be nil where parallelResult")
 		}
-		begin = parallelResultSolve(begin, currentBegin)
-
+		if parallelResultSolve != nil {
+			begin = parallelResultSolve(begin, currentBegin)
+		}
 		return nil
 	}, s.parallel, lynx.NewLimiter(optional.IsTrue(s.parallel, algorithm.NumOfTwoMultiply(size), 1)))
 	return begin
