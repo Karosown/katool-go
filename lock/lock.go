@@ -1,5 +1,9 @@
 package lock
 
+import (
+	"sync"
+)
+
 type LockSupport struct {
 	wt    chan bool
 	state chan bool
@@ -37,4 +41,10 @@ func (l *LockSupport) Unpark() (err error) {
 	}
 	l.wt <- true
 	return nil
+}
+
+func Synchronized(locker sync.Locker, f func()) {
+	locker.Lock()
+	defer locker.Unlock()
+	f()
 }
