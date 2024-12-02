@@ -2,6 +2,7 @@ package container_test
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
 	"testing"
@@ -559,10 +560,54 @@ func Test_GroupBy(t *testing.T) {
 
 func Test_OrderBy(t *testing.T) {
 	users := userList[:]
-	by := stream.ToStream(&users).OrderBy(true, func(u any) algorithm.HashType {
-		return algorithm.HashType(u.(user).Name)
-	}).ToList()
-	println(by)
+	//for i := 0; i < 100; i++ {
+	//	users = append(users, userList[:]...)
+	//}
+	var unParallel []user
+	computed := util.BeginEndTimeComputed(func() {
+		unParallel = stream.ToStream(&users).OrderBy(false, func(u any) algorithm.HashType {
+			return algorithm.HashType(u.(user).Name)
+		}).ToList()
+	})
+	println(computed)
+	var parallel []user
+	computed = util.BeginEndTimeComputed(func() {
+		parallel = stream.ToStream(&users).Parallel().OrderBy(false, func(u any) algorithm.HashType {
+			return algorithm.HashType(u.(user).Name)
+		}).ToList()
+	})
+	println(computed)
+	for i := 0; i < len(unParallel); i++ {
+		if unParallel[i].Name != parallel[i].Name {
+			panic("unparallel not equal parallel" + convert.ConvertToString(i))
+		}
+	}
+}
+
+func Test_OrderBy_Round(t *testing.T) {
+	users := make([]int, 0)
+	for i := 0; i < 1e3; i++ {
+		users = append(users, rand.Int()%10000)
+	}
+	var unParallel []int
+	computed := util.BeginEndTimeComputed(func() {
+		unParallel = stream.ToStream(&users).OrderBy(false, func(u any) algorithm.HashType {
+			return algorithm.HashType(convert.ConvertToString(u.(int)))
+		}).ToList()
+	})
+	println(computed)
+	var parallel []int
+	computed = util.BeginEndTimeComputed(func() {
+		parallel = stream.ToStream(&users).Parallel().OrderBy(false, func(u any) algorithm.HashType {
+			return algorithm.HashType(convert.ConvertToString(u.(int)))
+		}).ToList()
+	})
+	println(computed)
+	for i := 0; i < len(unParallel); i++ {
+		if unParallel[i] != parallel[i] {
+			panic("unparallel not equal parallel" + convert.ConvertToString(i))
+		}
+	}
 }
 
 func Test_FlatMap(t *testing.T) {

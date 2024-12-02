@@ -130,6 +130,6 @@ func ConvertToString(source any) string {
 	return str
 }
 
-func PatitonToStreamp[T any, RT ~[]T](pattion lists.Batch[T, RT]) *stream.Stream[RT, []RT] {
+func PatitonToStream[T any, RT ~[]T](pattion lists.Batch[T, RT]) *stream.Stream[RT, []RT] {
 	return stream.ToStream(&pattion.SplitData)
 }

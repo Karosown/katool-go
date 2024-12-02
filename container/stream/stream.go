@@ -1,6 +1,7 @@
 package stream
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 	"sync"
@@ -27,6 +28,7 @@ func NewStream(source *[]any) *Stream[any, []any] {
 		source:  source,
 	}
 }
+
 func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	resOptions := make(Options[T], 0)
 	for i := 0; i < len(*source); i++ {
@@ -35,6 +37,43 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	return &Stream[T, Slice]{
 		options: &resOptions,
 		source:  source,
+	}
+}
+
+func NewOptionsStream[Opt any, Opts Options[Opt]](source *[]Opts) *Stream[Options[any], []Options[any]] {
+	resOptions := make([]Option[Options[any]], 0)
+	sourceList := make([]Options[any], 0)
+	optionsAdpter := func(opts Options[Opt]) Options[any] {
+		res := make(Options[any], 0)
+		for i := 0; i < len(opts); i++ {
+			convertOption := &Option[any]{opt: any(opts[i].opt)}
+			res = append(res, *convertOption)
+		}
+		return res
+	}
+	for i := 0; i < len(*source); i++ {
+		t := Options[Opt]((*source)[i])
+		resOptions = append(resOptions, Option[Options[any]]{opt: optionsAdpter(t)})
+		sourceList = append(sourceList, optionsAdpter(t))
+	}
+	return &Stream[Options[any], []Options[any]]{
+		options: (*Options[Options[any]])(&resOptions),
+		source:  &sourceList,
+	}
+}
+
+func NewOptionStream[Opt any, T Options[Opt]](source *T) *Stream[Option[any], []Option[any]] {
+	resOptions := make(Options[Option[any]], 0)
+	resSource := make([]Option[any], 0)
+	for i := 0; i < len(*source); i++ {
+		resOptions = append(resOptions, Option[Option[any]]{
+			Option[any]{opt: any((*source)[i].opt)},
+		})
+		resSource = append(resSource, Option[any]{opt: any((*source)[i].opt)})
+	}
+	return &Stream[Option[any], []Option[any]]{
+		options: (&resOptions),
+		source:  &resSource,
 	}
 }
 func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
@@ -48,17 +87,25 @@ func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 		parallel: true,
 	}
 }
+func goRun[T any](datas []T, parallel bool, solve func(pos int, automicDatas []T) error) {
+	size := len(datas)
+	err := lists.Partition(datas, optional.IsTrue(parallel, (size>>2)^1, 1)).ForEach(solve, parallel, lynx.NewLimiter(optional.IsTrue(parallel, algorithm.NumOfTwoMultiply(size), 1)))
+	if err != nil {
+		fmt.Println(err)
+	}
+	return
+}
 func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 	resSource := make([]any, 0)
 	size := len(*s.options)
 	resChan := make(chan any, size)
-	lists.Partition(*s.options, optional.IsTrue(s.parallel, size<<4^0x1, 1)).ForEach(func(pos int, options []Option[T]) error {
+	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			runCall := fn(options[i].opt)
 			resChan <- runCall
 		}
 		return nil
-	}, s.parallel, lynx.NewLimiter(optional.IsTrue(s.parallel, algorithm.NumOfTwoMultiply(size), 1)))
+	})
 	//if !s.parallel {
 	for i := 0; i < size; i++ {
 		resSource = append(resSource, <-resChan)
@@ -69,13 +116,13 @@ func (s *Stream[T, Slice]) FlatMap(fn func(i T) *Stream[any, []any]) *Stream[any
 	size := len(*s.options)
 	resSource := make([]any, 0)
 	resChan := make(chan []any, size)
-	lists.Partition(*s.options, optional.IsTrue(s.parallel, size<<4^0x1, 1)).ForEach(func(pos int, options []Option[T]) error {
+	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			runCall := fn(options[i].opt)
 			resChan <- runCall.ToList()
 		}
 		return nil
-	}, s.parallel, lynx.NewLimiter(optional.IsTrue(s.parallel, algorithm.NumOfTwoMultiply(size), 1)))
+	})
 	//if !s.parallel {
 	for i := 0; i < size; i++ {
 		resSource = append(resSource, <-resChan...)
@@ -115,24 +162,31 @@ func (s *Stream[T, Slice]) Reduce(begin any, atomicSolveFunction func(cntValue a
 	if atomicSolveFunction == nil {
 		panic("atomicSolveFunction must not nil")
 	}
-	size := len(*s.options)
+	if s.parallel && parallelResultSolve == nil {
+		panic("parallelResultSolve must not be nil where parallelResult")
+	}
+	//size := len(*s.options)
 	beginType := reflect.TypeOf(begin)
 	lock := &sync.Mutex{}
-	lists.Partition(*s.options, optional.IsTrue(s.parallel, size<<4^0x1, 1)).ForEach(func(pos int, options []Option[T]) error {
-		currentBegin := reflect.New(beginType).Elem().Interface()
-		for i := 0; i < len(options); i++ {
-			currentBegin = atomicSolveFunction(currentBegin, options[i].opt)
-		}
-		lock.Lock()
-		defer lock.Unlock()
-		if s.parallel && parallelResultSolve == nil {
-			panic("parallelResultSolve must not be nil where parallelResult")
-		}
-		if parallelResultSolve != nil {
-			begin = parallelResultSolve(begin, currentBegin)
+	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+		if s.parallel {
+			currentBegin := reflect.New(beginType).Elem().Interface()
+			for i := 0; i < len(options); i++ {
+				currentBegin = atomicSolveFunction(currentBegin, options[i].opt)
+			}
+			lock.Lock()
+			defer lock.Unlock()
+
+			if parallelResultSolve != nil {
+				begin = parallelResultSolve(begin, currentBegin)
+			}
+		} else {
+			for i := 0; i < len(options); i++ {
+				begin = atomicSolveFunction(begin, options[i].opt)
+			}
 		}
 		return nil
-	}, s.parallel, lynx.NewLimiter(optional.IsTrue(s.parallel, algorithm.NumOfTwoMultiply(size), 1)))
+	})
 	return begin
 }
 
@@ -140,14 +194,14 @@ func (s *Stream[T, Slice]) Filter(fn func(i T) bool) *Stream[T, Slice] {
 	res := make(Slice, 0)
 	size := len(*s.options)
 	resChan := make(chan T, size)
-	lists.Partition(*s.options, optional.IsTrue(s.parallel, size<<4^0x1, 1)).ForEach(func(pos int, options []Option[T]) error {
+	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			if fn((options)[i].opt) {
 				resChan <- (options)[i].opt
 			}
 		}
 		return nil
-	}, s.parallel, lynx.NewLimiter(optional.IsTrue(s.parallel, algorithm.NumOfTwoMultiply(size), 1)))
+	})
 	for i := 0; i < len(resChan); i++ {
 		res = append(res, <-resChan)
 	}
@@ -160,12 +214,12 @@ func (s *Stream[T, Slice]) ToList() []T {
 	res := make([]T, 0)
 	size := len(*s.options)
 	resChan := make(chan T, size)
-	lists.Partition(*s.options, optional.IsTrue(s.parallel, size<<4^0x1, 1)).ForEach(func(pos int, options []Option[T]) error {
+	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			resChan <- (options)[i].opt
 		}
 		return nil
-	}, s.parallel, lynx.NewLimiter(optional.IsTrue(s.parallel, algorithm.NumOfTwoMultiply(size), 1)))
+	})
 	for i := 0; i < size; i++ {
 		res = append(res, <-resChan)
 	}
@@ -174,14 +228,14 @@ func (s *Stream[T, Slice]) ToList() []T {
 func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, item T) any) map[any]any {
 	ress := sync.Map{}
 	size := len(*s.options)
-	lists.Partition(*s.options, optional.IsTrue(s.parallel, size<<4^0x1, 1)).ForEach(func(pos int, options []Option[T]) error {
+	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			ress.Store(k(pos*optional.IsTrue(s.parallel, size<<4^0x1, 1)+i, (options)[i].opt), v(pos*optional.IsTrue(s.parallel, size<<4^0x1, 1)+i, (options)[i].opt))
 		}
 		return nil
-	}, s.parallel, lynx.NewLimiter(optional.IsTrue(s.parallel, algorithm.NumOfTwoMultiply(size), 1)))
-	res := make(map[interface{}]interface{})
-	ress.Range(func(key, value interface{}) bool {
+	})
+	res := make(map[any]any)
+	ress.Range(func(key, value any) bool {
 		res[key] = value
 		return true // 继续遍历
 	})
@@ -190,8 +244,8 @@ func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, it
 
 func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 	res := make(map[any]Slice, 0)
-	size := len(*s.options)
-	lists.Partition(*s.options, optional.IsTrue(s.parallel, size<<4^0x1, 1)).ForEach(func(pos int, options []Option[T]) error {
+	//size := len(*s.options)
+	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			key := groupBy((options)[i].opt)
 			if _, ok := res[key]; !ok {
@@ -200,19 +254,96 @@ func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 			res[key] = append(res[key], (*s.source)[i])
 		}
 		return nil
-	}, s.parallel, lynx.NewLimiter(optional.IsTrue(s.parallel, algorithm.NumOfTwoMultiply(size), 1)))
+	})
 	return res
 }
 
 func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunction) *Stream[T, Slice] {
-	sort.SliceStable(*s.options, func(i, j int) bool {
-		if desc {
-			return orderBy((*s.options)[i].opt) > orderBy((*s.options)[j].opt)
-		} else {
-			return orderBy((*s.options)[i].opt) < orderBy((*s.options)[j].opt)
-		}
+	if !s.parallel {
+		sort.SliceStable(*s.options, func(i, j int) bool {
+			if desc {
+				return orderBy((*s.options)[i].opt) > orderBy((*s.options)[j].opt)
+			} else {
+				return orderBy((*s.options)[i].opt) < orderBy((*s.options)[j].opt)
+			}
+		})
+		return s
+	}
+
+	//size := len(*s.options)
+	data := make([]Options[T], 0)
+	// opt opt opt opt -> opts opts
+	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
+		data = append(data, options)
+		return nil
 	})
-	return s
+	optionsStream := NewOptionsStream[T, Options[T]](&data)
+	optionsStream.parallel = s.parallel
+	res := optionsStream.Map(func(options Options[any]) any {
+		sort.SliceStable(options, func(i, j int) bool {
+			if desc {
+				return orderBy((options)[i].opt) > orderBy((options)[j].opt)
+			} else {
+				return orderBy((options)[i].opt) < orderBy((options)[j].opt)
+			}
+		})
+		return options
+	}).Map(func(v any) any {
+		i := v.(Options[any])
+		ress := NewOptionStream(&i).Map(func(item Option[any]) any {
+			return item.opt
+		}).ToList()
+		return ress
+	}).ToList()
+	re := make([]any, 0)
+	mergeSorted := ToStream(&res).Reduce(re, func(cntValue any, nxt any) any {
+		ts := cntValue.([]any)
+		nxts := nxt.([]any)
+		if len(nxts) == 0 {
+			return ts
+		}
+		lenRe := len(ts)
+		lenNxt := len(nxts)
+		ress := make([]any, 0)
+		l := 0
+		r := 0
+		for l < lenRe && r < lenNxt {
+			current := nxts[r].(T)
+			total := ts[l].(T)
+			if orderBy(total) > orderBy(current) {
+				if desc {
+					ress = append(ress, total)
+					l++
+				} else {
+					ress = append(ress, current)
+					r++
+				}
+			} else {
+				if desc {
+					ress = append(ress, current)
+					r++
+				} else {
+					ress = append(ress, total)
+					l++
+				}
+			}
+		}
+
+		if r < lenNxt {
+			ress = append(ress, nxts[r:lenNxt]...)
+		}
+		if l < lenRe {
+			ress = append(ress, ts[l:lenRe]...)
+		}
+		return ress
+	}, nil).([]any)
+	result := make(Slice, 0)
+	for i := 0; i < len(mergeSorted); i++ {
+		result = append(result, mergeSorted[i].(T))
+	}
+	//stream := ToStream(&result)
+	stream := ToStream(&result)
+	return stream
 }
 
 func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
@@ -227,13 +358,13 @@ func (s *Stream[T, Slice]) Collect(call func(data Options[T], sourceData Slice) 
 }
 
 func (s *Stream[T, Slice]) ForEach(fn func(item T)) {
-	size := len(*s.options)
-	lists.Partition(*s.options, optional.IsTrue(s.parallel, size<<4^0x1, 1)).ForEach(func(pos int, options []Option[T]) error {
+	//size := len(*s.options)
+	goRun(*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			fn((options)[i].opt)
 		}
 		return nil
-	}, s.parallel, lynx.NewLimiter(optional.IsTrue(s.parallel, algorithm.NumOfTwoMultiply(size), 1)))
+	})
 }
 
 func (s *Stream[T, Slice]) Count() int64 {
