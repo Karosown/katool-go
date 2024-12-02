@@ -10,6 +10,7 @@ import (
 	"github.com/karosown/katool/algorithm"
 	"github.com/karosown/katool/container/stream"
 	"github.com/karosown/katool/convert"
+	"github.com/karosown/katool/util"
 )
 
 type user struct {
@@ -566,15 +567,37 @@ func Test_OrderBy(t *testing.T) {
 
 func Test_FlatMap(t *testing.T) {
 	users := userList[:]
-	stream.ToStream(&users).Parallel().FlatMap(func(user user) *stream.Stream[any, []any] {
-		split := strings.Split(user.Name, "")
-		res := make([]any, len(split))
-		for i, v := range split {
-			res[i] = v
-		}
-		return stream.NewStream(&res)
-	}).ForEach(func(item any) {
-		println(item.(string))
+	for i := 0; i < 100; i++ {
+		users = append(users, userList[:]...)
+	}
+	//print("123")
+	computed := util.BeginEndTimeComputed(func() {
+		stream.ToStream(&users).FlatMap(func(user user) *stream.Stream[any, []any] {
+			split := strings.Split(user.Name, "")
+			res := make([]any, len(split))
+			for i, v := range split {
+				res[i] = v
+			}
+			return stream.NewStream(&res)
+		}).ForEach(func(item any) {
+			print(item.(string))
+		})
 	})
+	println()
+	println(computed)
+	computed = util.BeginEndTimeComputed(func() {
+		stream.ToParallelStream(&users).FlatMap(func(user user) *stream.Stream[any, []any] {
+			split := strings.Split(user.Name, "")
+			res := make([]any, len(split))
+			for i, v := range split {
+				res[i] = v
+			}
+			return stream.NewStream(&res)
+		}).ForEach(func(item any) {
+			print(item.(string))
+		})
+	})
+	println()
+	println(computed)
 
 }
