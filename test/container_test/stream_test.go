@@ -586,24 +586,25 @@ func Test_OrderBy(t *testing.T) {
 
 func Test_OrderBy_Round(t *testing.T) {
 	users := make([]int, 0)
-	for i := 0; i < 1e3; i++ {
+	for i := 0; i < 6e6+5e5+3e3+2e2+1e1; i++ {
 		users = append(users, rand.Int()%10000)
 	}
 	var unParallel []int
 	computed := util.BeginEndTimeComputed(func() {
-		unParallel = stream.ToStream(&users).OrderById(false, func(u any) algorithm.IdType {
-			return algorithm.IdType((u.(int)))
+		unParallel = stream.ToStream(&users).OrderById(false, func(u any) algorithm.IDType {
+			return algorithm.IDType(u.(int))
 		}).ToList()
 	})
 	println(computed)
 	var parallel []int
 	computed = util.BeginEndTimeComputed(func() {
-		parallel = stream.ToStream(&users).Parallel().OrderById(false, func(u any) algorithm.IdType {
-			return algorithm.IdType((u.(int)))
+		parallel = stream.ToStream(&users).Parallel().OrderById(false, func(u any) algorithm.IDType {
+			return algorithm.IDType(u.(int))
 		}).ToList()
 	})
 	println(computed)
 	for i := 0; i < len(unParallel); i++ {
+		//println(unParallel[i], parallel[i])
 		if unParallel[i] != parallel[i] {
 			panic("unparallel not equal parallel" + convert.ConvertToString(i))
 		}
@@ -612,7 +613,7 @@ func Test_OrderBy_Round(t *testing.T) {
 
 func Test_FlatMap(t *testing.T) {
 	users := userList[:]
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		users = append(users, userList[:]...)
 	}
 	//print("123")

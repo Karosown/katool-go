@@ -6,9 +6,9 @@ import (
 )
 
 type HashType string
-type IdType int64
+type IDType int64
 type HashComputeFunction func(any2 any) HashType
-type IDComputeFunction func(any2 any) IdType
+type IDComputeFunction func(any2 any) IDType
 
 func HASH_WITH_JSON(cnt any) HashType {
 	marshal, err := json.Marshal(cnt)

@@ -10,6 +10,7 @@ import (
 	"github.com/karosown/katool/algorithm"
 	"github.com/karosown/katool/collect/lists"
 	"github.com/karosown/katool/container/optional"
+	"github.com/karosown/katool/util"
 )
 
 type Stream[T any, Slice ~[]T] struct {
@@ -72,7 +73,7 @@ func NewOptionStream[Opt any, T Options[Opt]](source *T) *Stream[Option[any], []
 		resSource = append(resSource, Option[any]{opt: any((*source)[i].opt)})
 	}
 	return &Stream[Option[any], []Option[any]]{
-		options: (&resOptions),
+		options: &resOptions,
 		source:  &resSource,
 	}
 }
@@ -89,8 +90,9 @@ func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 }
 func goRun[T any](datas []T, parallel bool, solve func(pos int, automicDatas []T) error) {
 	size := len(datas)
-	page := optional.IsTrue((size>>2) == 0, 1, (size >> 2))
-	err := lists.Partition(datas, optional.IsTrue(parallel, page, 1)).ForEach(solve, parallel, lynx.NewLimiter(optional.IsTrue(parallel, algorithm.NumOfTwoMultiply(size), 1)))
+	pageSize := optional.IsTrue((size>>2) == 0, 1, size>>2)
+	goNum := algorithm.NumOfTwoMultiply(size)
+	err := lists.Partition(datas, optional.IsTrue(parallel, pageSize, 1)).ForEach(solve, parallel, lynx.NewLimiter(optional.IsTrue(parallel, goNum, 1)))
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -275,13 +277,19 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 
 	//size := len(*s.options)
 	data := make([]Options[T], 0)
+	rwLock := &sync.RWMutex{}
 	// opt opt opt opt -> opts opts
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
+		//println(pos, options)
+		rwLock.Lock()
+		defer rwLock.Unlock()
 		data = append(data, options)
 		return nil
 	})
+	rwLock.RLock()
 	optionsStream := NewOptionsStream[T, Options[T]](&data)
-	optionsStream.parallel = false
+	rwLock.RUnlock()
+	optionsStream.parallel = s.parallel
 	sortedMap := optionsStream.Map(func(options Options[any]) any {
 		sort.SliceStable(options, func(i, j int) bool {
 			a := orderBy(options[i].opt)
@@ -294,7 +302,7 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 		})
 		return options
 	})
-	sortedMap.parallel = false
+	sortedMap.parallel = s.parallel
 	res := sortedMap.Map(func(v any) any {
 		i := v.(Options[any])
 		ress := NewOptionStream(&i).Map(func(item Option[any]) any {
@@ -303,47 +311,9 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 		return ress
 	}).ToList()
 	re := make([]any, 0)
-	mergeSorted := ToStream(&res).Reduce(re, func(cntValue any, nxt any) any {
-		ts := cntValue.([]any)
-		nxts := nxt.([]any)
-		if len(nxts) == 0 {
-			return ts
-		}
-		lenRe := len(ts)
-		lenNxt := len(nxts)
-		ress := make([]any, 0)
-		l := 0
-		r := 0
-		for l < lenRe && r < lenNxt {
-			current := nxts[r].(T)
-			total := ts[l].(T)
-			if orderBy(total) > orderBy(current) {
-				if desc {
-					ress = append(ress, total)
-					l++
-				} else {
-					ress = append(ress, current)
-					r++
-				}
-			} else {
-				if desc {
-					ress = append(ress, current)
-					r++
-				} else {
-					ress = append(ress, total)
-					l++
-				}
-			}
-		}
-
-		if r < lenNxt {
-			ress = append(ress, nxts[r:lenNxt]...)
-		}
-		if l < lenRe {
-			ress = append(ress, ts[l:lenRe]...)
-		}
-		return ress
-	}, nil).([]any)
+	toStream := ToStream(&res)
+	toStream.parallel = s.parallel
+	mergeSorted := toStream.Reduce(re, util.MergeSortedArrayWithHash[T](desc, orderBy), util.MergeSortedArrayWithHash[T](desc, orderBy)).([]any)
 	result := make(Slice, 0)
 	for i := 0; i < len(mergeSorted); i++ {
 		result = append(result, mergeSorted[i].(T))
@@ -369,13 +339,19 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 
 	//size := len(*s.options)
 	data := make([]Options[T], 0)
+	rwLock := &sync.RWMutex{}
 	// opt opt opt opt -> opts opts
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
+		//println(pos, options)
+		rwLock.Lock()
+		defer rwLock.Unlock()
 		data = append(data, options)
 		return nil
 	})
+	rwLock.RLock()
 	optionsStream := NewOptionsStream[T, Options[T]](&data)
-	optionsStream.parallel = false
+	rwLock.RUnlock()
+	optionsStream.parallel = s.parallel
 	sortedMap := optionsStream.Map(func(options Options[any]) any {
 		sort.SliceStable(options, func(i, j int) bool {
 			a := orderBy(options[i].opt)
@@ -388,7 +364,7 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 		})
 		return options
 	})
-	sortedMap.parallel = false
+	sortedMap.parallel = s.parallel
 	res := sortedMap.Map(func(v any) any {
 		i := v.(Options[any])
 		ress := NewOptionStream(&i).Map(func(item Option[any]) any {
@@ -397,47 +373,9 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 		return ress
 	}).ToList()
 	re := make([]any, 0)
-	mergeSorted := ToStream(&res).Reduce(re, func(cntValue any, nxt any) any {
-		ts := cntValue.([]any)
-		nxts := nxt.([]any)
-		if len(nxts) == 0 {
-			return ts
-		}
-		lenRe := len(ts)
-		lenNxt := len(nxts)
-		ress := make([]any, 0)
-		l := 0
-		r := 0
-		for l < lenRe && r < lenNxt {
-			current := nxts[r].(T)
-			total := ts[l].(T)
-			if orderBy(total) > orderBy(current) {
-				if desc {
-					ress = append(ress, total)
-					l++
-				} else {
-					ress = append(ress, current)
-					r++
-				}
-			} else {
-				if desc {
-					ress = append(ress, current)
-					r++
-				} else {
-					ress = append(ress, total)
-					l++
-				}
-			}
-		}
-
-		if r < lenNxt {
-			ress = append(ress, nxts[r:lenNxt]...)
-		}
-		if l < lenRe {
-			ress = append(ress, ts[l:lenRe]...)
-		}
-		return ress
-	}, nil).([]any)
+	toStream := ToStream(&res)
+	toStream.parallel = s.parallel
+	mergeSorted := toStream.Reduce(re, util.MergeSortedArrayWithId[T](desc, orderBy), util.MergeSortedArrayWithId[T](desc, orderBy)).([]any)
 	result := make(Slice, 0)
 	for i := 0; i < len(mergeSorted); i++ {
 		result = append(result, mergeSorted[i].(T))

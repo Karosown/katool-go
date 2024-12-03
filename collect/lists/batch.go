@@ -26,17 +26,18 @@ func (b Batch[T, RT]) ForEach(solve func(pos int, automicDatas []T) error, async
 	errs := make([]error, 0)
 	if async {
 		countDownLatch := &sync.WaitGroup{}
-		countDownLatch.Add(len(b.SplitData))
+		//countDownLatch.Add(len(b.SplitData))
 		for i, data := range b.SplitData {
 			limiter.Acquire()
-			go func(datas []T, pos int) {
+			countDownLatch.Add(1)
+			go func(limit *lynxSync.Limiter, datas []T, pos int) {
 				defer countDownLatch.Done()
 				err := solve(pos, datas)
 				if err != nil {
 					errs = append(errs, err)
 				}
-				defer limiter.Release()
-			}(data, i)
+				defer limit.Release()
+			}(limiter, data, i)
 		}
 		countDownLatch.Wait()
 	} else {
