@@ -58,7 +58,7 @@ func fieldSetValue(field *reflect.Value, fieldValue reflect.Value) error {
 	return nil
 }
 
-func ConvertToString(source any) string {
+func ToString(source any) string {
 	var str string
 	if source == nil {
 		return str

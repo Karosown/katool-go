@@ -82,7 +82,7 @@ func Test_Map(t *testing.T) {
 	// 排序
 	stream.ToStream(&ul).
 		Parallel().
-		Sort(func(a user, b user) bool { return a.Id > b.Id }).ForEach(func(item user) { println(convert.ConvertToString(item.Id) + " " + item.Name) })
+		Sort(func(a user, b user) bool { return a.Id > b.Id }).ForEach(func(item user) { println(convert.ToString(item.Id) + " " + item.Name) })
 	// 求和
 	totalMoney := userStream.Reduce(int64(0), func(cntValue any, nxt user) any { return cntValue.(int64) + int64(nxt.Money) }, func(sum1, sum2 any) any {
 		return sum1.(int64) + sum2.(int64)
@@ -165,7 +165,7 @@ func Test_Partition(t *testing.T) {
 
 func Test_ForEach(t *testing.T) {
 	lists.Partition(userList[:], 15).ForEach(func(pos int, automicDatas []user) error {
-		fmt.Println("分批处理 第" + convert.ConvertToString(pos) + "批")
+		fmt.Println("分批处理 第" + convert.ToString(pos) + "批")
 		stream.ToStream(&automicDatas).ForEach(func(data user) {
 			fmt.Println(data)
 		})

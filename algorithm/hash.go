@@ -3,6 +3,7 @@ package algorithm
 import (
 	"crypto/md5"
 	"encoding/json"
+	"strconv"
 )
 
 type HashType string
@@ -33,5 +34,5 @@ func HASH_WITH_JSON_SUM(cnt any) HashType {
 	for _, v := range jsonStr {
 		sum += (sum<<2 + sum) + int(v)
 	}
-	return HashType(sum)
+	return HashType(strconv.Itoa(sum))
 }

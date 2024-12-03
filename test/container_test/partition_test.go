@@ -35,7 +35,7 @@ func Test_Partition(t *testing.T) {
 
 func Test_ForEach(t *testing.T) {
 	lists.Partition(userList[:], 15).ForEach(func(pos int, automicDatas []user) error {
-		fmt.Println("分批处理 第" + convert.ConvertToString(pos) + "批")
+		fmt.Println("分批处理 第" + convert.ToString(pos) + "批")
 		stream.ToStream(&automicDatas).Parallel().ForEach(func(data user) {
 			fmt.Println(data)
 		})

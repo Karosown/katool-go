@@ -57,7 +57,7 @@ func StructToCSV[T any](datas []T, fullPath string) error {
 				} else if field.Type().String() == "[]uint8" && field.Len() > 0 {
 					record = append(record, string(field.Bytes()))
 				} else {
-					return (errors.New("unsupported field type: " + field.Type().String()))
+					return errors.New("unsupported field type: " + field.Type().String())
 				}
 			}
 		}

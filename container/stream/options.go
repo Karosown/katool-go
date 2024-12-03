@@ -6,7 +6,7 @@ type Option[T any] struct {
 
 type Options[T any] []Option[T]
 
-// you can't change the options data with you use the function,if you want to change the options data,use the Stream.ForEach
+// ForEach you can't change the options data with you use the function,if you want to change the options data,use the Stream.ForEach
 func (s Options[T]) ForEach(fn func(item T)) Options[T] {
 	for i := 0; i < len(s); i++ {
 		fn((s)[i].opt)

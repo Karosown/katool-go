@@ -5,7 +5,7 @@ type HashBasedMap[K1, K2, V comparable] struct {
 }
 
 // New 创建一个新的 HashBasedMap
-func New[K1, K2, V comparable]() *HashBasedMap[K1, K2, V] {
+func NewHashBasedMap[K1, K2, V comparable]() *HashBasedMap[K1, K2, V] {
 	return &HashBasedMap[K1, K2, V]{
 		m: make(map[K1]map[K2]V),
 	}

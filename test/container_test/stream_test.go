@@ -529,7 +529,7 @@ func Test_Map(t *testing.T) {
 	// 排序
 	stream.ToStream(&ul).
 		Parallel().
-		Sort(func(a user, b user) bool { return a.Id < b.Id }).ForEach(func(item user) { println(convert.ConvertToString(item.Id) + " " + item.Name) })
+		Sort(func(a user, b user) bool { return a.Id < b.Id }).ForEach(func(item user) { println(convert.ToString(item.Id) + " " + item.Name) })
 	// 求和
 	totalMoney := userStream.Reduce(int64(0), func(cntValue any, nxt user) any { return cntValue.(int64) + int64(nxt.Money) }, func(sum1, sum2 any) any {
 		return sum1.(int64) + sum2.(int64)
@@ -579,7 +579,7 @@ func Test_OrderBy(t *testing.T) {
 	println(computed)
 	for i := 0; i < len(unParallel); i++ {
 		if unParallel[i].Name != parallel[i].Name {
-			panic("unparallel not equal parallel" + convert.ConvertToString(i))
+			panic("unparallel not equal parallel" + convert.ToString(i))
 		}
 	}
 }
@@ -606,7 +606,7 @@ func Test_OrderBy_Round(t *testing.T) {
 	for i := 0; i < len(unParallel); i++ {
 		//println(unParallel[i], parallel[i])
 		if unParallel[i] != parallel[i] {
-			panic("unparallel not equal parallel" + convert.ConvertToString(i))
+			panic("unparallel not equal parallel" + convert.ToString(i))
 		}
 	}
 }
