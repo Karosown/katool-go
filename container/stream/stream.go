@@ -149,7 +149,7 @@ func (s *Stream[T, Slice]) Distinct(hash algorithm.HashComputeFunction) *Stream[
 		}
 	} else {
 		//  if large data, use map
-		m := make(map[algorithm.HashType]bool, 0)
+		m := make(map[algorithm.HashType]bool)
 		for i := 0; i < size; i++ {
 			if _, ok := m[hash((*s.options)[i].opt)]; !ok {
 				m[hash((*s.options)[i].opt)] = true
@@ -246,7 +246,7 @@ func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, it
 }
 
 func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
-	res := make(map[any]Slice, 0)
+	res := make(map[any]Slice)
 	//size := len(*s.options)
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
@@ -383,7 +383,6 @@ func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 		sort.SliceStable(*s.options, func(i, j int) bool {
 			return orderBy((*s.options)[i].opt, (*s.options)[j].opt)
 		})
-		return s
 		return s
 	}
 

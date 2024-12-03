@@ -28,9 +28,9 @@ func HASH_WITH_JSON_MD5(cnt any) HashType {
 }
 
 func HASH_WITH_JSON_SUM(cnt any) HashType {
-	json := HASH_WITH_JSON(cnt)
+	jsonStr := HASH_WITH_JSON(cnt)
 	sum := 0
-	for _, v := range json {
+	for _, v := range jsonStr {
 		sum += (sum<<2 + sum) + int(v)
 	}
 	return HashType(sum)
