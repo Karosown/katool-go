@@ -275,20 +275,17 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 		return s
 	}
 
-	//size := len(*s.options)
-	data := make([]Options[T], 0)
-	rwLock := &sync.RWMutex{}
+	size := len(*s.options)
+	data := make([]Options[T], 0, optional.IsTrue((size>>2) == 0, 1, size>>2))
 	// opt opt opt opt -> opts opts
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		//println(pos, options)
-		rwLock.Lock()
-		defer rwLock.Unlock()
 		data = append(data, options)
 		return nil
 	})
-	rwLock.RLock()
+
 	optionsStream := NewOptionsStream[T, Options[T]](&data)
-	rwLock.RUnlock()
+
 	optionsStream.parallel = s.parallel
 	sortedMap := optionsStream.Map(func(options Options[any]) any {
 		sort.SliceStable(options, func(i, j int) bool {
@@ -337,20 +334,15 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 		return s
 	}
 
-	//size := len(*s.options)
-	data := make([]Options[T], 0)
-	rwLock := &sync.RWMutex{}
+	size := len(*s.options)
+	data := make([]Options[T], 0, optional.IsTrue((size>>2) == 0, 1, size>>2))
 	// opt opt opt opt -> opts opts
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		//println(pos, options)
-		rwLock.Lock()
-		defer rwLock.Unlock()
 		data = append(data, options)
 		return nil
 	})
-	rwLock.RLock()
 	optionsStream := NewOptionsStream[T, Options[T]](&data)
-	rwLock.RUnlock()
 	optionsStream.parallel = s.parallel
 	sortedMap := optionsStream.Map(func(options Options[any]) any {
 		sort.SliceStable(options, func(i, j int) bool {

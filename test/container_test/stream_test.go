@@ -560,9 +560,9 @@ func Test_GroupBy(t *testing.T) {
 
 func Test_OrderBy(t *testing.T) {
 	users := userList[:]
-	//for i := 0; i < 100; i++ {
-	//	users = append(users, userList[:]...)
-	//}
+	for i := 0; i < 100000; i++ {
+		users = append(users, userList[:]...)
+	}
 	var unParallel []user
 	computed := util.BeginEndTimeComputed(func() {
 		unParallel = stream.ToStream(&users).OrderBy(false, func(u any) algorithm.HashType {
