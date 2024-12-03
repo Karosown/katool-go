@@ -4,7 +4,7 @@
 
 支持像Java一样的Stream流，但是由于Go不支持方法泛型，在使用过程中需要自行处理
 
-包含map、reduce、filter、groupBy、distinct、sort、flatMap、orderBy等操作, 支持foreach遍历，也支持collect进行自定义函数逻辑采集，同时支持异步流调用（目前异步流支持map、reduce、fillter、flatMap、ToMap、ForEach等方法
+包含map、reduce、filter、groupBy、distinct、sort、flatMap、orderBy等操作, 支持foreach遍历，也支持collect进行自定义函数逻辑采集，同时支持异步流调用（目前异步流支持map、reduce、fillter、flatMap、ToMap、ForEach、OrderBy、OrderByID、Sort等方法
 
 具体使用查看test
 
