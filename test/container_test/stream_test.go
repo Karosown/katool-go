@@ -158,9 +158,9 @@ func Test_Sorted(t *testing.T) {
 	})
 }
 func Test_Distinct(t *testing.T) {
-	arr := []int{1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10}
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	for i := 0; i < 10000; i++ {
-		arr = append(arr, 1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10, 8848)
+		arr = append(arr, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 	}
 	stream.ToStream(&arr).Parallel().Distinct().ForEach(func(item int) {
 		fmt.Println(item)
