@@ -10,6 +10,7 @@ import (
 	"github.com/karosown/katool/algorithm"
 	"github.com/karosown/katool/collect/lists"
 	"github.com/karosown/katool/container/optional"
+	"github.com/karosown/katool/convert"
 	"github.com/karosown/katool/util"
 )
 
@@ -99,7 +100,6 @@ func goRun[T any](datas []T, parallel bool, solve func(pos int, automicDatas []T
 	return
 }
 func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
-	resSource := make([]any, 0)
 	size := len(*s.options)
 	resChan := make(chan any, size)
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
@@ -109,15 +109,11 @@ func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 		}
 		return nil
 	})
-	resChanSize := len(resChan)
-	for i := 0; i < resChanSize; i++ {
-		resSource = append(resSource, <-resChan)
-	}
+	resSource := convert.ChanToArray(resChan)
 	return ToStream(&resSource)
 }
 func (s *Stream[T, Slice]) FlatMap(fn func(i T) *Stream[any, []any]) *Stream[any, []any] {
 	size := len(*s.options)
-	resSource := make([]any, 0)
 	resChan := make(chan []any, size)
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
@@ -127,56 +123,22 @@ func (s *Stream[T, Slice]) FlatMap(fn func(i T) *Stream[any, []any]) *Stream[any
 		return nil
 	})
 	//if !s.parallel {
-	for i := 0; i < size; i++ {
-		resSource = append(resSource, <-resChan...)
-	}
+	resSource := convert.ChanToFlatArray(resChan)
 	return ToStream(&resSource)
 }
 func (s *Stream[T, Slice]) Distinct() *Stream[T, Slice] {
-	hash := func(i T) algorithm.HashType {
-		return algorithm.HASH_WITH_JSON(i)
-	}
-	//if !s.parallel {
-	res := make(Slice, 0)
-	size := len(*s.options)
-	if size < 1e10+5 {
-		sort.SliceStable(*s.options, func(i, j int) bool {
-			return hash((*s.options)[i].opt) < hash((*s.options)[j].opt)
-		})
-		for i := 0; i < size; i++ {
-			if i == 0 {
-				res = append(res, (*s.options)[i].opt)
-			} else if hash((*s.options)[i-1].opt) != hash((*s.options)[i].opt) {
-				res = append(res, (*s.options)[i].opt)
-			}
-		}
-	} else {
-		//  if large data, use map
-		m := make(map[algorithm.HashType]bool)
-		for i := 0; i < size; i++ {
-			if _, ok := m[hash((*s.options)[i].opt)]; !ok {
-				m[hash((*s.options)[i].opt)] = true
-				res = append(res, (*s.options)[i].opt)
-			}
-		}
-	}
-	return ToStream(&res)
-	//}
-	//return nil
+	return s.DistinctBy(algorithm.HASH_WITH_JSON)
 }
 func (s *Stream[T, Slice]) DistinctBy(hash algorithm.HashComputeFunction) *Stream[T, Slice] {
-	//if !s.parallel {
 	res := make(Slice, 0)
 	size := len(*s.options)
 	if size < 1e10+5 {
-		sort.SliceStable(*s.options, func(i, j int) bool {
-			return hash((*s.options)[i].opt) < hash((*s.options)[j].opt)
-		})
-		for i := 0; i < size; i++ {
+		options := s.Sort(func(a, b T) bool { return hash(a) < hash(b) }).ToOptionList()
+		for i := 0; i < len(options); i++ {
 			if i == 0 {
-				res = append(res, (*s.options)[i].opt)
-			} else if hash((*s.options)[i-1].opt) != hash((*s.options)[i].opt) {
-				res = append(res, (*s.options)[i].opt)
+				res = append(res, (options)[i].opt)
+			} else if hash((options)[i-1].opt) != hash((options)[i].opt) {
+				res = append(res, (options)[i].opt)
 			}
 		}
 	} else {

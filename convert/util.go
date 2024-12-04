@@ -134,3 +134,21 @@ func ToAnyArray[T any](source []T) []any {
 	}
 	return res
 }
+
+func ChanToArray[T any](source <-chan T) []T {
+	size := len(source)
+	res := make([]T, 0, size)
+	for i := 0; i < size; i++ {
+		res = append(res, <-source)
+	}
+	return res
+}
+
+func ChanToFlatArray[T any](source <-chan []T) []T {
+	size := len(source)
+	res := make([]T, 0, size)
+	for i := 0; i < size; i++ {
+		res = append(res, <-source...)
+	}
+	return res
+}

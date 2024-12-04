@@ -11,33 +11,29 @@ func MergeSortedArrayWithEntity[T any](orderBy func(a, b T) bool) func(any, any)
 		if len(nxts) == 0 {
 			return ts
 		}
-		lenRe := len(ts)
+		lenLast := len(ts)
 		lenNxt := len(nxts)
-		ress := make([]any, 0)
+		rest := make([]any, 0)
 		l := 0
 		r := 0
-		for l < lenRe && r < lenNxt {
-			current := nxts[r].(T)
+		for l < lenLast && r < lenNxt {
 			total := ts[l].(T)
-			if orderBy(current, total) {
-
-				ress = append(ress, total)
+			current := nxts[r].(T)
+			if orderBy(total, current) {
+				rest = append(rest, total)
 				l++
-
 			} else {
-				ress = append(ress, current)
+				rest = append(rest, current)
 				r++
-
 			}
 		}
-
+		if l < lenLast {
+			rest = append(rest, ts[l:lenLast]...)
+		}
 		if r < lenNxt {
-			ress = append(ress, nxts[r:lenNxt]...)
+			rest = append(rest, nxts[r:lenNxt]...)
 		}
-		if l < lenRe {
-			ress = append(ress, ts[l:lenRe]...)
-		}
-		return ress
+		return rest
 	}
 }
 func MergeSortedArrayWithPrimaryData[T any](desc bool, orderBy algorithm.HashComputeFunction) func(any, any) any {

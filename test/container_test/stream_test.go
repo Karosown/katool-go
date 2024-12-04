@@ -148,13 +148,21 @@ func Test(t *testing.T) {
 			print(item.(rune))
 		})
 }
-
+func Test_Sorted(t *testing.T) {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10}
+	for i := 0; i < 100; i++ {
+		arr = append(arr, 1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10, 8848)
+	}
+	stream.ToStream(&arr).Parallel().Sort(func(a, b int) bool { return a < b }).ForEach(func(item int) {
+		fmt.Println(item)
+	})
+}
 func Test_Distinct(t *testing.T) {
 	arr := []int{1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10}
 	for i := 0; i < 10000; i++ {
 		arr = append(arr, 1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10, 8848)
 	}
-	stream.ToStream(&arr).Distinct().ForEach(func(item int) {
+	stream.ToStream(&arr).Parallel().Distinct().ForEach(func(item int) {
 		fmt.Println(item)
 	})
 }
