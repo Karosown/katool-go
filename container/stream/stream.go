@@ -109,8 +109,8 @@ func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 		}
 		return nil
 	})
-	//if !s.parallel {
-	for i := 0; i < cap(resChan); i++ {
+	resChanSize := len(resChan)
+	for i := 0; i < resChanSize; i++ {
 		resSource = append(resSource, <-resChan)
 	}
 	return ToStream(&resSource)
@@ -205,7 +205,8 @@ func (s *Stream[T, Slice]) Filter(fn func(i T) bool) *Stream[T, Slice] {
 		}
 		return nil
 	})
-	for i := 0; i < len(resChan); i++ {
+	chanSize := len(resChan)
+	for i := 0; i < chanSize; i++ {
 		res = append(res, <-resChan)
 	}
 	return ToStream(&res)
@@ -233,7 +234,7 @@ func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, it
 	size := len(*s.options)
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
-			ress.Store(k(pos*optional.IsTrue(s.parallel, size<<4^0x1, 1)+i, (options)[i].opt), v(pos*optional.IsTrue(s.parallel, size<<4^0x1, 1)+i, (options)[i].opt))
+			ress.Store(k(pos*optional.IsTrue((size>>2) == 0, 1, size>>2)+i, (options)[i].opt), v(pos*optional.IsTrue((size>>2) == 0, 1, size>>2)+i, (options)[i].opt))
 		}
 		return nil
 	})
@@ -246,19 +247,29 @@ func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, it
 }
 
 func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
-	res := make(map[any]Slice)
+	res := &sync.Map{}
 	//size := len(*s.options)
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			key := groupBy((options)[i].opt)
-			if _, ok := res[key]; !ok {
-				res[key] = make(Slice, 0)
+			if _, ok := res.Load(key); !ok {
+				res.Store(key, make(Slice, 0))
 			}
-			res[key] = append(res[key], (*s.source)[i])
+			//res[key] = append(res[key], (*s.source)[pos*optional.IsTrue(s.parallel, len(*s.source)<<4^0x1, 1)+i])
+			value, ok := res.Load(key)
+			if ok {
+				res.Store(key, append(value.(Slice), (*s.source)[pos*optional.IsTrue((len(*s.source)>>2) == 0, 1, len(*s.source)>>2)+i]))
+			}
+
 		}
 		return nil
 	})
-	return res
+	result := make(map[any]Slice)
+	res.Range(func(key, value any) bool {
+		result[key] = value.(Slice)
+		return true // 继续遍历
+	})
+	return result
 }
 
 func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunction) *Stream[T, Slice] {
@@ -427,7 +438,7 @@ func (s *Stream[T, Slice]) Collect(call func(data Options[T], sourceData Slice) 
 	return res
 }
 
-func (s *Stream[T, Slice]) ForEach(fn func(item T)) {
+func (s *Stream[T, Slice]) ForEach(fn func(item T)) *Stream[T, Slice] {
 	//size := len(*s.options)
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
@@ -435,6 +446,7 @@ func (s *Stream[T, Slice]) ForEach(fn func(item T)) {
 		}
 		return nil
 	})
+	return s
 }
 
 func (s *Stream[T, Slice]) Count() int64 {

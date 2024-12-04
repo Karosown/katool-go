@@ -6,8 +6,10 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/duke-git/lancet/v2/maputil"
+	"github.com/duke-git/lancet/v2/random"
 	"github.com/karosown/katool/algorithm"
 	"github.com/karosown/katool/container/stream"
 	"github.com/karosown/katool/convert"
@@ -19,6 +21,7 @@ type user struct {
 	Age   int    `json:"age"`
 	Sex   int    `json:"sex"`
 	Money int    `json:"money"`
+	Class string `json:"class"`
 	Id    int    `json:"id"`
 }
 type userVo struct {
@@ -646,4 +649,52 @@ func Test_FlatMap(t *testing.T) {
 	println()
 	println(computed)
 
+}
+
+func Test(t *testing.T) {
+	classes := []string{"一班", "二班", "三班", "四班", "五班"}
+	students := make([]user, 0)
+	for i := 0; i < 100; i++ {
+		students = append(students, user{
+			Name:  random.RandString(10),
+			Class: classes[rand.Int()%len(classes)],
+			Age:   rand.Intn(100),
+			Sex:   rand.Intn(2),
+		})
+		time.Sleep(1)
+	}
+	by := stream.ToStream(&students).Parallel().GroupBy(func(user user) any {
+		return user.Class
+	})
+	maputil.ForEach(by, func(key any, value []user) {
+		println(key.(string))
+		toStream := stream.ToStream(&value).Parallel()
+		toStream.ForEach(func(item user) {
+			fmt.Println(item)
+		})
+		reduce := toStream.Reduce(0, func(cntValue any, nxt user) any {
+			return cntValue.(int) + nxt.Sex
+		}, func(cntValue any, nxt any) any {
+			return cntValue.(int) + nxt.(int)
+		})
+		println("男生总数：" + convert.ToString(reduce))
+		reduce = toStream.Reduce(0, func(cntValue any, nxt user) any {
+			return cntValue.(int) + (nxt.Sex ^ 1)
+		}, func(cntValue any, nxt any) any {
+			return cntValue.(int) + nxt.(int)
+		})
+		println("女生总数：" + convert.ToString(reduce))
+	})
+	println("年龄大于等于60岁的人")
+	toStream := stream.ToStream(&students).Parallel()
+	//p := 0
+	count := toStream.Filter(func(item user) bool { return item.Age >= 60 }).ForEach(func(item user) {
+		fmt.Println(item)
+	}).Count()
+	println("年龄大于等于60岁的共" + convert.ToString(count) + "人")
+	print("年龄小于60岁的人")
+	count = toStream.Filter(func(item user) bool { return item.Age < 60 }).ForEach(func(item user) {
+		fmt.Println(item)
+	}).Count()
+	println("年龄小于60岁的共" + convert.ToString(count) + "人")
 }
