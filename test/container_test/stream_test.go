@@ -41,7 +41,7 @@ func TestOfStream(t *testing.T) {
 			return i > 1
 		}).Map(func(item int) any {
 		return strconv.Itoa(item) + "w "
-	}).Distinct(algorithm.HASH_WITH_JSON_SUM)
+	}).DistinctBy(algorithm.HASH_WITH_JSON_SUM)
 
 	fmt.Println(distinct.Reduce("", func(cntValue any, nxt any) any {
 		return cntValue.(string) + nxt.(string)
@@ -79,7 +79,7 @@ func Test_Map(t *testing.T) {
 	})
 	println(totalMoney.(int64))
 	// 过滤
-	userStream.Filter(func(item user) bool { return item.Sex != 0 }).Distinct(algorithm.HASH_WITH_JSON_MD5).ToOptionList().ForEach(func(item user) { println(item.Name) })
+	userStream.Filter(func(item user) bool { return item.Sex != 0 }).DistinctBy(algorithm.HASH_WITH_JSON_MD5).ToOptionList().ForEach(func(item user) { println(item.Name) })
 	// 转换
 	s := userStream.Map(func(item user) any {
 		properties, err := convert.CopyProperties(&item, &userVo{})
@@ -147,4 +147,14 @@ func Test(t *testing.T) {
 		ForEach(func(item any) {
 			print(item.(rune))
 		})
+}
+
+func Test_Distinct(t *testing.T) {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10}
+	for i := 0; i < 10000; i++ {
+		arr = append(arr, 1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10, 8848)
+	}
+	stream.ToStream(&arr).Distinct().ForEach(func(item int) {
+		fmt.Println(item)
+	})
 }

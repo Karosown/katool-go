@@ -132,7 +132,39 @@ func (s *Stream[T, Slice]) FlatMap(fn func(i T) *Stream[any, []any]) *Stream[any
 	}
 	return ToStream(&resSource)
 }
-func (s *Stream[T, Slice]) Distinct(hash algorithm.HashComputeFunction) *Stream[T, Slice] {
+func (s *Stream[T, Slice]) Distinct() *Stream[T, Slice] {
+	hash := func(i T) algorithm.HashType {
+		return algorithm.HASH_WITH_JSON(i)
+	}
+	//if !s.parallel {
+	res := make(Slice, 0)
+	size := len(*s.options)
+	if size < 1e10+5 {
+		sort.SliceStable(*s.options, func(i, j int) bool {
+			return hash((*s.options)[i].opt) < hash((*s.options)[j].opt)
+		})
+		for i := 0; i < size; i++ {
+			if i == 0 {
+				res = append(res, (*s.options)[i].opt)
+			} else if hash((*s.options)[i-1].opt) != hash((*s.options)[i].opt) {
+				res = append(res, (*s.options)[i].opt)
+			}
+		}
+	} else {
+		//  if large data, use map
+		m := make(map[algorithm.HashType]bool)
+		for i := 0; i < size; i++ {
+			if _, ok := m[hash((*s.options)[i].opt)]; !ok {
+				m[hash((*s.options)[i].opt)] = true
+				res = append(res, (*s.options)[i].opt)
+			}
+		}
+	}
+	return ToStream(&res)
+	//}
+	//return nil
+}
+func (s *Stream[T, Slice]) DistinctBy(hash algorithm.HashComputeFunction) *Stream[T, Slice] {
 	//if !s.parallel {
 	res := make(Slice, 0)
 	size := len(*s.options)
