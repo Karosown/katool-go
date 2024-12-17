@@ -143,15 +143,14 @@ func Test(t *testing.T) {
 	toStream.FlatMap(func(i user) *stream.Stream[any, []any] {
 		array := convert.ToAnyArray([]rune(i.Name))
 		return stream.ToStream(&array)
-	}).
-		ForEach(func(item any) {
-			print(item.(rune))
-		})
+	}).ForEach(func(item any) {
+		print(string(item.(rune)) + " ")
+	})
 }
 func Test_Sorted(t *testing.T) {
 	arr := []int{1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10}
 	for i := 0; i < 100; i++ {
-		arr = append(arr, 1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10, 8848)
+		arr = append(arr, 1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10)
 	}
 	stream.ToStream(&arr).Parallel().Sort(func(a, b int) bool { return a < b }).ForEach(func(item int) {
 		fmt.Println(item)

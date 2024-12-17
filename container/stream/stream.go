@@ -447,6 +447,11 @@ func (s *Stream[T, Slice]) Count() int64 {
 	return int64(len(*s.options))
 }
 
+// Of creates a stream from the given slice.
+func Of[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
+	return ToStream(source)
+}
+
 func (s *Stream[T, Slice]) Parallel() *Stream[T, Slice] {
 	s.parallel = true
 	return s

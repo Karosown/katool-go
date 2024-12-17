@@ -7,6 +7,7 @@ import (
 
 	"github.com/karosown/katool/log"
 	remote "github.com/karosown/katool/net/http"
+	rm "github.com/karosown/katool/net/http/format_detail"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -67,4 +68,6 @@ func TestOAuth2WithLogrus(t *testing.T) {
 	req := remote.Req{}
 	req.SetLogger(&log.LogrusAdapter{})
 	req.Url("http://www.baidu.com").QueryParam(map[string]string{"a": "1"}).Build(&map[string]string{})
+
+	req.Url().Format(&rm.JSONEnDeCodeFormat{}).Build().B
 }
