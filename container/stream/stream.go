@@ -1,5 +1,10 @@
 package stream
 
+//TIP 模仿Java的Stream流式处理
+// 通常使用ToStream或者Of方法即可（Of是为了保留Java原有的API)，特殊情况构建Any的Stream可以用NewStream方法
+// 另外两个Option的Stream方法为内部实现(newOptionsStream 和 newOptionStream)
+// 使用泛型的时候注意不要造成泛型循环
+
 import (
 	"fmt"
 	"reflect"
@@ -11,7 +16,6 @@ import (
 	"github.com/karosown/katool/collect/lists"
 	"github.com/karosown/katool/container/optional"
 	"github.com/karosown/katool/convert"
-	"github.com/karosown/katool/util"
 )
 
 type Stream[T any, Slice ~[]T] struct {
@@ -42,7 +46,12 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	}
 }
 
-func NewOptionsStream[Opt any, Opts Options[Opt]](source *[]Opts) *Stream[Options[any], []Options[any]] {
+// Of creates a stream from the given slice.
+func Of[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
+	return ToStream(source)
+}
+
+func newOptionsStream[Opt any, Opts Options[Opt]](source *[]Opts) *Stream[Options[any], []Options[any]] {
 	resOptions := make([]Option[Options[any]], 0)
 	sourceList := make([]Options[any], 0)
 	optionsAdpter := func(opts Options[Opt]) Options[any] {
@@ -64,7 +73,7 @@ func NewOptionsStream[Opt any, Opts Options[Opt]](source *[]Opts) *Stream[Option
 	}
 }
 
-func NewOptionStream[Opt any, T Options[Opt]](source *T) *Stream[Option[any], []Option[any]] {
+func newOptionStream[Opt any, T Options[Opt]](source *T) *Stream[Option[any], []Option[any]] {
 	resOptions := make(Options[Option[any]], 0)
 	resSource := make([]Option[any], 0)
 	for i := 0; i < len(*source); i++ {
@@ -89,6 +98,11 @@ func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 		parallel: true,
 	}
 }
+func (s *Stream[T, Slice]) Join(source *Slice) *Stream[T, []T] {
+	list := s.ToList()
+	list = append(list, *source...)
+	return ToStream(&list)
+}
 func goRun[T any](datas []T, parallel bool, solve func(pos int, automicDatas []T) error) {
 	size := len(datas)
 	pageSize := optional.IsTrue((size>>2) == 0, 1, size>>2)
@@ -112,6 +126,9 @@ func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 	resSource := convert.ChanToArray(resChan)
 	return ToStream(&resSource)
 }
+
+// FlatMap 扁平化处理，需要放入一个返回新的Stream流的函数
+// 参考：https://blog.csdn.net/feinifi/article/details/128980814
 func (s *Stream[T, Slice]) FlatMap(fn func(i T) *Stream[any, []any]) *Stream[any, []any] {
 	size := len(*s.options)
 	resChan := make(chan []any, size)
@@ -126,9 +143,13 @@ func (s *Stream[T, Slice]) FlatMap(fn func(i T) *Stream[any, []any]) *Stream[any
 	resSource := convert.ChanToFlatArray(resChan)
 	return ToStream(&resSource)
 }
+
+// Distinct 按照默认方法去重(默认是json化之后来进行字符串的比对)
 func (s *Stream[T, Slice]) Distinct() *Stream[T, Slice] {
 	return s.DistinctBy(algorithm.HASH_WITH_JSON)
 }
+
+// DistinctBy 按照指定方法去重
 func (s *Stream[T, Slice]) DistinctBy(hash algorithm.HashComputeFunction) *Stream[T, Slice] {
 	res := make(Slice, 0)
 	size := len(*s.options)
@@ -155,6 +176,8 @@ func (s *Stream[T, Slice]) DistinctBy(hash algorithm.HashComputeFunction) *Strea
 	//}
 	//return nil
 }
+
+// Reduce 求和计算
 func (s *Stream[T, Slice]) Reduce(begin any, atomicSolveFunction func(cntValue any, nxt T) any, parallelResultSolve func(sum1, sum2 any) any) any {
 	if atomicSolveFunction == nil {
 		panic("atomicSolveFunction must not nil")
@@ -289,7 +312,7 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 		return nil
 	})
 
-	optionsStream := NewOptionsStream[T, Options[T]](&data)
+	optionsStream := newOptionsStream[T, Options[T]](&data)
 
 	optionsStream.parallel = s.parallel
 	sortedMap := optionsStream.Map(func(options Options[any]) any {
@@ -307,7 +330,7 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 	sortedMap.parallel = s.parallel
 	res := sortedMap.Map(func(v any) any {
 		i := v.(Options[any])
-		ress := NewOptionStream(&i).Map(func(item Option[any]) any {
+		ress := newOptionStream(&i).Map(func(item Option[any]) any {
 			return item.opt
 		}).ToList()
 		return ress
@@ -315,7 +338,7 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 	re := make([]any, 0)
 	toStream := ToStream(&res)
 	toStream.parallel = s.parallel
-	mergeSorted := toStream.Reduce(re, util.MergeSortedArrayWithPrimaryData[T](desc, orderBy), util.MergeSortedArrayWithPrimaryData[T](desc, orderBy)).([]any)
+	mergeSorted := toStream.Reduce(re, algorithm.MergeSortedArrayWithPrimaryData[T](desc, orderBy), algorithm.MergeSortedArrayWithPrimaryData[T](desc, orderBy)).([]any)
 	result := make(Slice, 0)
 	for i := 0; i < len(mergeSorted); i++ {
 		result = append(result, mergeSorted[i].(T))
@@ -347,7 +370,7 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 		data = append(data, options)
 		return nil
 	})
-	optionsStream := NewOptionsStream[T, Options[T]](&data)
+	optionsStream := newOptionsStream[T, Options[T]](&data)
 	optionsStream.parallel = s.parallel
 	sortedMap := optionsStream.Map(func(options Options[any]) any {
 		sort.SliceStable(options, func(i, j int) bool {
@@ -364,7 +387,7 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 	sortedMap.parallel = s.parallel
 	res := sortedMap.Map(func(v any) any {
 		i := v.(Options[any])
-		ress := NewOptionStream(&i).Map(func(item Option[any]) any {
+		ress := newOptionStream(&i).Map(func(item Option[any]) any {
 			return item.opt
 		}).ToList()
 		return ress
@@ -372,7 +395,7 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 	re := make([]any, 0)
 	toStream := ToStream(&res)
 	toStream.parallel = s.parallel
-	mergeSorted := toStream.Reduce(re, util.MergeSortedArrayWithPrimaryId[T](desc, orderBy), util.MergeSortedArrayWithPrimaryId[T](desc, orderBy)).([]any)
+	mergeSorted := toStream.Reduce(re, algorithm.MergeSortedArrayWithPrimaryId[T](desc, orderBy), algorithm.MergeSortedArrayWithPrimaryId[T](desc, orderBy)).([]any)
 	result := make(Slice, 0)
 	for i := 0; i < len(mergeSorted); i++ {
 		result = append(result, mergeSorted[i].(T))
@@ -399,7 +422,7 @@ func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 		data = append(data, options)
 		return nil
 	})
-	optionsStream := NewOptionsStream[T, Options[T]](&data)
+	optionsStream := newOptionsStream[T, Options[T]](&data)
 	optionsStream.parallel = s.parallel
 	sortedMap := optionsStream.Map(func(options Options[any]) any {
 		sort.SliceStable(options, func(i, j int) bool {
@@ -410,7 +433,7 @@ func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 	sortedMap.parallel = s.parallel
 	res := sortedMap.Map(func(v any) any {
 		i := v.(Options[any])
-		ress := NewOptionStream(&i).Map(func(item Option[any]) any {
+		ress := newOptionStream(&i).Map(func(item Option[any]) any {
 			return item.opt
 		}).ToList()
 		return ress
@@ -418,7 +441,7 @@ func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 	re := make([]any, 0)
 	toStream := ToStream(&res)
 	toStream.parallel = s.parallel
-	mergeSorted := toStream.Reduce(re, util.MergeSortedArrayWithEntity[T](orderBy), util.MergeSortedArrayWithEntity[T](orderBy)).([]any)
+	mergeSorted := toStream.Reduce(re, algorithm.MergeSortedArrayWithEntity[T](orderBy), algorithm.MergeSortedArrayWithEntity[T](orderBy)).([]any)
 	result := make(Slice, 0)
 	for i := 0; i < len(mergeSorted); i++ {
 		result = append(result, mergeSorted[i].(T))
@@ -445,11 +468,6 @@ func (s *Stream[T, Slice]) ForEach(fn func(item T)) *Stream[T, Slice] {
 
 func (s *Stream[T, Slice]) Count() int64 {
 	return int64(len(*s.options))
-}
-
-// Of creates a stream from the given slice.
-func Of[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
-	return ToStream(source)
 }
 
 func (s *Stream[T, Slice]) Parallel() *Stream[T, Slice] {

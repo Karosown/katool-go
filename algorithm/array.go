@@ -1,8 +1,4 @@
-package util
-
-import (
-	"github.com/karosown/katool/algorithm"
-)
+package algorithm
 
 func MergeSortedArrayWithEntity[T any](orderBy func(a, b T) bool) func(any, any) any {
 	return func(cntValue any, nxt any) any {
@@ -36,7 +32,7 @@ func MergeSortedArrayWithEntity[T any](orderBy func(a, b T) bool) func(any, any)
 		return rest
 	}
 }
-func MergeSortedArrayWithPrimaryData[T any](desc bool, orderBy algorithm.HashComputeFunction) func(any, any) any {
+func MergeSortedArrayWithPrimaryData[T any](desc bool, orderBy HashComputeFunction) func(any, any) any {
 	return func(cntValue any, nxt any) any {
 		ts := cntValue.([]any)
 		nxts := nxt.([]any)
@@ -80,7 +76,7 @@ func MergeSortedArrayWithPrimaryData[T any](desc bool, orderBy algorithm.HashCom
 	}
 }
 
-func MergeSortedArrayWithPrimaryId[T any](desc bool, orderBy algorithm.IDComputeFunction) func(any, any) any {
+func MergeSortedArrayWithPrimaryId[T any](desc bool, orderBy IDComputeFunction) func(any, any) any {
 	return func(cntValue any, nxt any) any {
 		ts := cntValue.([]any)
 		nxts := nxt.([]any)
