@@ -141,7 +141,7 @@ func Test(t *testing.T) {
 	count = toStream.Filter(func(item user) bool { return item.Age < 60 }).Count()
 	println("年龄小于60岁的共" + convert.ToString(count) + "人")
 	toStream.FlatMap(func(i user) *stream.Stream[any, []any] {
-		array := convert.ToAnyArray([]rune(i.Name))
+		array := convert.ToAnySlice([]rune(i.Name))
 		return stream.ToStream(&array)
 	}).ForEach(func(item any) {
 		print(string(item.(rune)) + " ")

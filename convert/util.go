@@ -127,10 +127,18 @@ func ToString(source any) string {
 	return str
 }
 
-func ToAnyArray[T any](source []T) []any {
+func ToAnySlice[T any](source []T) []any {
 	res := make([]any, 0, len(source))
 	for _, v := range source {
 		res = append(res, v)
+	}
+	return res
+}
+
+func FromAnySlice[T any](source []any) []T {
+	res := make([]T, len(source))
+	for i, v := range source {
+		res[i] = v.(T)
 	}
 	return res
 }

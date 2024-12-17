@@ -69,5 +69,5 @@ func TestOAuth2WithLogrus(t *testing.T) {
 	req.SetLogger(&log.LogrusAdapter{})
 	req.Url("http://www.baidu.com").QueryParam(map[string]string{"a": "1"}).Build(&map[string]string{})
 
-	req.Url().Format(&rm.JSONEnDeCodeFormat{}).Build().B
+	req.Url().Format(&rm.JSONEnDeCodeFormat{}).Build()
 }

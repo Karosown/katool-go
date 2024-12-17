@@ -16,4 +16,12 @@ func Test_Map(t *testing.T) {
 	stream.EntrySet(m).ToStream().ForEach(func(e stream.Entry[string, string]) {
 		fmt.Println(e)
 	})
+
+	stream.EntrySet(m).KeySetStream().ForEach(func(item string) {
+		fmt.Println(item)
+	})
+
+	stream.EntrySet(m).ValuesStream().ForEach(func(item string) {
+		fmt.Println(item)
+	})
 }
