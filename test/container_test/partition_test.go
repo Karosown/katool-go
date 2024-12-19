@@ -12,7 +12,7 @@ import (
 )
 
 func Test_Partition(t *testing.T) {
-	sum := collect.PatitonToStream(lists.Partition(userList[:], 15)).
+	sum := collect.PartitionToStream(lists.Partition(userList[:], 15)).
 		Parallel().
 		Map(func(i []user) any {
 			return stream.ToStream(&i).Map(func(user user) any {

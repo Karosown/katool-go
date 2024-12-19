@@ -1,6 +1,7 @@
 package test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/karosown/katool/container/stream"
@@ -8,6 +9,28 @@ import (
 	"github.com/karosown/katool/lock"
 )
 
+type A struct {
+	Name string `json:"name,omitempty"`
+}
+
+type B struct {
+	A
+	Age int `json:"age"`
+}
+
+func TestOfStructJson(t *testing.T) {
+	b := &B{
+		A: A{
+			Name: "test",
+		},
+		Age: 0,
+	}
+	marshal, err := json.Marshal(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(string(marshal))
+}
 func TestLockSupport(t *testing.T) {
 	support := lock.NewLockSupport()
 	go func() {
