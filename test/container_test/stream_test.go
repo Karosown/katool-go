@@ -33,7 +33,7 @@ var userList []user
 
 func TestOfStream(t *testing.T) {
 
-	arr := []int{1, 3, 2, 3, 3, 3, 3}
+	arr := []int{1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3}
 
 	distinct := stream.ToStream(&arr).
 		Parallel().
@@ -53,11 +53,13 @@ func TestOfStream(t *testing.T) {
 		fmt.Println(s)
 	})
 
-	toMap := stream.ToStream(&arr).Parallel().ToMap(func(index int, item int) any {
-		return index
-	}, func(index int, item int) any {
-		return item
-	})
+	toMap := stream.ToStream(&arr).
+		//Parallel().
+		ToMap(func(index int, item int) any {
+			return index
+		}, func(index int, item int) any {
+			return item
+		})
 
 	maputil.ForEach(toMap, func(key any, value any) {
 		fmt.Printf("key: %v, value: %v\n", key, value)
@@ -96,7 +98,7 @@ func Test_Map(t *testing.T) {
 func Test_GroupBy(t *testing.T) {
 	users := userList[:]
 	by := stream.ToStream(&users).GroupBy(func(user user) any {
-		return user.Name
+		return user.Class
 	})
 	println(by)
 }

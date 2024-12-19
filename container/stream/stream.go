@@ -18,6 +18,10 @@ import (
 	"github.com/karosown/katool/convert"
 )
 
+func getPageSize(size int) int {
+	return size >> 2
+}
+
 type Stream[T any, Slice ~[]T] struct {
 	options  *Options[T]
 	source   *Slice
@@ -105,7 +109,7 @@ func (s *Stream[T, Slice]) Join(source *Slice) *Stream[T, []T] {
 }
 func goRun[T any](datas []T, parallel bool, solve func(pos int, automicDatas []T) error) {
 	size := len(datas)
-	pageSize := optional.IsTrue((size>>2) == 0, 1, size>>2)
+	pageSize := optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size))
 	goNum := algorithm.NumOfTwoMultiply(size)
 	err := lists.Partition(datas, optional.IsTrue(parallel, pageSize, 1)).ForEach(solve, parallel, lynx.NewLimiter(optional.IsTrue(parallel, goNum, 1)))
 	if err != nil {
@@ -251,7 +255,9 @@ func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, it
 	size := len(*s.options)
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
-			ress.Store(k(pos*optional.IsTrue((size>>2) == 0, 1, size>>2)+i, (options)[i].opt), v(pos*optional.IsTrue((size>>2) == 0, 1, size>>2)+i, (options)[i].opt))
+			index := pos*optional.IsTrue(s.parallel,
+				optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)), 1) + i
+			ress.Store(k(index, (options)[i].opt), v(index, (options)[i].opt))
 		}
 		return nil
 	})
@@ -263,19 +269,21 @@ func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, it
 	return res
 }
 
+// GroupBy 分工单一原则，保证GroupBy无法修改options
 func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 	res := &sync.Map{}
-	//size := len(*s.options)
+	size := len(*s.options)
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			key := groupBy((options)[i].opt)
 			if _, ok := res.Load(key); !ok {
 				res.Store(key, make(Slice, 0))
 			}
-			//res[key] = append(res[key], (*s.source)[pos*optional.IsTrue(s.parallel, len(*s.source)<<4^0x1, 1)+i])
 			value, ok := res.Load(key)
 			if ok {
-				res.Store(key, append(value.(Slice), (*s.source)[pos*optional.IsTrue((len(*s.source)>>2) == 0, 1, len(*s.source)>>2)+i]))
+				index := pos*optional.IsTrue(s.parallel,
+					optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)), 1) + i
+				res.Store(key, append(value.(Slice), (*s.source)[index]))
 			}
 
 		}
@@ -304,7 +312,7 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 	}
 
 	size := len(*s.options)
-	data := make([]Options[T], 0, optional.IsTrue((size>>2) == 0, 1, size>>2))
+	data := make([]Options[T], 0, optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)))
 	// opt opt opt opt -> opts opts
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		//println(pos, options)
@@ -363,7 +371,7 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 	}
 
 	size := len(*s.options)
-	data := make([]Options[T], 0, optional.IsTrue((size>>2) == 0, 1, size>>2))
+	data := make([]Options[T], 0, optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)))
 	// opt opt opt opt -> opts opts
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		//println(pos, options)
@@ -415,7 +423,7 @@ func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 	}
 
 	size := len(*s.options)
-	data := make([]Options[T], 0, optional.IsTrue((size>>2) == 0, 1, size>>2))
+	data := make([]Options[T], 0, optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)))
 	// opt opt opt opt -> opts opts
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
 		//println(pos, options)
