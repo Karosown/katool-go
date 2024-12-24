@@ -1,0 +1,111 @@
+package core
+
+import (
+	"sync"
+
+	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
+)
+
+// Contain 浏览器容器结构体
+type Contain struct {
+	Path     string
+	Headless bool
+	URL      string
+	*launcher.Launcher
+	*rod.Browser
+}
+
+// WebReaderSysLock 全局读写锁
+var WebReaderSysLock sync.RWMutex = sync.RWMutex{}
+
+// browserPool 全局浏览器池
+var browserPool rod.Pool[rod.Browser]
+
+// init 初始化浏览器池
+func init() {
+	browserPool = rod.NewBrowserPool(10) // 设置池大小为10
+}
+
+// NewCotain 创建新的Contain实例
+func NewCotain(path string, headless bool) *Contain {
+	l := launcher.NewUserMode()
+	launch := l.NoSandbox(true).Headless(headless).Set("disable-gpu").
+		Set("disable-dev-shm-usage").
+		Set("disable-setuid-sandbox").
+		Set("no-sandbox").
+		Set("disable-web-security").
+		Set("disable-infobars").Bin(path).MustLaunch()
+
+	// 从浏览器池中获取浏览器实例
+	elem, err := browserPool.Get(func() (*rod.Browser, error) {
+		connect := rod.New().ControlURL(launch).MustConnect()
+		return connect, nil
+	})
+	if err != nil {
+		elem = rod.New().ControlURL(launch).MustConnect()
+	}
+	browser := elem
+
+	return &Contain{
+		Path:     path,
+		Headless: headless,
+		URL:      launch,
+		Launcher: l,
+		Browser:  browser,
+	}
+}
+
+// GetContainer 获取浏览器实例
+func (c *Contain) GetContainer() *rod.Browser {
+	return c.Browser
+}
+
+// Close 关闭浏览器实例并归还到池中
+func (c *Contain) Close() {
+	WebReaderSysLock.Lock()
+	defer WebReaderSysLock.Unlock()
+	if c == nil {
+		return
+	}
+	pages, err := c.Browser.Pages()
+	if err == nil {
+		for _, page := range pages {
+			page.Close()
+		}
+	}
+	// 将浏览器归还到池中
+	c.Launcher.Cleanup()
+	c.Launcher.Kill()
+	if len(browserPool) < 3 {
+		for len(browserPool) < 10 {
+			go func() {
+				if len(browserPool) > 10 {
+					return
+				}
+				l := launcher.NewUserMode()
+				launch := l.NoSandbox(true).Headless(c.Headless).Set("disable-gpu").
+					Set("disable-dev-shm-usage").
+					Set("disable-setuid-sandbox").
+					Set("no-sandbox").
+					Set("disable-web-security").
+					Set("disable-infobars").Bin(c.Path).MustLaunch()
+				browserPool.Put(rod.New().ControlURL(launch).MustConnect())
+			}()
+		}
+	}
+
+}
+
+// ReStart 重启浏览器
+func (c *Contain) ReStart() {
+	WebReaderSysLock.Lock()
+	defer WebReaderSysLock.Unlock()
+
+	// 关闭当前实例
+	c.Close()
+
+	// 创建新实例并复制到当前对象
+	newC := NewCotain(c.Path, c.Headless)
+	*c = *newC
+}

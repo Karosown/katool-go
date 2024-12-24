@@ -4,33 +4,33 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/karosown/katool/log"
+	remote2 "github.com/karosown/katool/net/http"
 )
 
 type BackData any
 type EnDeCodeFormat interface {
-	SetLogger(logger log.Logger)
-	GetLogger() log.Logger
+	SetLogger(logger remote2.Logger)
+	GetLogger() remote2.Logger
 	ValidEncode(obj any) (bool, error)
 	ValidDecode(encode any) (bool, error)
 	Encode(obj any) (any, error)
 	Decode(encode any, backDao any) (any, error)
 	Then(format EnDeCodeFormat) EnDeCodeFormat
-	SystemEncode(self EnDeCodeFormat, obj any) *string
-	SystemDecode(self EnDeCodeFormat, encode any, back any) any
+	SystemEncode(self EnDeCodeFormat, obj any) (*string, error)
+	SystemDecode(self EnDeCodeFormat, encode any, back any) (any, error)
 }
 
 type DefaultEnDeCodeFormat struct {
 	self    EnDeCodeFormat
 	next    EnDeCodeFormat
 	backDao any
-	logger  log.Logger
+	logger  remote2.Logger
 }
 
-func (e *DefaultEnDeCodeFormat) SetLogger(logger log.Logger) {
+func (e *DefaultEnDeCodeFormat) SetLogger(logger remote2.Logger) {
 	e.logger = logger
 }
-func (e *DefaultEnDeCodeFormat) GetLogger() log.Logger {
+func (e *DefaultEnDeCodeFormat) GetLogger() remote2.Logger {
 	return e.logger
 }
 
@@ -41,9 +41,7 @@ func (e *DefaultEnDeCodeFormat) ValidDecode(encode any) (bool, error) {
 	return true, nil
 }
 
-/**
- * 工具链
- */
+// Then 工具链
 func (e *DefaultEnDeCodeFormat) Then(format EnDeCodeFormat) EnDeCodeFormat {
 	e.next = format
 	return format
@@ -58,46 +56,45 @@ func (e *DefaultEnDeCodeFormat) Decode(encode any, back any) (any, error) {
 	return nil, err
 }
 
-func (e *DefaultEnDeCodeFormat) SystemDecode(self EnDeCodeFormat, encode any, back any) any {
+func (e *DefaultEnDeCodeFormat) SystemDecode(self EnDeCodeFormat, encode any, back any) (any, error) {
 	if e.self == nil {
 		e.self = self
 	}
 	valid, err := e.self.ValidDecode(encode)
 	if !valid {
-		e.logger.Error(fmt.Errorf("DefaultEnDeCodeFormat.SystemDecode.Valid failed: %v", err))
-		return nil
+		err = fmt.Errorf("DefaultEnDeCodeFormat.SystemDecode.Valid failed: %v", err)
+		e.logger.Error(err)
+		return nil, err
 	}
 	backData, err := e.self.Decode(encode, back)
 	if err != nil {
 		e.logger.Error(fmt.Errorf("DefaultEnDeCodeFormat.SystemDecode failed: %v", err))
-		return nil
+		return nil, err
 	}
 	if e.next != nil {
-		res := e.next.SystemDecode(e.next, backData, back)
-		return res
+		res, err := e.next.SystemDecode(e.next, backData, back)
+		return res, err
 	}
-	return backData
+	return backData, err
 }
 
-func (e *DefaultEnDeCodeFormat) SystemEncode(self EnDeCodeFormat, obj any) *string {
+func (e *DefaultEnDeCodeFormat) SystemEncode(self EnDeCodeFormat, obj any) (*string, error) {
 	if e.self == nil {
 		e.self = self
 	}
 	valid, err := e.self.ValidEncode(obj)
 	if !valid {
-		fmt.Errorf("DefaultEnDeCodeFormat.SystemEncode.Valid failed: %v", err)
-		return nil
+		return nil, fmt.Errorf("DefaultEnDeCodeFormat.SystemEncode.Valid failed: %v", err)
 	}
 	encode, err := e.self.Encode(obj)
 	if err != nil {
-		fmt.Errorf("DefaultEnDeCodeFormat.SystemEncode failed: %v", err)
-		return nil
+		return nil, fmt.Errorf("DefaultEnDeCodeFormat.SystemEncode failed: %v", err)
 	}
 	if e.next != nil {
 		return e.next.SystemEncode(e.self, encode)
 	} else {
 		s := encode.(string)
-		return &s
+		return &s, nil
 	}
 }
 

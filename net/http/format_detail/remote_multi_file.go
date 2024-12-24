@@ -9,10 +9,10 @@ import (
 )
 
 type RemoteMultiMultiFileDeCodeFormat struct {
-	remote.DefaultEnDeCodeFormat
+	DefaultEnDeCodeFormat
 	Req     *remote.Req
 	reqBody map[string]any
-	Decoder remote.EnDeCodeFormat
+	Decoder EnDeCodeFormat
 	DaoMap  map[string]any
 }
 
@@ -38,6 +38,7 @@ func (e *RemoteMultiMultiFileDeCodeFormat) Encode(obj any) (any, error) {
 func (e *RemoteMultiMultiFileDeCodeFormat) Decode(encode any, back any) (any, error) {
 	urlMap := encode.(map[string][]string)
 	result := make(map[string][][]any)
+	var errs error
 	for k, v := range urlMap {
 		if dao, ok := e.DaoMap[k]; ok {
 			for i, url := range v {
@@ -45,7 +46,10 @@ func (e *RemoteMultiMultiFileDeCodeFormat) Decode(encode any, back any) (any, er
 				if body, status := e.reqBody[k]; status {
 					req.Data(body)
 				}
-				build := req.Build(dao)
+				build, err := req.Build(dao)
+				if err != nil {
+					errs = errors.Join(errs, err)
+				}
 				if build != nil {
 					if result[k] == nil {
 						result[k] = make([][]any, len(v))
@@ -61,5 +65,5 @@ func (e *RemoteMultiMultiFileDeCodeFormat) Decode(encode any, back any) (any, er
 		}
 	}
 
-	return result, nil
+	return result, errs
 }

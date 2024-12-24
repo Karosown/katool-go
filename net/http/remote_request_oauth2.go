@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/karosown/katool/log"
+	remote2 "github.com/karosown/katool/net/http/format_detail"
 )
 
 // OAuth2Req
@@ -59,8 +60,8 @@ func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string,
 		if trimPrefix != "" {
 			accessToken = trimPrefix + " " + accessToken
 		}
-		if O.headers != nil {
-			O.headers[O.tokenHeaderName] = accessToken
+		if O.ReqHeaders != nil {
+			O.ReqHeaders[O.tokenHeaderName] = accessToken
 		}
 		if expiresIn, ok := result["expires_in"].(float64); ok {
 			O.refreshTokenExpiry = time.Now().Add(time.Duration(int(expiresIn)) * time.Second).Unix()
@@ -135,7 +136,7 @@ func (O *OAuth2Req) HttpClient(client *resty.Client) *OAuth2Req {
 	return O
 }
 
-func (O *OAuth2Req) Format(format EnDeCodeFormat) *OAuth2Req {
+func (O *OAuth2Req) Format(format remote2.EnDeCodeFormat) *OAuth2Req {
 	O.Req.Format(format)
 	return O
 }
@@ -144,10 +145,9 @@ func (O *OAuth2Req) SetLogger(logger log.Logger) *OAuth2Req {
 	O.Logger = logger
 	return O
 }
-func (O *OAuth2Req) Build(backDao any) any {
+func (O *OAuth2Req) Build(backDao any) (any, error) {
 	if err := O.EnsureAccessToken(); err != nil {
-		fmt.Println("Error ensuring access token:", err)
-		return nil
+		return nil, fmt.Errorf("error ensuring access token:%s", err)
 	}
 	return O.Req.Build(backDao)
 }

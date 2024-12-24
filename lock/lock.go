@@ -48,3 +48,5 @@ func Synchronized(locker sync.Locker, f func()) {
 	defer locker.Unlock()
 	f()
 }
+
+type LockMap map[string]sync.Locker

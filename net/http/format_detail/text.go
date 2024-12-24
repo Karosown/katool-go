@@ -4,12 +4,11 @@ import (
 	"fmt"
 
 	"github.com/karosown/katool/file/file_serialize"
-	remote "github.com/karosown/katool/net/http"
 )
 
 type TextEnDecodeFormat struct {
-	remote.DefaultEnDeCodeFormat
-	remote.BytesDecodeFormatValid
+	DefaultEnDeCodeFormat
+	BytesDecodeFormatValid
 	MapToStruct func(fields []string, headers []string, backDao any) any
 	Convert     func(backDao any) any
 	BackDao     any
