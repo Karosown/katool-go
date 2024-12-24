@@ -1,14 +1,26 @@
 package remote
 
 import (
-	"fmt"
+	"encoding/json"
+	"net/http"
 	"reflect"
 	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/karosown/katool/log"
 )
+
+type Logger interface {
+	Infof(string, ...any)
+	Errorf(string, ...any)
+	Warnf(string, ...any)
+	Warnln(arg ...any)
+	Infoln(arg ...any)
+	Errorln(arg ...any)
+	Warn(arg ...any)
+	Info(arg ...any)
+	Error(arg ...any)
+}
 
 type ReqApi interface {
 	Url(url string) ReqApi
@@ -19,19 +31,19 @@ type ReqApi interface {
 	HttpClient(client *resty.Client) ReqApi
 	Format(format EnDeCodeFormat) ReqApi
 	ReHeader(k, v string) ReqApi
-	SetLogger(logger log.Logger) ReqApi
-	Build(backDao any) any
+	SetLogger(logger Logger) ReqApi
+	Build(backDao any) (any, error)
 }
 
 type Req struct {
 	url         string
 	queryParams map[string]string
-	headers     map[string]string
+	ReqHeaders  map[string]string `json:"headers"`
 	method      string
 	data        any
 	format      EnDeCodeFormat // 请求格式化解析器（bing使用的是xml进行请求响应，google采用的是json
 	httpClient  *resty.Client
-	Logger      log.Logger
+	Logger      Logger
 }
 
 func (r *Req) Url(url string) ReqApi {
@@ -42,12 +54,13 @@ func (r *Req) QueryParam(psPair map[string]string) ReqApi {
 	r.queryParams = psPair
 	return r
 }
-func (r *Req) SetLogger(logger log.Logger) ReqApi {
+
+func (r *Req) SetLogger(logger Logger) ReqApi {
 	r.Logger = logger
 	return r
 }
 func (r *Req) Headers(headers map[string]string) ReqApi {
-	r.headers = headers
+	r.ReqHeaders = headers
 	return r
 }
 
@@ -81,10 +94,12 @@ func (r *Req) Format(format EnDeCodeFormat) ReqApi {
 	}
 	return r
 }
-func (r *Req) Build(backDao any) any {
+func (r *Req) Build(backDao any) (any, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			r.Logger.Error(err)
+			if r.Logger != nil {
+				r.Logger.Error(err)
+			}
 		}
 	}()
 	// 检查 response 是否为指针类型
@@ -95,34 +110,47 @@ func (r *Req) Build(backDao any) any {
 		r.httpClient = resty.New()
 		r.httpClient.SetTimeout(30 * time.Second)
 	}
-
 	url := r.url
 	data := r.data
-	reqAtomic := r.httpClient.R().SetQueryParams(r.queryParams).SetHeaders(r.headers)
+	reqAtomic := r.httpClient.R().SetQueryParams(r.queryParams).SetHeaders(r.ReqHeaders)
 	switch strings.ToUpper(r.method) {
 	case "GET":
 		fallthrough
 	case "DELETE":
 		if nil != data {
-			url += "/" + fmt.Sprintf("%v", r.data)
+			marshal, err := json.Marshal(data)
+			if nil != err {
+				return nil, err
+			}
+			mp := make(map[string]string)
+			err = json.Unmarshal(marshal, &mp)
+			if nil != err {
+				return nil, err
+			}
+			reqAtomic.SetPathParams(mp)
 		}
 		var res *resty.Response
 		var err error
 		if strings.ToUpper(r.method) == "GET" {
-			res, err = reqAtomic.Get(url)
+			res, err = reqAtomic.Get(url + "/{id}")
 		} else {
 			res, err = reqAtomic.Delete(url)
 		}
 		if nil != err {
-			panic(err)
+			return nil, err
 		}
 		body := res.Body()
 		if nil != r.Logger {
-			r.Logger.Infof("url:%s,method:%s,status_code:%d,status:%s,body:%s", url, r.method, res.StatusCode(),
-				res.Status(), string(body))
+			if res.StatusCode() != http.StatusOK {
+				r.Logger.Errorf("url:%s,method:%s,status_code:%d,status:%s,body:%s", url, r.method, res.StatusCode(),
+					res.Status(), string(body))
+			} else {
+				r.Logger.Infof("url:%s,method:%s,status_code:%d,status:%s", url, r.method, res.StatusCode(),
+					res.Status())
+			}
 		}
-		response := (r.format).SystemDecode(r.format, body, backDao)
-		return response
+		response, err := (r.format).SystemDecode(r.format, body, backDao)
+		return response, err
 	default:
 		// resty 会自动对data进行处理：resty.middleware.handleRequestBody , 通过反射判断
 		// if IsJSONType(contentType) && (kind == reflect.Struct || kind == reflect.Map || kind == reflect.Slice) {
@@ -131,11 +159,11 @@ func (r *Req) Build(backDao any) any {
 		//			bodyBytes, err = c.XMLMarshal(r.Body)
 		//		}
 		if data != nil && reflect.TypeOf(data).Kind() == reflect.Ptr {
-			data = reflect.ValueOf(data).Elem().String()
+			data = reflect.ValueOf(data).Elem().Interface()
 		}
 		response, err := reqAtomic.SetBody(data).Execute(r.method, url)
 		if nil != err {
-			panic(err)
+			return nil, err
 		}
 		body := response.Body()
 		if nil != r.Logger {
@@ -143,13 +171,13 @@ func (r *Req) Build(backDao any) any {
 				response.Status())
 		}
 		//fmt.Println(string(body))
-		res := (r.format).SystemDecode(r.format, body, backDao)
-		return res
+		res, err := (r.format).SystemDecode(r.format, body, backDao)
+		return res, err
 	}
-	return backDao
+	return backDao, nil
 }
 func (r *Req) ReHeader(k, v string) ReqApi {
-	r.headers[k] = v
+	r.ReqHeaders[k] = v
 	return r
 }
 
