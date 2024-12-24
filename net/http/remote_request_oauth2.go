@@ -158,7 +158,7 @@ type FileWithOAuth2TokenStorage struct {
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
-const oauth2prefix = "spider:oauth2:tokens"
+const oauth2prefix = "katool:oauth2:tokens"
 
 func makeOauth2Key(platform string) string {
 	return fmt.Sprintf("%s:%s", oauth2prefix, platform)
