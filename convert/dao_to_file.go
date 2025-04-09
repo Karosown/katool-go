@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/fileutil"
+	"github.com/karosown/katool/xlog"
 )
 
 func StructToCSV[T any](datas []T, fullPath string) error {
@@ -68,7 +69,7 @@ func StructToCSV[T any](datas []T, fullPath string) error {
 		if !fileutil.IsExist(dir) {
 			err := fileutil.CreateDir(dir)
 			if err != nil {
-				panic(err)
+				xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(err.Error()).Panic()
 			}
 		}
 		status := fileutil.CreateFile(fullPath)

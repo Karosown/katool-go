@@ -2,6 +2,8 @@ package ioc
 
 import (
 	"sync"
+
+	"github.com/karosown/katool/xlog"
 )
 
 var ic = sync.Map{}
@@ -35,7 +37,7 @@ func MustRegisterValue(key string, value any) {
 
 func RegisterValue(key string, value any) {
 	if Get(key) != nil {
-		panic("ioc:key already exists")
+		xlog.KaToolLoggerWrapper.ApplicationDesc("ioc:key already exists").Panic()
 	} else {
 		ic.Store(key, value)
 	}
@@ -51,7 +53,7 @@ func ForceRegister[V any](key string, valueFunction func() V) {
 }
 func Register(key string, valueFunction func() any) {
 	if Get(key) != nil {
-		panic("ioc:key already exists")
+		xlog.KaToolLoggerWrapper.ApplicationDesc("ioc:key already exists").Panic()
 	} else {
 		ic.Store(key, valueFunction())
 	}

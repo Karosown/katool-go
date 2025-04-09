@@ -1,6 +1,7 @@
 package test
 
 import (
+	"encoding/json"
 	"sync"
 	"testing"
 
@@ -190,4 +191,34 @@ func TestSafeMapConcurrency(t *testing.T) {
 	}
 
 	readWg.Wait()
+}
+
+func TestSortedMap_MarshalJSON(t *testing.T) {
+	// 创建一个 SortedMap，使用 int 作为键
+	sm := xmap.NewSortedMap[int, string]()
+	sm.Set(3, "three")
+	sm.Set(1, "one")
+	sm.Set(2, "two")
+
+	// 期望的 JSON 字符串（按数值大小排序）
+	expectedJSON := `{"1":"one","2":"two","3":"three"}`
+
+	// 序列化 SortedMap
+	jsonBytes, err := json.Marshal(sm)
+	assert.NoError(t, err, "JSON 序列化不应失败")
+	assert.JSONEq(t, expectedJSON, string(jsonBytes), "输出的 JSON 字符串不符合预期顺序")
+
+	// 使用 string 类型的键
+	smStr := xmap.NewSortedMap[string, int]()
+	smStr.Set("banana", 3)
+	smStr.Set("apple", 1)
+	smStr.Set("cherry", 2)
+
+	// 期望的 JSON 字符串（按字母排序）
+	expectedJSONStr := `{"apple":1,"banana":3,"cherry":2}`
+
+	// 序列化 SortedMap
+	jsonBytesStr, err := json.Marshal(smStr)
+	assert.NoError(t, err, "JSON 序列化不应失败")
+	assert.JSONEq(t, expectedJSONStr, string(jsonBytesStr), "输出的 JSON 字符串不符合预期顺序")
 }
