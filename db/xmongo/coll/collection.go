@@ -23,8 +23,10 @@ type Collection struct {
 func NewCollection(coll *mongo.Collection) *Collection {
 	return &Collection{coll: coll}
 }
-func (c *Collection) Partition(key string) *Collection {
-	partitionCollName := mongo_util.NewDefPartitionHelper(c.coll.Name()).GetCollName(key)
+
+// Partition sizes[0]虚拟节点数量 sizes[1]每个虚拟节点包含的数据量大小
+func (c *Collection) Partition(key string, sizes ...int) *Collection {
+	partitionCollName := mongo_util.NewDefPartitionHelper(c.coll.Name(), sizes...).GetCollName(key)
 	return ioc.GetDefFunc(partitionCollName, func() *Collection {
 		db := c.coll.Database()
 		names, err := db.ListCollectionNames(context.Background(), bson.D{})
