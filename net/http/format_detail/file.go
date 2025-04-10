@@ -21,7 +21,7 @@ type FileSaveFormat[T any] struct {
 func (c *FileSaveFormat[T]) ValidDecode(encode any) (bool, error) {
 	return c.BytesDecodeFormatValid.ValidDecode(encode)
 }
-func (e *FileSaveFormat[T]) Encode(obj T) (any, error) {
+func (e *FileSaveFormat[T]) Encode(obj any) (any, error) {
 	filePath := e.FileFullNameBuilder(obj)
 	get, b := e.FileLockers.Get(filePath)
 	if !b {
