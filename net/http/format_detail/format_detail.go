@@ -63,12 +63,21 @@ func (e *DefaultEnDeCodeFormat) SystemDecode(self EnDeCodeFormat, encode any, ba
 	valid, err := e.self.ValidDecode(encode)
 	if !valid {
 		err = fmt.Errorf("DefaultEnDeCodeFormat.SystemDecode.Valid failed: %v", err)
-		e.logger.Error(err)
+		if nil != e.logger {
+			e.logger.Error(err)
+		} else {
+			xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(err.Error()).Panic()
+		}
 		return nil, err
 	}
 	backData, err := e.self.Decode(encode, back)
 	if err != nil {
-		e.logger.Error(fmt.Errorf("DefaultEnDeCodeFormat.SystemDecode failed: %v", err))
+		err := fmt.Errorf("DefaultEnDeCodeFormat.SystemDecode failed: %v", err)
+		if nil != e.logger {
+			e.logger.Error(err)
+		} else {
+			xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(err.Error()).Panic()
+		}
 		return nil, err
 	}
 	if e.next != nil {

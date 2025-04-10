@@ -3,6 +3,7 @@ package remote
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/karosown/katool-go/log"
 	remote2 "github.com/karosown/katool-go/net/http/format_detail"
+	"github.com/karosown/katool-go/xlog"
 	"go.uber.org/zap"
 )
 
@@ -147,13 +149,21 @@ func (r *Req) Build(backDao any) (any, error) {
 			return nil, err
 		}
 		body := res.Body()
+		noOkErr := fmt.Errorf("url:%s,method:%s,status_code:%d,status:%s,body:%s", url, r.method, res.StatusCode(),
+			res.Status(), string(body))
+		otherErr := fmt.Sprintf("url:%s,method:%s,status_code:%d,status:%s", url, r.method, res.StatusCode(),
+			res.Status())
 		if nil != r.Logger {
 			if res.StatusCode() != http.StatusOK {
-				r.Logger.Errorf("url:%s,method:%s,status_code:%d,status:%s,body:%s", url, r.method, res.StatusCode(),
-					res.Status(), string(body))
+				r.Logger.Error(noOkErr)
 			} else {
-				r.Logger.Infof("url:%s,method:%s,status_code:%d,status:%s", url, r.method, res.StatusCode(),
-					res.Status())
+				r.Logger.Info(otherErr)
+			}
+		} else {
+			if res.StatusCode() != http.StatusOK {
+				xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(noOkErr.Error()).Panic()
+			} else {
+				xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(otherErr).Panic()
 			}
 		}
 		response, err := (r.format).SystemDecode(r.format, body, backDao)
