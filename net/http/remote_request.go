@@ -14,17 +14,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type Logger interface {
-	Infof(string, ...any)
-	Errorf(string, ...any)
-	Warnf(string, ...any)
-	Warnln(arg ...any)
-	Infoln(arg ...any)
-	Errorln(arg ...any)
-	Warn(arg ...any)
-	Info(arg ...any)
-	Error(arg ...any)
-}
 type ReqApi interface {
 	Url(url string) ReqApi
 	QueryParam(psPair map[string]string) ReqApi
