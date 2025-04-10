@@ -1,4 +1,4 @@
-package remote
+package comloex_format_detail
 
 import (
 	"bytes"
@@ -6,13 +6,14 @@ import (
 	"errors"
 
 	remote "github.com/karosown/katool-go/net/http"
+	remote2 "github.com/karosown/katool-go/net/http/format_detail"
 )
 
 type RemoteMultiMultiFileDeCodeFormat struct {
-	DefaultEnDeCodeFormat
+	remote2.DefaultEnDeCodeFormat
 	Req     *remote.Req
 	reqBody map[string]any
-	Decoder EnDeCodeFormat
+	Decoder remote2.EnDeCodeFormat
 	DaoMap  map[string]any
 }
 
