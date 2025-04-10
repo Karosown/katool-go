@@ -10,19 +10,21 @@ import (
 	"github.com/spf13/cast"
 )
 
-type FileSaveFormat[T any] struct {
+type FileSaveFormat struct {
 	DefaultEnDeCodeFormat
 	BytesDecodeFormatValid
 	FileLockers         xmap.SafeMap[string, *sync.RWMutex]
-	FileFullNameBuilder func(data T) string
+	FileFullNameBuilder func(data any) string
+	FileFilterFunc      func(data any) any
 	Status              int
 }
 
-func (c *FileSaveFormat[T]) ValidDecode(encode any) (bool, error) {
+func (c *FileSaveFormat) ValidDecode(encode any) (bool, error) {
 	return c.BytesDecodeFormatValid.ValidDecode(encode)
 }
-func (e *FileSaveFormat[T]) Encode(obj any) (any, error) {
+func (e *FileSaveFormat) Encode(obj any) (any, error) {
 	filePath := e.FileFullNameBuilder(obj)
+	obj = e.FileFilterFunc(obj)
 	get, b := e.FileLockers.Get(filePath)
 	if !b {
 		store, b2 := e.FileLockers.LoadOrStore(filePath, &sync.RWMutex{})
@@ -55,6 +57,6 @@ func (e *FileSaveFormat[T]) Encode(obj any) (any, error) {
 	return nil, err
 }
 
-func (e *FileSaveFormat[T]) Decode(encode any, back any) (any, error) {
+func (e *FileSaveFormat) Decode(encode any, back any) (any, error) {
 	return e.Encode(encode)
 }
