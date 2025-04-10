@@ -55,6 +55,6 @@ func (e *FileSaveFormat[T]) Encode(obj T) (any, error) {
 	return nil, err
 }
 
-func (e *FileSaveFormat[T]) Decode(encode T, back any) (any, error) {
+func (e *FileSaveFormat[T]) Decode(encode any, back any) (any, error) {
 	return e.Encode(encode)
 }
