@@ -55,7 +55,7 @@ func (e *FileSaveFormat) Encode(obj any) (any, error) {
 	}
 	toString, err := cast.ToStringE(obj)
 	if err != nil {
-		bytes, err := json.Marshal(obj)
+		bytes, err := json.MarshalIndent(obj, "", "    ")
 		if err != nil {
 			xlog.KaToolLoggerWrapper.ApplicationDesc("encode error").Panic()
 		}
