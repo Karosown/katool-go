@@ -30,9 +30,9 @@ func (e *FileSaveFormat) Encode(obj any) (any, error) {
 		store, _ := e.FileLockers.LoadOrStore(filePath, &sync.RWMutex{})
 		get = store
 	}
-	if fileutil.IsExist(filePath) {
+	if !fileutil.IsExist(filePath) {
 		get.Lock()
-		if fileutil.IsExist(filePath) {
+		if !fileutil.IsExist(filePath) {
 			err := fileutil.CreateDir(filePath)
 			if err != nil {
 				xlog.KaToolLoggerWrapper.ApplicationDesc("create dir error").Panic()
