@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/karosown/katool/xlog"
+	"github.com/karosown/katool-go/xlog"
 )
 
 type HashType string

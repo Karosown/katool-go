@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	lynx "github.com/Tangerg/lynx/pkg/sync"
-	"github.com/karosown/katool/collect"
-	"github.com/karosown/katool/collect/lists"
-	"github.com/karosown/katool/container/stream"
-	"github.com/karosown/katool/convert"
+	"github.com/karosown/katool-go/collect"
+	"github.com/karosown/katool-go/collect/lists"
+	"github.com/karosown/katool-go/container/stream"
+	"github.com/karosown/katool-go/convert"
 )
 
 func Test_Partition(t *testing.T) {

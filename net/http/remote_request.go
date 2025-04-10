@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/karosown/katool/log"
-	remote2 "github.com/karosown/katool/net/http/format_detail"
+	"github.com/karosown/katool-go/log"
+	remote2 "github.com/karosown/katool-go/net/http/format_detail"
 	"go.uber.org/zap"
 )
 

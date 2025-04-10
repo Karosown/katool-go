@@ -9,9 +9,9 @@ import (
 
 	"github.com/duke-git/lancet/v2/maputil"
 	"github.com/duke-git/lancet/v2/random"
-	"github.com/karosown/katool/algorithm"
-	"github.com/karosown/katool/container/stream"
-	"github.com/karosown/katool/convert"
+	"github.com/karosown/katool-go/algorithm"
+	"github.com/karosown/katool-go/container/stream"
+	"github.com/karosown/katool-go/convert"
 )
 
 type user struct {

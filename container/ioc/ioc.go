@@ -3,7 +3,7 @@ package ioc
 import (
 	"sync"
 
-	"github.com/karosown/katool/xlog"
+	"github.com/karosown/katool-go/xlog"
 )
 
 var ic = sync.Map{}

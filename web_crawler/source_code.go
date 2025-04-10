@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/go-rod/rod"
-	"github.com/karosown/katool/container/optional"
-	"github.com/karosown/katool/web_crawler/feed"
-	"github.com/karosown/katool/web_crawler/rss"
+	"github.com/karosown/katool-go/container/optional"
+	"github.com/karosown/katool-go/web_crawler/feed"
+	"github.com/karosown/katool-go/web_crawler/rss"
 	"golang.org/x/net/html"
 )
 

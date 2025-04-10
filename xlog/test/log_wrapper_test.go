@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/karosown/katool/xlog"
+	"github.com/karosown/katool-go/xlog"
 )
 
 func Test_logger_wrapper(t *testing.T) {

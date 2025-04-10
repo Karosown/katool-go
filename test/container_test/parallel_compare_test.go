@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/karosown/katool/algorithm"
-	"github.com/karosown/katool/container/stream"
-	"github.com/karosown/katool/convert"
-	"github.com/karosown/katool/util"
+	"github.com/karosown/katool-go/algorithm"
+	"github.com/karosown/katool-go/container/stream"
+	"github.com/karosown/katool-go/convert"
+	"github.com/karosown/katool-go/util"
 )
 
 func orderById(flag bool, ids []int) []int {

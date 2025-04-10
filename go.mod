@@ -1,4 +1,4 @@
-module github.com/karosown/katool
+module github.com/karosown/katool-go
 
 go 1.23.1
 

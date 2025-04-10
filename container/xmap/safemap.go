@@ -3,7 +3,7 @@ package xmap
 import (
 	"sync"
 
-	"github.com/karosown/katool/container/stream"
+	"github.com/karosown/katool-go/container/stream"
 )
 
 // SafeMap 是对 sync.SafeMap 的泛型封装

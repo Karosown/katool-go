@@ -1,12 +1,12 @@
-package database
+package xmongo
 
 import (
 	"context"
 	"slices"
 
-	"github.com/karosown/katool/container/ioc"
-	"github.com/karosown/katool/db/xmongo/coll"
-	"github.com/karosown/katool/xlog"
+	"github.com/karosown/katool-go/container/ioc"
+	"github.com/karosown/katool-go/db/xmongo/coll"
+	"github.com/karosown/katool-go/xlog"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

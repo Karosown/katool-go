@@ -12,10 +12,10 @@ import (
 	"sync"
 
 	lynx "github.com/Tangerg/lynx/pkg/sync"
-	"github.com/karosown/katool/algorithm"
-	"github.com/karosown/katool/collect/lists"
-	"github.com/karosown/katool/container/optional"
-	"github.com/karosown/katool/convert"
+	"github.com/karosown/katool-go/algorithm"
+	"github.com/karosown/katool-go/collect/lists"
+	"github.com/karosown/katool-go/container/optional"
+	"github.com/karosown/katool-go/convert"
 )
 
 func getPageSize(size int) int {

@@ -3,7 +3,7 @@ package rss
 import (
 	"encoding/xml"
 
-	"github.com/karosown/katool/container/stream"
+	"github.com/karosown/katool-go/container/stream"
 )
 
 type RSS struct {

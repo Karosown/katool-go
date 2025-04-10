@@ -11,9 +11,9 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/go-shiori/go-readability"
-	"github.com/karosown/katool/container/optional"
-	"github.com/karosown/katool/container/stream"
-	"github.com/karosown/katool/web_crawler/core"
+	"github.com/karosown/katool-go/container/optional"
+	"github.com/karosown/katool-go/container/stream"
+	"github.com/karosown/katool-go/web_crawler/core"
 )
 
 var WebChrome *core.Contain

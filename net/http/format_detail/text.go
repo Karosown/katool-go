@@ -3,7 +3,7 @@ package remote
 import (
 	"fmt"
 
-	"github.com/karosown/katool/file/file_serialize"
+	"github.com/karosown/katool-go/file/file_serialize"
 )
 
 type TextEnDecodeFormat struct {

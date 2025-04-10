@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/karosown/katool/log"
-	remote2 "github.com/karosown/katool/net/http/format_detail"
+	"github.com/karosown/katool-go/log"
+	remote2 "github.com/karosown/katool-go/net/http/format_detail"
 )
 
 // OAuth2Req
@@ -158,7 +158,7 @@ type FileWithOAuth2TokenStorage struct {
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
-const oauth2prefix = "katool:oauth2:tokens"
+const oauth2prefix = "katool-go:oauth2:tokens"
 
 func makeOauth2Key(platform string) string {
 	return fmt.Sprintf("%s:%s", oauth2prefix, platform)

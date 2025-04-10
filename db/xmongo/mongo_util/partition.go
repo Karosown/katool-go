@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/karosown/katool/container/optional"
+	"github.com/karosown/katool-go/container/optional"
 	"github.com/twmb/murmur3"
 )
 

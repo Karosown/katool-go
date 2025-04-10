@@ -4,8 +4,8 @@ import (
 	"encoding/xml"
 	"time"
 
-	"github.com/karosown/katool/container/stream"
-	"github.com/karosown/katool/web_crawler/rss"
+	"github.com/karosown/katool-go/container/stream"
+	"github.com/karosown/katool-go/web_crawler/rss"
 )
 
 // AtomFeed 表示Atom格式的feed

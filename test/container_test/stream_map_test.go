@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/karosown/katool/container/stream"
+	"github.com/karosown/katool-go/container/stream"
 )
 
 func Test_Map(t *testing.T) {

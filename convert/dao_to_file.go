@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/fileutil"
-	"github.com/karosown/katool/xlog"
+	"github.com/karosown/katool-go/xlog"
 )
 
 func StructToCSV[T any](datas []T, fullPath string) error {

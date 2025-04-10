@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	remote2 "github.com/karosown/katool/net/http"
+	remote2 "github.com/karosown/katool-go/net/http"
 )
 
 type BackData any

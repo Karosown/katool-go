@@ -1,7 +1,7 @@
 package xmap
 
 import (
-	"github.com/karosown/katool/container/stream"
+	"github.com/karosown/katool-go/container/stream"
 )
 
 // Map 是原生 map 的类型别名

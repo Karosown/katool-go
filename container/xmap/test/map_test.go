@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/karosown/katool/container/xmap"
+	"github.com/karosown/katool-go/container/xmap"
 	"github.com/stretchr/testify/assert"
 )
 

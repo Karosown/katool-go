@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/karosown/katool/container/stream"
-	"github.com/karosown/katool/convert"
-	"github.com/karosown/katool/lock"
+	"github.com/karosown/katool-go/container/stream"
+	"github.com/karosown/katool-go/convert"
+	"github.com/karosown/katool-go/lock"
 )
 
 type A struct {

@@ -8,9 +8,9 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
-	"github.com/karosown/katool/web_crawler"
-	"github.com/karosown/katool/web_crawler/core"
-	"github.com/karosown/katool/web_crawler/rss"
+	"github.com/karosown/katool-go/web_crawler"
+	"github.com/karosown/katool-go/web_crawler/core"
+	"github.com/karosown/katool-go/web_crawler/rss"
 )
 
 func TestChorme(t *testing.T) {

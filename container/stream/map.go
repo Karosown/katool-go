@@ -1,7 +1,7 @@
 package stream
 
 import (
-	"github.com/karosown/katool/convert"
+	"github.com/karosown/katool-go/convert"
 )
 
 type Entry[K comparable, V any] struct {

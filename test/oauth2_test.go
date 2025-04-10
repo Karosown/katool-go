@@ -5,9 +5,9 @@ import (
 	"path"
 	"testing"
 
-	"github.com/karosown/katool/log"
-	remote "github.com/karosown/katool/net/http"
-	rm "github.com/karosown/katool/net/http/format_detail"
+	"github.com/karosown/katool-go/log"
+	remote "github.com/karosown/katool-go/net/http"
+	rm "github.com/karosown/katool-go/net/http/format_detail"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"

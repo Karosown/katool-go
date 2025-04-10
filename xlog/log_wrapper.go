@@ -3,7 +3,7 @@ package xlog
 import (
 	"runtime"
 
-	"github.com/karosown/katool/xlog/xtype"
+	"github.com/karosown/katool-go/xlog/xtype"
 )
 
 // LogWrapper is a wrapper for LogMessage with method chaining support
