@@ -2,6 +2,7 @@ package remote
 
 import (
 	"encoding/json"
+	"path"
 	"sync"
 
 	"github.com/duke-git/lancet/v2/fileutil"
@@ -25,20 +26,32 @@ func (c *FileSaveFormat) ValidDecode(encode any) (bool, error) {
 func (e *FileSaveFormat) Encode(obj any) (any, error) {
 	filePath := e.FileFullNameBuilder(obj)
 	obj = e.FileFilterFunc(obj)
-	get, b := e.FileLockers.Get(filePath)
+	fileLock, b := e.FileLockers.Get(filePath)
 	if !b {
 		store, _ := e.FileLockers.LoadOrStore(filePath, &sync.RWMutex{})
-		get = store
+		fileLock = store
 	}
 	if !fileutil.IsExist(filePath) {
-		get.Lock()
+		fileLock.Lock()
 		if !fileutil.IsExist(filePath) {
-			err := fileutil.CreateDir(filePath)
-			if err != nil {
-				xlog.KaToolLoggerWrapper.ApplicationDesc("create dir error").Panic()
+			fileurl := path.Dir(filePath)
+			if !fileutil.IsExist(fileurl) {
+				pathLock, _ := e.FileLockers.LoadOrStore(fileurl, &sync.RWMutex{})
+				pathLock.Lock()
+				if !fileutil.IsExist(fileurl) {
+					err := fileutil.CreateDir(fileurl)
+					if err != nil {
+						xlog.KaToolLoggerWrapper.ApplicationDesc("create dir has error").Panic()
+					}
+				}
+				pathLock.Unlock()
+			}
+			file := fileutil.CreateFile(filePath)
+			if file == false {
+				xlog.KaToolLoggerWrapper.ApplicationDesc("create file is failed").Panic()
 			}
 		}
-		get.Unlock()
+		fileLock.Unlock()
 	}
 	toString, err := cast.ToStringE(obj)
 	if err != nil {
@@ -48,9 +61,9 @@ func (e *FileSaveFormat) Encode(obj any) (any, error) {
 		}
 		toString = string(bytes)
 	}
-	get.Lock()
+	fileLock.Lock()
 	fileutil.WriteStringToFile(filePath, toString, true)
-	get.Unlock()
+	fileLock.Unlock()
 	return nil, err
 }
 
