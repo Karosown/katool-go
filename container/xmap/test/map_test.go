@@ -195,10 +195,10 @@ func TestSafeMapConcurrency(t *testing.T) {
 
 func TestSortedMap_MarshalJSON(t *testing.T) {
 	// 创建一个 SortedMap，使用 int 作为键
-	sm := xmap.NewSortedMap[int, string]()
-	sm.Set(3, "three")
-	sm.Set(1, "one")
-	sm.Set(2, "two")
+	sm := xmap.NewSortedMap[string, string]()
+	sm.Set("3", "three")
+	sm.Set("1", "one")
+	sm.Set("2", "two")
 
 	// 期望的 JSON 字符串（按数值大小排序）
 	expectedJSON := `{"1":"one","2":"two","3":"three"}`
