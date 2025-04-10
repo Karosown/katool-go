@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/karosown/katool/log"
 	remote2 "github.com/karosown/katool/net/http/format_detail"
 	"go.uber.org/zap"
 )
@@ -49,7 +50,7 @@ type Req struct {
 	files       map[string]string
 	format      remote2.EnDeCodeFormat // 请求格式化解析器（bing使用的是xml进行请求响应，google采用的是json
 	httpClient  *resty.Client
-	Logger      *zap.SugaredLogger
+	Logger      log.Logger
 }
 
 func (r *Req) Url(url string) ReqApi {

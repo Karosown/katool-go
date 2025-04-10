@@ -60,8 +60,8 @@ func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string,
 		if trimPrefix != "" {
 			accessToken = trimPrefix + " " + accessToken
 		}
-		if O.ReqHeaders != nil {
-			O.ReqHeaders[O.tokenHeaderName] = accessToken
+		if O.headers != nil {
+			O.headers[O.tokenHeaderName] = accessToken
 		}
 		if expiresIn, ok := result["expires_in"].(float64); ok {
 			O.refreshTokenExpiry = time.Now().Add(time.Duration(int(expiresIn)) * time.Second).Unix()
