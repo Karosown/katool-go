@@ -10,7 +10,7 @@ type Entry[K comparable, V any] struct {
 }
 type Entries[K comparable, V any] []Entry[K, V]
 
-func EntrySet[K comparable, V any](m map[K]V) Entries[K, V] {
+func EntrySet[K comparable, V any, Map ~map[K]V](m Map) Entries[K, V] {
 	var entries []Entry[K, V]
 	for k, v := range m {
 		entries = append(entries, Entry[K, V]{Key: k, Value: v})

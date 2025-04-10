@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"reflect"
-
-	remote "github.com/karosown/katool/net/http"
 )
 
 type JSONEnDeCodeFormat struct {
-	remote.DefaultEnDeCodeFormat
-	remote.BytesDecodeFormatValid
+	DefaultEnDeCodeFormat
+	BytesDecodeFormatValid
 }
 
 func (c *JSONEnDeCodeFormat) ValidDecode(encode any) (bool, error) {
@@ -31,8 +29,8 @@ func (e *JSONEnDeCodeFormat) Decode(encode any, back any) (any, error) {
 }
 
 type JSONArrayEnDeCodeFormat struct {
-	remote.DefaultEnDeCodeFormat
-	remote.BytesDecodeFormatValid
+	DefaultEnDeCodeFormat
+	BytesDecodeFormatValid
 }
 
 func (c *JSONArrayEnDeCodeFormat) ValidDecode(encode any) (bool, error) {

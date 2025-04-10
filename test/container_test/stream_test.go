@@ -86,7 +86,8 @@ func Test_Map(t *testing.T) {
 	s := userStream.Map(func(item user) any {
 		properties, err := convert.CopyProperties(&item, &userVo{})
 		if err != nil {
-			panic(err)
+			xlog.KaToolLoggerWrapper.ApplicationDesc(err.Error()).Panic()
+
 		}
 		return properties
 	}).ToOptionList()

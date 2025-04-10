@@ -9,10 +9,10 @@ import (
 )
 
 type RemoteMultiMultiFileDeCodeFormat struct {
-	remote.DefaultEnDeCodeFormat
+	DefaultEnDeCodeFormat
 	Req     *remote.Req
 	reqBody map[string]any
-	Decoder remote.EnDeCodeFormat
+	Decoder EnDeCodeFormat
 	DaoMap  map[string]any
 }
 

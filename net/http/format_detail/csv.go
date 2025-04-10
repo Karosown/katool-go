@@ -4,12 +4,11 @@ import (
 	"fmt"
 
 	"github.com/karosown/katool/file/file_serialize"
-	remote "github.com/karosown/katool/net/http"
 )
 
 type CSVEnDecodeFormat struct {
-	remote.DefaultEnDeCodeFormat
-	remote.BytesDecodeFormatValid
+	DefaultEnDeCodeFormat
+	BytesDecodeFormatValid
 }
 
 func (c *CSVEnDecodeFormat) ValidDecode(encode any) (bool, error) {

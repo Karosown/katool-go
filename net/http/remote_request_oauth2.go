@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/karosown/katool/log"
+	remote2 "github.com/karosown/katool/net/http/format_detail"
 )
 
 // OAuth2Req
@@ -135,7 +136,7 @@ func (O *OAuth2Req) HttpClient(client *resty.Client) *OAuth2Req {
 	return O
 }
 
-func (O *OAuth2Req) Format(format EnDeCodeFormat) *OAuth2Req {
+func (O *OAuth2Req) Format(format remote2.EnDeCodeFormat) *OAuth2Req {
 	O.Req.Format(format)
 	return O
 }

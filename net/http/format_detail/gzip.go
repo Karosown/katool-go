@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
-
-	remote "github.com/karosown/katool/net/http"
 )
 
 type GzipEnDecodeFormat struct {
-	remote.DefaultEnDeCodeFormat
-	remote.BytesDecodeFormatValid
+	DefaultEnDeCodeFormat
+	BytesDecodeFormatValid
 }
 
 func (c *GzipEnDecodeFormat) ValidDecode(encode any) (bool, error) {

@@ -3,13 +3,11 @@ package remote
 import (
 	"bytes"
 	"encoding/xml"
-
-	remote "github.com/karosown/katool/net/http"
 )
 
 type XMLEnDeCodeFormat struct {
-	remote.DefaultEnDeCodeFormat
-	remote.BytesDecodeFormatValid
+	DefaultEnDeCodeFormat
+	BytesDecodeFormatValid
 }
 
 func (c *XMLEnDeCodeFormat) ValidDecode(encode any) (bool, error) {

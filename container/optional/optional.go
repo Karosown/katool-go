@@ -1,5 +1,10 @@
 package optional
 
+import (
+	"cmp"
+	"slices"
+)
+
 func IsTrue[T any](valid bool, isTrue T, isFalse T) T {
 	if valid {
 		return isTrue
@@ -32,4 +37,8 @@ func Identity[T any](obj T) func() T {
 	return func() T {
 		return obj
 	}
+}
+func In[T cmp.Ordered](item T, arr ...T) bool {
+	search := slices.Contains(arr, item)
+	return search
 }

@@ -1,0 +1,7 @@
+{"level":"ERROR","ts":"2024-11-29T14:33:59+08:00","caller":"runtime/panic.go:785","msg":"runtime error: invalid memory address or nil pointer dereference"}
+{"level":"ERROR","ts":"2024-11-29T14:34:14+08:00","caller":"runtime/panic.go:785","msg":"runtime error: invalid memory address or nil pointer dereference"}
+{"level":"ERROR","ts":"2024-11-29T14:35:18+08:00","caller":"runtime/panic.go:785","msg":"back must be a pointer"}
+{"level":"INFO","ts":"2024-11-29T14:35:26+08:00","caller":"test/oauth2_test.go:63","msg":"url:http://www.baidu.com,method:,status_code:200,status:200 OK"}
+{"level":"ERROR","ts":"2024-11-29T14:35:26+08:00","caller":"runtime/panic.go:785","msg":"runtime error: invalid memory address or nil pointer dereference"}
+{"level":"INFO","ts":"2024-11-29T14:41:27+08:00","caller":"test/oauth2_test.go:64","msg":"url:http://www.baidu.com,method:,status_code:200,status:200 OK"}
+{"level":"ERROR","ts":"2024-11-29T14:41:27+08:00","caller":"runtime/panic.go:785","msg":"runtime error: invalid memory address or nil pointer dereference"}

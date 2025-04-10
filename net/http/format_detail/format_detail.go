@@ -3,12 +3,14 @@ package remote
 import (
 	"fmt"
 	"reflect"
+
+	remote2 "github.com/karosown/katool/net/http"
 )
 
 type BackData any
 type EnDeCodeFormat interface {
-	SetLogger(logger Logger)
-	GetLogger() Logger
+	SetLogger(logger remote2.Logger)
+	GetLogger() remote2.Logger
 	ValidEncode(obj any) (bool, error)
 	ValidDecode(encode any) (bool, error)
 	Encode(obj any) (any, error)
@@ -22,13 +24,13 @@ type DefaultEnDeCodeFormat struct {
 	self    EnDeCodeFormat
 	next    EnDeCodeFormat
 	backDao any
-	logger  Logger
+	logger  remote2.Logger
 }
 
-func (e *DefaultEnDeCodeFormat) SetLogger(logger Logger) {
+func (e *DefaultEnDeCodeFormat) SetLogger(logger remote2.Logger) {
 	e.logger = logger
 }
-func (e *DefaultEnDeCodeFormat) GetLogger() Logger {
+func (e *DefaultEnDeCodeFormat) GetLogger() remote2.Logger {
 	return e.logger
 }
 

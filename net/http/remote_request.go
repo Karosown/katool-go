@@ -2,12 +2,16 @@ package remote
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"reflect"
 	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/karosown/katool/log"
+	remote2 "github.com/karosown/katool/net/http/format_detail"
+	"go.uber.org/zap"
 )
 
 type Logger interface {
@@ -21,46 +25,56 @@ type Logger interface {
 	Info(arg ...any)
 	Error(arg ...any)
 }
-
 type ReqApi interface {
 	Url(url string) ReqApi
 	QueryParam(psPair map[string]string) ReqApi
 	Data(dataobj any) ReqApi
+	FormData(datas map[string]string) ReqApi
+	Files(datas map[string]string) ReqApi
 	Method(method string) ReqApi
 	Headers(headers map[string]string) ReqApi
 	HttpClient(client *resty.Client) ReqApi
-	Format(format EnDeCodeFormat) ReqApi
+	Format(format remote2.EnDeCodeFormat) ReqApi
 	ReHeader(k, v string) ReqApi
-	SetLogger(logger Logger) ReqApi
+	SetLogger(logger *zap.SugaredLogger) ReqApi
 	Build(backDao any) (any, error)
 }
 
 type Req struct {
 	url         string
 	queryParams map[string]string
-	ReqHeaders  map[string]string `json:"headers"`
+	headers     map[string]string
 	method      string
 	data        any
-	format      EnDeCodeFormat // 请求格式化解析器（bing使用的是xml进行请求响应，google采用的是json
+	form        map[string]string
+	files       map[string]string
+	format      remote2.EnDeCodeFormat // 请求格式化解析器（bing使用的是xml进行请求响应，google采用的是json
 	httpClient  *resty.Client
-	Logger      Logger
+	Logger      log.Logger
 }
 
 func (r *Req) Url(url string) ReqApi {
 	r.url = url
 	return r
 }
+func (r *Req) FormData(datas map[string]string) ReqApi {
+	r.form = datas
+	return r
+}
+func (r *Req) Files(datas map[string]string) ReqApi {
+	r.files = datas
+	return r
+}
 func (r *Req) QueryParam(psPair map[string]string) ReqApi {
 	r.queryParams = psPair
 	return r
 }
-
-func (r *Req) SetLogger(logger Logger) ReqApi {
+func (r *Req) SetLogger(logger *zap.SugaredLogger) ReqApi {
 	r.Logger = logger
 	return r
 }
 func (r *Req) Headers(headers map[string]string) ReqApi {
-	r.ReqHeaders = headers
+	r.headers = headers
 	return r
 }
 
@@ -70,10 +84,11 @@ func (r *Req) Data(dataobj any) ReqApi {
 }
 
 const (
-	GET   = "GET"
-	POST  = "POST"
-	PUT   = "PUT"
-	HEARD = "HEAD"
+	GET    = "GET"
+	POST   = "POST"
+	PUT    = "PUT"
+	HEAD   = "HEAD"
+	DELETE = "DELETE"
 )
 
 func (r *Req) Method(method string) ReqApi {
@@ -87,7 +102,7 @@ func (r *Req) HttpClient(client *resty.Client) ReqApi {
 }
 
 // 放置编解码工具链
-func (r *Req) Format(format EnDeCodeFormat) ReqApi {
+func (r *Req) Format(format remote2.EnDeCodeFormat) ReqApi {
 	r.format = format
 	if nil == format.GetLogger() {
 		r.format.SetLogger(r.Logger)
@@ -104,15 +119,18 @@ func (r *Req) Build(backDao any) (any, error) {
 	}()
 	// 检查 response 是否为指针类型
 	if reflect.TypeOf(backDao).Kind() != reflect.Ptr {
-		panic("back must be a pointer")
+		return nil, errors.New("back must be a pointer")
 	}
 	if r.httpClient == nil {
 		r.httpClient = resty.New()
 		r.httpClient.SetTimeout(30 * time.Second)
 	}
+	if r.format == nil {
+		r.format = &remote2.JSONEnDeCodeFormat{}
+	}
 	url := r.url
 	data := r.data
-	reqAtomic := r.httpClient.R().SetQueryParams(r.queryParams).SetHeaders(r.ReqHeaders)
+	reqAtomic := r.httpClient.R().SetQueryParams(r.queryParams).SetHeaders(r.headers)
 	switch strings.ToUpper(r.method) {
 	case "GET":
 		fallthrough
@@ -132,7 +150,7 @@ func (r *Req) Build(backDao any) (any, error) {
 		var res *resty.Response
 		var err error
 		if strings.ToUpper(r.method) == "GET" {
-			res, err = reqAtomic.Get(url + "/{id}")
+			res, err = reqAtomic.Get(url)
 		} else {
 			res, err = reqAtomic.Delete(url)
 		}
@@ -159,9 +177,15 @@ func (r *Req) Build(backDao any) (any, error) {
 		//			bodyBytes, err = c.XMLMarshal(r.Body)
 		//		}
 		if data != nil && reflect.TypeOf(data).Kind() == reflect.Ptr {
-			data = reflect.ValueOf(data).Elem().Interface()
+			data = reflect.ValueOf(data).Elem().String()
 		}
-		response, err := reqAtomic.SetBody(data).Execute(r.method, url)
+		var response *resty.Response
+		var err error
+		if r.form != nil || r.files != nil {
+			response, err = reqAtomic.SetFormData(r.form).SetFiles(r.files).Execute(r.method, url)
+		} else {
+			response, err = reqAtomic.SetBody(data).Execute(r.method, url)
+		}
 		if nil != err {
 			return nil, err
 		}
@@ -177,7 +201,7 @@ func (r *Req) Build(backDao any) (any, error) {
 	return backDao, nil
 }
 func (r *Req) ReHeader(k, v string) ReqApi {
-	r.ReqHeaders[k] = v
+	r.headers[k] = v
 	return r
 }
 

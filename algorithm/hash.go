@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"strconv"
+
+	"github.com/karosown/katool/xlog"
 )
 
 type HashType string
@@ -14,7 +16,7 @@ type IDComputeFunction func(any2 any) IDType
 func HASH_WITH_JSON(cnt any) HashType {
 	marshal, err := json.Marshal(cnt)
 	if err != nil {
-		panic(err)
+		xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(err.Error()).Panic()
 	}
 	return HashType(marshal)
 }
@@ -22,7 +24,7 @@ func HASH_WITH_JSON(cnt any) HashType {
 func HASH_WITH_JSON_MD5(cnt any) HashType {
 	marshal, err := json.Marshal(cnt)
 	if err != nil {
-		panic(err)
+		xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(err.Error()).Panic()
 	}
 	sum := md5.Sum(marshal)
 	return HashType(sum[:])
