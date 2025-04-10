@@ -27,10 +27,7 @@ func (e *FileSaveFormat) Encode(obj any) (any, error) {
 	obj = e.FileFilterFunc(obj)
 	get, b := e.FileLockers.Get(filePath)
 	if !b {
-		store, b2 := e.FileLockers.LoadOrStore(filePath, &sync.RWMutex{})
-		if !b2 {
-			xlog.KaToolLoggerWrapper.ApplicationDesc("get lock error").Panic()
-		}
+		store, _ := e.FileLockers.LoadOrStore(filePath, &sync.RWMutex{})
 		get = store
 	}
 	if fileutil.IsExist(filePath) {
