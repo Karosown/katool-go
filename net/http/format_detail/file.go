@@ -65,7 +65,7 @@ func (e *FileSaveFormat) Encode(obj any) (any, error) {
 	fileLock.Lock()
 	fileutil.WriteStringToFile(filePath, toString, e.Append)
 	fileLock.Unlock()
-	return nil, nil
+	return filePath, nil
 }
 
 func (e *FileSaveFormat) Decode(encode any, back any) (any, error) {
