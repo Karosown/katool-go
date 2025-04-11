@@ -17,7 +17,7 @@ type FileSaveFormat struct {
 	FileLockers         xmap.SafeMap[string, *sync.RWMutex]
 	FileFullNameBuilder func(data any) string
 	FileFilterFunc      func(data any) any
-	Status              int
+	Append              bool
 }
 
 func (c *FileSaveFormat) ValidDecode(encode any) (bool, error) {
@@ -62,7 +62,7 @@ func (e *FileSaveFormat) Encode(obj any) (any, error) {
 		toString = string(bytes)
 	}
 	fileLock.Lock()
-	fileutil.WriteStringToFile(filePath, toString, true)
+	fileutil.WriteStringToFile(filePath, toString, e.Append)
 	fileLock.Unlock()
 	return nil, err
 }
