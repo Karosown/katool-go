@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/karosown/katool-go/net/format/base_format"
 	"net/http"
 	"reflect"
 	"strings"
@@ -117,7 +118,7 @@ func (r *Req) Build(backDao any) (any, error) {
 	}
 	// 如果没有传值，那么默认是json解析起
 	if r.format == nil {
-		r.format = &format.JSONEnDeCodeFormat{}
+		r.format = &base_format.JSONEnDeCodeFormat{}
 	}
 	url := r.url
 	data := r.data

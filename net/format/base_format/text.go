@@ -1,14 +1,15 @@
-package format
+package base_format
 
 import (
 	"fmt"
+	"github.com/karosown/katool-go/net/format"
 
 	"github.com/karosown/katool-go/file/file_serialize"
 )
 
 type TextEnDecodeFormat struct {
-	DefaultEnDeCodeFormat
-	BytesDecodeFormatValid
+	format.DefaultEnDeCodeFormat
+	format.BytesDecodeFormatValid
 	MapToStruct func(fields []string, headers []string, backDao any) any
 	Convert     func(backDao any) any
 	BackDao     any

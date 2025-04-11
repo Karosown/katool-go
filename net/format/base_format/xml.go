@@ -1,13 +1,14 @@
-package format
+package base_format
 
 import (
 	"bytes"
 	"encoding/xml"
+	"github.com/karosown/katool-go/net/format"
 )
 
 type XMLEnDeCodeFormat struct {
-	DefaultEnDeCodeFormat
-	BytesDecodeFormatValid
+	format.DefaultEnDeCodeFormat
+	format.BytesDecodeFormatValid
 }
 
 func (c *XMLEnDeCodeFormat) ValidDecode(encode any) (bool, error) {

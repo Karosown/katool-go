@@ -1,14 +1,15 @@
-package format
+package base_format
 
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/karosown/katool-go/net/format"
 	"reflect"
 )
 
 type JSONEnDeCodeFormat struct {
-	DefaultEnDeCodeFormat
-	BytesDecodeFormatValid
+	format.DefaultEnDeCodeFormat
+	format.BytesDecodeFormatValid
 }
 
 func (c *JSONEnDeCodeFormat) ValidDecode(encode any) (bool, error) {
@@ -29,8 +30,8 @@ func (e *JSONEnDeCodeFormat) Decode(encode any, back any) (any, error) {
 }
 
 type JSONArrayEnDeCodeFormat struct {
-	DefaultEnDeCodeFormat
-	BytesDecodeFormatValid
+	format.DefaultEnDeCodeFormat
+	format.BytesDecodeFormatValid
 }
 
 func (c *JSONArrayEnDeCodeFormat) ValidDecode(encode any) (bool, error) {

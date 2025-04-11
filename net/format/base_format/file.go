@@ -1,7 +1,7 @@
-package format
+package base_format
 
 import (
-	"encoding/json"
+	"github.com/karosown/katool-go/net/format"
 	"path"
 	"sync"
 
@@ -13,11 +13,12 @@ import (
 )
 
 type FileSaveFormat struct {
-	DefaultEnDeCodeFormat
-	BytesDecodeFormatValid
+	format.DefaultEnDeCodeFormat
+	format.BytesDecodeFormatValid
 	FileLockers         xmap.SafeMap[string, *sync.RWMutex]
 	FileFullNameBuilder func(data any) string
 	FileFilterFunc      func(data any) any
+	DataProcessHandler  format.EnDeCodeFormat
 	Append              bool
 }
 
@@ -56,12 +57,15 @@ func (e *FileSaveFormat) Encode(obj any) (any, error) {
 	}
 	toString, err := cast.ToStringE(obj)
 	if err != nil {
-		bytes, err := json.MarshalIndent(obj, "", "  ")
+		if e.DataProcessHandler == nil {
+			e.DataProcessHandler = &JSONEnDeCodeFormat{}
+		}
+		obj, err = e.DataProcessHandler.Encode(obj)
 		if err != nil {
 			sys.Warn("encode error")
 			return nil, err
 		}
-		toString, err = string(bytes), nil
+		toString = cast.ToString(obj)
 	}
 	lock.Synchronized(fileLock, func() {
 		fileutil.WriteStringToFile(filePath, toString, e.Append)
@@ -70,5 +74,14 @@ func (e *FileSaveFormat) Encode(obj any) (any, error) {
 }
 
 func (e *FileSaveFormat) Decode(encode any, back any) (any, error) {
-	return e.Encode(encode)
+	filePath := cast.ToString(encode)
+	toString, err := fileutil.ReadFileToString(filePath)
+	if err != nil {
+		sys.Warn("decode error")
+		return nil, err
+	}
+	if e.DataProcessHandler == nil {
+		e.DataProcessHandler = &JSONEnDeCodeFormat{}
+	}
+	return e.DataProcessHandler.Decode(toString, back)
 }

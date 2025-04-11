@@ -1,14 +1,15 @@
-package format
+package base_format
 
 import (
 	"bytes"
 	"compress/gzip"
+	"github.com/karosown/katool-go/net/format"
 	"io"
 )
 
 type GzipEnDecodeFormat struct {
-	DefaultEnDeCodeFormat
-	BytesDecodeFormatValid
+	format.DefaultEnDeCodeFormat
+	format.BytesDecodeFormatValid
 }
 
 func (c *GzipEnDecodeFormat) ValidDecode(encode any) (bool, error) {

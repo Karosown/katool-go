@@ -1,14 +1,15 @@
-package format
+package base_format
 
 import (
 	"fmt"
+	"github.com/karosown/katool-go/net/format"
 
 	"github.com/karosown/katool-go/file/file_serialize"
 )
 
 type CSVEnDecodeFormat struct {
-	DefaultEnDeCodeFormat
-	BytesDecodeFormatValid
+	format.DefaultEnDeCodeFormat
+	format.BytesDecodeFormatValid
 }
 
 func (c *CSVEnDecodeFormat) ValidDecode(encode any) (bool, error) {
