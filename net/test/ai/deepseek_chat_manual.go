@@ -43,7 +43,7 @@ func main() {
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
 	if apiKey == "" {
 		// 注意：这个密钥仅用于测试，实际使用中应该通过环境变量设置
-		apiKey = "sk-换成你自己的APIKEY进行测试"
+		apiKey = "sk-用你自己的api"
 		fmt.Println("使用默认API密钥")
 	} else {
 		fmt.Println("使用环境变量中设置的API密钥")
@@ -98,13 +98,6 @@ func main() {
 			"stream":   true,
 		}
 
-		// 转为JSON
-		requestJSON, err := json.Marshal(requestData)
-		if err != nil {
-			fmt.Printf("创建请求数据失败: %v\n", err)
-			continue
-		}
-
 		fmt.Println("准备发送请求...")
 
 		// 响应变量
@@ -114,39 +107,31 @@ func main() {
 		var receivedEvents int
 
 		// 创建SSE请求
-		sseReq := remote.NewSSEReq().
+		sseReq := remote.NewSSEReq[DeepSeekSSEResponse]().
 			Url("https://api.deepseek.com/v1/chat/completions").
 			Method("POST").
-			SetLogger(logger)
-
-		// 设置请求头
-		sseReq.Headers(map[string]string{
-			"Content-Type":  "application/json",
-			"Authorization": "Bearer " + apiKey,
-		})
-
-		// 设置请求体
-		sseReq.Data(string(requestJSON))
-
-		// 设置事件处理函数
-		sseReq.OnEvent(func(event remote.SSEEvent) error {
-			receivedEvents++
-
-			// 如果是[DONE]事件，表示响应完成
-			if event.Data == "[DONE]" {
-				fmt.Println("\n收到完成事件")
-				close(completionCh)
-				return nil
-			}
-
-			// 解析响应
-			var response DeepSeekSSEResponse
-			if err := json.Unmarshal([]byte(event.Data), &response); err != nil {
-				fmt.Printf("\n解析响应失败: %v, 数据: %s\n", err, event.Data)
-				return nil // 忽略解析错误，继续处理
-			}
-
-			// 如果有内容，打印出来
+			SetLogger(logger).
+			Headers(map[string]string{
+				"Content-type":  "application/json",
+				"Authorization": "Bearer " + apiKey,
+			}).
+			Data(requestData).
+			BeforeEvent(func(event remote.SSEEvent[DeepSeekSSEResponse]) (*DeepSeekSSEResponse, error) {
+				receivedEvents++
+				// 如果是[DONE]事件，表示响应完成
+				if event.Data == "[DONE]" {
+					fmt.Println("\n收到完成事件")
+					close(completionCh)
+					return nil, nil
+				}
+				// 解析响应
+				var response DeepSeekSSEResponse
+				if err := json.Unmarshal([]byte(event.Data), &response); err != nil {
+					return nil, fmt.Errorf("\n解析响应失败: %v, 数据: %s\n", err, event.Data) // 忽略解析错误，继续处理
+				}
+				// 如果有内容，打印出来
+				return &response, nil
+			}).OnEvent(func(response DeepSeekSSEResponse) error {
 			if len(response.Choices) > 0 && response.Choices[0].Delta.Content != "" {
 				content := response.Choices[0].Delta.Content
 				mu.Lock()
@@ -154,7 +139,6 @@ func main() {
 				mu.Unlock()
 				fmt.Print(content)
 			}
-
 			return nil
 		})
 

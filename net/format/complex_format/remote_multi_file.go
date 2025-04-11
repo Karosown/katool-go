@@ -43,7 +43,7 @@ func (e *RemoteMultiMultiFileDeCodeFormat) Decode(encode any, back any) (any, er
 	for k, v := range urlMap {
 		if dao, ok := e.DaoMap[k]; ok {
 			for i, url := range v {
-				req := e.Req.Url(url).Format(e.Decoder)
+				req := e.Req.Url(url).DecodeHandler(e.Decoder)
 				if body, status := e.reqBody[k]; status {
 					req.Data(body)
 				}

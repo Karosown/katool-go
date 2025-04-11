@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/karosown/katool-go/net/format"
 	"io"
 	"net/http"
 	"strings"
@@ -16,7 +17,7 @@ import (
 )
 
 // SSE事件结构
-type SSEEvent struct {
+type SSEEvent[T any] struct {
 	ID    string
 	Event string
 	Data  string
@@ -24,27 +25,29 @@ type SSEEvent struct {
 }
 
 // SSE事件处理回调函数
-type SSEEventHandler func(event SSEEvent) error
+type SSEEventPreHandler[T any] func(event SSEEvent[T]) (*T, error)
+type SSEEventHandler[T any] func(event T) error
 
 // SSE请求接口
-type SSEReqApi interface {
-	Url(url string) SSEReqApi
-	QueryParam(psPair map[string]string) SSEReqApi
-	Headers(headers map[string]string) SSEReqApi
-	HttpClient(client *resty.Client) SSEReqApi
-	SetLogger(logger log.Logger) SSEReqApi
-	ReHeader(k, v string) SSEReqApi
-	Method(method string) SSEReqApi
-	Data(data interface{}) SSEReqApi
-	OnEvent(handler SSEEventHandler) SSEReqApi
-	OnConnected(handler func() error) SSEReqApi
-	OnError(handler func(err error)) SSEReqApi
+type SSEReqApi[T any] interface {
+	Url(url string) SSEReqApi[T]
+	QueryParam(psPair map[string]string) SSEReqApi[T]
+	Headers(headers map[string]string) SSEReqApi[T]
+	HttpClient(client *resty.Client) SSEReqApi[T]
+	SetLogger(logger log.Logger) SSEReqApi[T]
+	ReHeader(k, v string) SSEReqApi[T]
+	Method(method string) SSEReqApi[T]
+	Data(data interface{}) SSEReqApi[T]
+	BeforeEvent(handler SSEEventPreHandler[T]) SSEReqApi[T]
+	OnEvent(handler SSEEventHandler[T]) SSEReqApi[T]
+	OnConnected(handler func() error) SSEReqApi[T]
+	OnError(handler func(err error)) SSEReqApi[T]
 	Connect() error
 	Disconnect() error
 }
 
 // SSE请求结构
-type SSEReq struct {
+type SSEReq[T any] struct {
 	url              string
 	queryParams      map[string]string
 	headers          map[string]string
@@ -52,7 +55,9 @@ type SSEReq struct {
 	data             interface{}
 	httpClient       *resty.Client
 	Logger           log.Logger
-	eventHandler     SSEEventHandler
+	decodeHandler    format.EnDeCodeFormat
+	eventPreHandler  SSEEventPreHandler[T]
+	eventHandler     SSEEventHandler[T]
 	connectedHandler func() error
 	errorHandler     func(err error)
 	isConnected      bool
@@ -64,8 +69,8 @@ type SSEReq struct {
 }
 
 // 创建新的SSE请求实例
-func NewSSEReq() *SSEReq {
-	return &SSEReq{
+func NewSSEReq[T any]() *SSEReq[T] {
+	return &SSEReq[T]{
 		headers:      make(map[string]string),
 		queryParams:  make(map[string]string),
 		method:       http.MethodGet, // 默认使用GET方法，但允许覆盖
@@ -76,63 +81,69 @@ func NewSSEReq() *SSEReq {
 	}
 }
 
-func (r *SSEReq) Url(url string) SSEReqApi {
+func (r *SSEReq[T]) Url(url string) SSEReqApi[T] {
 	r.url = url
 	return r
 }
 
-func (r *SSEReq) QueryParam(psPair map[string]string) SSEReqApi {
+func (r *SSEReq[T]) QueryParam(psPair map[string]string) SSEReqApi[T] {
 	r.queryParams = psPair
 	return r
 }
 
-func (r *SSEReq) SetLogger(logger log.Logger) SSEReqApi {
+func (r *SSEReq[T]) SetLogger(logger log.Logger) SSEReqApi[T] {
 	r.Logger = logger
 	return r
 }
 
-func (r *SSEReq) Headers(headers map[string]string) SSEReqApi {
+func (r *SSEReq[T]) Headers(headers map[string]string) SSEReqApi[T] {
+	if headers["Content-type"] == "" {
+		headers["Content-type"] = "application/json"
+	}
 	r.headers = headers
 	return r
 }
 
-func (r *SSEReq) HttpClient(client *resty.Client) SSEReqApi {
+func (r *SSEReq[T]) HttpClient(client *resty.Client) SSEReqApi[T] {
 	r.httpClient = client
 	return r
 }
 
-func (r *SSEReq) ReHeader(k, v string) SSEReqApi {
+func (r *SSEReq[T]) ReHeader(k, v string) SSEReqApi[T] {
 	r.headers[k] = v
 	return r
 }
 
-func (r *SSEReq) Method(method string) SSEReqApi {
+func (r *SSEReq[T]) Method(method string) SSEReqApi[T] {
 	r.method = method
 	return r
 }
 
-func (r *SSEReq) Data(data interface{}) SSEReqApi {
+func (r *SSEReq[T]) Data(data interface{}) SSEReqApi[T] {
 	r.data = data
 	return r
 }
-
-func (r *SSEReq) OnEvent(handler SSEEventHandler) SSEReqApi {
+func (r *SSEReq[T]) BeforeEvent(handler SSEEventPreHandler[T]) SSEReqApi[T] {
+	r.eventPreHandler = handler
+	return r
+}
+func (r *SSEReq[T]) OnEvent(handler SSEEventHandler[T]) SSEReqApi[T] {
 	r.eventHandler = handler
 	return r
 }
 
-func (r *SSEReq) OnConnected(handler func() error) SSEReqApi {
+func (r *SSEReq[T]) OnConnected(handler func() error) SSEReqApi[T] {
 	r.connectedHandler = handler
 	return r
 }
 
-func (r *SSEReq) OnError(handler func(err error)) SSEReqApi {
+func (r *SSEReq[T]) OnError(handler func(err error)) SSEReqApi[T] {
 	r.errorHandler = handler
 	return r
 }
 
 // 连接到SSE服务器
-func (r *SSEReq) Connect() error {
+func (r *SSEReq[T]) Connect() error {
 	// 如果已经连接，先断开
 	if r.isConnected {
 		return errors.New("已经连接到SSE服务器")
@@ -253,7 +264,7 @@ func (r *SSEReq) Connect() error {
 }
 
 // 断开SSE连接
-func (r *SSEReq) Disconnect() error {
+func (r *SSEReq[T]) Disconnect() error {
 	if !r.isConnected {
 		return nil
 	}
@@ -280,7 +291,7 @@ func (r *SSEReq) Disconnect() error {
 }
 
 // 处理SSE事件流
-func (r *SSEReq) processEvents() {
+func (r *SSEReq[T]) processEvents() {
 	defer func() {
 		if err := recover(); err != nil {
 			if r.Logger != nil {
@@ -293,7 +304,7 @@ func (r *SSEReq) processEvents() {
 		r.Disconnect()
 	}()
 
-	var event SSEEvent
+	var event SSEEvent[T]
 
 	for {
 		select {
@@ -317,13 +328,19 @@ func (r *SSEReq) processEvents() {
 
 			if line == "" {
 				// 空行表示事件结束，处理事件
-				if event.Data != "" && r.eventHandler != nil {
-					if err := r.eventHandler(event); err != nil && r.errorHandler != nil {
+				if event.Data != "" && r.eventPreHandler != nil && r.eventHandler != nil {
+					handler, err := r.eventPreHandler(event)
+					if err != nil && r.errorHandler != nil {
 						r.errorHandler(err)
+					}
+					if handler != nil {
+						if err := r.eventHandler(*handler); err != nil && r.errorHandler != nil {
+							r.errorHandler(err)
+						}
 					}
 				}
 				// 重置事件
-				event = SSEEvent{}
+				event = SSEEvent[T]{}
 				continue
 			}
 

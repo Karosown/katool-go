@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/karosown/katool-go/net/format/base_format"
 	"net/http"
 	"sync"
 	"testing"
@@ -183,23 +184,26 @@ func TestSSEReqWithMockServer(t *testing.T) {
 	// 创建Logger
 	logger := log.LogrusAdapter{}
 
-	var receivedEvents []remote.SSEEvent
+	var receivedEvents []remote.SSEEvent[map[string]any]
 	var mu sync.Mutex
 	var connected bool
 	var connectedCh = make(chan struct{})
-
 	// 创建SSE请求
-	sseReq := remote.NewSSEReq().
+	sseReq := remote.NewSSEReq[map[string]any]().
 		Url("http://localhost:8855/events").
 		Method(http.MethodGet).
 		SetLogger(logger)
-
 	// 设置事件处理函数
-	sseReq.OnEvent(func(event remote.SSEEvent) error {
+	sseReq.BeforeEvent(func(event remote.SSEEvent[map[string]any]) (*map[string]any, error) {
 		fmt.Printf("收到事件: ID=%s, Event=%s, Data=%s\n", event.ID, event.Event, event.Data)
 		mu.Lock()
 		receivedEvents = append(receivedEvents, event)
 		mu.Unlock()
+		i, err := (&base_format.JSONEnDeCodeFormat{}).Decode([]byte(event.Data), &map[string]any{})
+		return i.(*map[string]any), err
+	})
+	sseReq.OnEvent(func(event map[string]any) error {
+		fmt.Printf("%+v\n", event)
 		return nil
 	})
 
@@ -272,7 +276,7 @@ func TestSSEReqReconnect(t *testing.T) {
 	var mu sync.Mutex
 
 	// 测试重连逻辑
-	connectSSE := func() (remote.SSEReqApi, error) {
+	connectSSE := func() (remote.SSEReqApi[string], error) {
 		mu.Lock()
 		connectionCount++
 		currentCount := connectionCount
@@ -280,14 +284,16 @@ func TestSSEReqReconnect(t *testing.T) {
 
 		logger := log.LogrusAdapter{}
 
-		sseReq := remote.NewSSEReq().
+		sseReq := remote.NewSSEReq[string]().
 			Url("http://localhost:8856/events").
 			Method(http.MethodGet).
 			SetLogger(logger)
 
 		// 设置事件处理函数
-		sseReq.OnEvent(func(event remote.SSEEvent) error {
+		sseReq.BeforeEvent(func(event remote.SSEEvent[string]) (*string, error) {
 			fmt.Printf("连接 %d 收到事件: %+v\n", currentCount, event)
+			return &event.Data, nil
+		}).OnEvent(func(event string) error {
 			return nil
 		})
 

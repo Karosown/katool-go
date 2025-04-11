@@ -25,23 +25,23 @@ type ReqApi interface {
 	Method(method string) ReqApi
 	Headers(headers map[string]string) ReqApi
 	HttpClient(client *resty.Client) ReqApi
-	Format(format format.EnDeCodeFormat) ReqApi
+	DecodeHandler(format format.EnDeCodeFormat) ReqApi
 	ReHeader(k, v string) ReqApi
 	SetLogger(logger log.Logger) ReqApi
 	Build(backDao any) (any, error)
 }
 
 type Req struct {
-	url         string
-	queryParams map[string]string
-	headers     map[string]string
-	method      string
-	data        any
-	form        map[string]string
-	files       map[string]string
-	format      format.EnDeCodeFormat // 请求格式化解析器（bing使用的是xml进行请求响应，google采用的是json
-	httpClient  *resty.Client
-	Logger      log.Logger
+	url           string
+	queryParams   map[string]string
+	headers       map[string]string
+	method        string
+	data          any
+	form          map[string]string
+	files         map[string]string
+	decodeHandler format.EnDeCodeFormat // 请求格式化解析器（bing使用的是xml进行请求响应，google采用的是json
+	httpClient    *resty.Client
+	Logger        log.Logger
 }
 
 func (r *Req) Url(url string) ReqApi {
@@ -93,10 +93,10 @@ func (r *Req) HttpClient(client *resty.Client) ReqApi {
 }
 
 // 放置编解码工具链
-func (r *Req) Format(format format.EnDeCodeFormat) ReqApi {
-	r.format = format
+func (r *Req) DecodeHandler(format format.EnDeCodeFormat) ReqApi {
+	r.decodeHandler = format
 	if nil == format.GetLogger() {
-		r.format.SetLogger(r.Logger)
+		r.decodeHandler.SetLogger(r.Logger)
 	}
 	return r
 }
@@ -117,8 +117,8 @@ func (r *Req) Build(backDao any) (any, error) {
 		r.httpClient.SetTimeout(30 * time.Second)
 	}
 	// 如果没有传值，那么默认是json解析起
-	if r.format == nil {
-		r.format = &base_format.JSONEnDeCodeFormat{}
+	if r.decodeHandler == nil {
+		r.decodeHandler = &base_format.JSONEnDeCodeFormat{}
 	}
 	url := r.url
 	data := r.data
@@ -167,7 +167,7 @@ func (r *Req) Build(backDao any) (any, error) {
 				sys.Warn(otherErr)
 			}
 		}
-		response, err := (r.format).SystemDecode(r.format, body, backDao)
+		response, err := (r.decodeHandler).SystemDecode(r.decodeHandler, body, backDao)
 		return response, err
 	default:
 		// resty 会自动对data进行处理：resty.middleware.handleRequestBody , 通过反射判断
@@ -195,7 +195,7 @@ func (r *Req) Build(backDao any) (any, error) {
 				response.Status())
 		}
 		//fmt.Println(string(body))
-		res, err := (r.format).SystemDecode(r.format, body, backDao)
+		res, err := (r.decodeHandler).SystemDecode(r.decodeHandler, body, backDao)
 		return res, err
 	}
 	return backDao, nil

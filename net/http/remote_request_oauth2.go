@@ -136,8 +136,8 @@ func (O *OAuth2Req) HttpClient(client *resty.Client) *OAuth2Req {
 	return O
 }
 
-func (O *OAuth2Req) Format(format remote2.EnDeCodeFormat) *OAuth2Req {
-	O.Req.Format(format)
+func (O *OAuth2Req) DecodeHandler(format remote2.EnDeCodeFormat) *OAuth2Req {
+	O.Req.DecodeHandler(format)
 	return O
 }
 
