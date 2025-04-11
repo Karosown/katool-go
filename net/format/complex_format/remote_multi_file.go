@@ -1,12 +1,12 @@
-package comloex_format_detail
+package complex_format
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
 
+	remote2 "github.com/karosown/katool-go/net/format"
 	remote "github.com/karosown/katool-go/net/http"
-	remote2 "github.com/karosown/katool-go/net/http/format_detail"
 )
 
 type RemoteMultiMultiFileDeCodeFormat struct {

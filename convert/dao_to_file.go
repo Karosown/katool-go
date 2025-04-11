@@ -12,13 +12,13 @@ import (
 	"time"
 
 	"github.com/duke-git/lancet/v2/fileutil"
-	"github.com/karosown/katool-go/xlog"
+	"github.com/karosown/katool-go/sys"
 )
 
 func StructToCSV[T any](datas []T, fullPath string) error {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("StructToCSV panic: " + err.(error).Error())
+			sys.Warn("StructToCSV sys.Panic: " + err.(error).Error())
 		}
 	}()
 	if datas == nil || len(datas) == 0 {
@@ -69,12 +69,12 @@ func StructToCSV[T any](datas []T, fullPath string) error {
 		if !fileutil.IsExist(dir) {
 			err := fileutil.CreateDir(dir)
 			if err != nil {
-				xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(err.Error()).Panic()
+				sys.Warn(err.Error())
 			}
 		}
 		status := fileutil.CreateFile(fullPath)
 		if !status {
-			panic(errors.New("create file error"))
+			sys.Panic("create file error")
 		}
 	}
 	err := fileutil.WriteCsvFile(fullPath, records, false)
@@ -84,7 +84,7 @@ func StructToCSV[T any](datas []T, fullPath string) error {
 func StructToJsonFlatLineFile[T any](datas []T, fullPath string) error {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("StructToJsonFlatLineFile panic: " + err.(error).Error())
+			fmt.Println("StructToJsonFlatLineFile sys.Panic: " + err.(error).Error())
 		}
 	}()
 	if datas == nil || len(datas) == 0 {
@@ -118,7 +118,7 @@ func StructToJsonFlatLineFile[T any](datas []T, fullPath string) error {
 func StructToJsonFile[T any](datas []T, fullPath string) error {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("StructToJsonFlatLineFile panic: " + err.(error).Error())
+			fmt.Println("StructToJsonFlatLineFile sys.Panic: " + err.(error).Error())
 		}
 	}()
 	if datas == nil || len(datas) == 0 {

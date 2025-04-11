@@ -8,6 +8,7 @@ import (
 	"github.com/karosown/katool-go/algorithm"
 	"github.com/karosown/katool-go/container/stream"
 	"github.com/karosown/katool-go/convert"
+	"github.com/karosown/katool-go/sys"
 	"github.com/karosown/katool-go/util"
 )
 
@@ -55,7 +56,7 @@ func Test_OrderBy_ID(t *testing.T) {
 	for i := 0; i < len(unParallel); i++ {
 		//println(unParallel[i], parallel[i])
 		if unParallel[i] != parallel[i] {
-			panic("unparallel not equal parallel" + convert.ToString(i))
+			sys.Panic("unparallel not equal parallel" + convert.ToString(i))
 		}
 	}
 }
@@ -81,7 +82,7 @@ func Test_OrderBy(t *testing.T) {
 	println(computed)
 	for i := 0; i < len(unParallel); i++ {
 		if unParallel[i].Name != parallel[i].Name {
-			panic("unparallel not equal parallel" + convert.ToString(i))
+			sys.Panic("unparallel not equal parallel" + convert.ToString(i))
 		}
 	}
 }

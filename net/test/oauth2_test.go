@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/karosown/katool-go/log"
+	rm "github.com/karosown/katool-go/net/format"
 	remote "github.com/karosown/katool-go/net/http"
-	rm "github.com/karosown/katool-go/net/http/format_detail"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -37,8 +37,7 @@ type Config struct {
 	MaxAge     int    `yaml:"MaxAge"`
 	Compress   bool   `yaml:"Compress"`
 	LocalTime  bool   `yaml:"LocalTime"`
-
-	Level zapcore.Level
+	Level      zapcore.Level
 }
 
 func getLogWriter(c *Config) zapcore.WriteSyncer {

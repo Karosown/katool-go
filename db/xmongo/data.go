@@ -6,7 +6,6 @@ import (
 
 	"github.com/karosown/katool-go/container/ioc"
 	"github.com/karosown/katool-go/db/xmongo/coll"
-	"github.com/karosown/katool-go/xlog"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -32,7 +31,7 @@ func (m *MongoClient) CollName(name string) *coll.Collection {
 			err = db.CreateCollection(background, name)
 			// todo
 			if err != nil {
-				xlog.KaToolLoggerWrapper.ApplicationDesc(err.Error()).Panic()
+				sys.Panic(err)
 			}
 		}
 		return coll.NewCollection(db.Collection(name))

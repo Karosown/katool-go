@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/karosown/katool-go/xlog"
+	"github.com/karosown/katool-go/sys"
 )
 
 type HashType string
@@ -16,7 +16,7 @@ type IDComputeFunction func(any2 any) IDType
 func HASH_WITH_JSON(cnt any) HashType {
 	marshal, err := json.Marshal(cnt)
 	if err != nil {
-		xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(err.Error()).Panic()
+		sys.Warn(err.Error())
 	}
 	return HashType(marshal)
 }
@@ -24,7 +24,7 @@ func HASH_WITH_JSON(cnt any) HashType {
 func HASH_WITH_JSON_MD5(cnt any) HashType {
 	marshal, err := json.Marshal(cnt)
 	if err != nil {
-		xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(err.Error()).Panic()
+		sys.Warn(err.Error())
 	}
 	sum := md5.Sum(marshal)
 	return HashType(sum[:])

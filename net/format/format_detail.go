@@ -1,9 +1,10 @@
-package remote
+package format
 
 import (
 	"fmt"
 	"reflect"
 
+	"github.com/karosown/katool-go/sys"
 	"github.com/karosown/katool-go/xlog"
 )
 
@@ -66,7 +67,7 @@ func (e *DefaultEnDeCodeFormat) SystemDecode(self EnDeCodeFormat, encode any, ba
 		if nil != e.logger {
 			e.logger.Error(err)
 		} else {
-			xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(err.Error()).Panic()
+			sys.Warn(err.Error())
 		}
 		return nil, err
 	}
@@ -76,7 +77,7 @@ func (e *DefaultEnDeCodeFormat) SystemDecode(self EnDeCodeFormat, encode any, ba
 		if nil != e.logger {
 			e.logger.Error(err)
 		} else {
-			xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(err.Error()).Panic()
+			sys.Warn(err.Error())
 		}
 		return nil, err
 	}

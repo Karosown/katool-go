@@ -16,6 +16,7 @@ import (
 	"github.com/karosown/katool-go/collect/lists"
 	"github.com/karosown/katool-go/container/optional"
 	"github.com/karosown/katool-go/convert"
+	"github.com/karosown/katool-go/sys"
 )
 
 func getPageSize(size int) int {
@@ -184,10 +185,10 @@ func (s *Stream[T, Slice]) DistinctBy(hash algorithm.HashComputeFunction) *Strea
 // Reduce 求和计算
 func (s *Stream[T, Slice]) Reduce(begin any, atomicSolveFunction func(cntValue any, nxt T) any, parallelResultSolve func(sum1, sum2 any) any) any {
 	if atomicSolveFunction == nil {
-		panic("atomicSolveFunction must not nil")
+		sys.Panic("atomicSolveFunction must not nil")
 	}
 	if s.parallel && parallelResultSolve == nil {
-		panic("parallelResultSolve must not be nil where parallelResult")
+		sys.Panic("parallelResultSolve must not be nil where parallelResult")
 	}
 	//size := len(*s.options)
 	beginType := reflect.TypeOf(begin)

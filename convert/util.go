@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/spf13/cast"
 )
 
 func Convert[T any, R any](datas []T, vacuumMachine func(agent T) R) []R {
@@ -157,6 +159,26 @@ func ChanToFlatArray[T any](source <-chan []T) []T {
 	res := make([]T, 0, size)
 	for i := 0; i < size; i++ {
 		res = append(res, <-source...)
+	}
+	return res
+}
+
+func ToMap(dao any) (res map[string]string) {
+	if dao == nil {
+		return nil
+	}
+	marshal, err := json.Marshal(dao)
+	if err != nil {
+		return res
+	}
+	temp := map[string]any{}
+	err = json.Unmarshal(marshal, &temp)
+	if err != nil {
+		return res
+	}
+	res = make(map[string]string)
+	for k, v := range temp {
+		res[k] = cast.ToString(v)
 	}
 	return res
 }

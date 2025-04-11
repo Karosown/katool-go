@@ -2,6 +2,8 @@ package util
 
 import (
 	"math/rand/v2"
+
+	"github.com/karosown/katool-go/sys"
 )
 
 // Int returns a random integer in [min, max) range (inclusive).
@@ -13,7 +15,7 @@ import (
 // Returns a random integer between min and max (inclusive).
 func Int(min, max int) int {
 	if min > max {
-		panic("Int: min cannot be greater than max")
+		sys.Panic("Int: min cannot be greater than max")
 	}
 	return rand.IntN(max-min) + min
 }

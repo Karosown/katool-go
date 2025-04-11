@@ -50,11 +50,11 @@ func (lw *LogWrapper) FunctionByFunc(function func(int) string) *LogWrapper {
 }
 
 // ApplicationDesc sets the ApplicationDesc field and returns the LogWrapper for chaining
-func (lw *LogWrapper) ApplicationDesc(desc string) *LogWrapper {
+func (lw *LogWrapper) ApplicationDesc(desc any) *LogWrapper {
 	lw.message.ApplicationDesc = desc
 	return lw
 }
-func (lw *LogWrapper) Format(format func(l xtype.LogMessage, format string) string) *LogWrapper {
+func (lw *LogWrapper) Format(format func(l xtype.LogMessage) string) *LogWrapper {
 	lw.message.Format = format
 	return lw
 }

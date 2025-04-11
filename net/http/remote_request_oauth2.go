@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/karosown/katool-go/log"
-	remote2 "github.com/karosown/katool-go/net/http/format_detail"
+	remote2 "github.com/karosown/katool-go/net/format"
 )
 
 // OAuth2Req

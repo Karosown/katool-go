@@ -8,6 +8,8 @@ import (
 	"os"
 	"reflect"
 	"strings"
+
+	"github.com/karosown/katool-go/sys"
 )
 
 type CSVSerializer struct{}
@@ -15,7 +17,7 @@ type CSVSerializer struct{}
 func (c CSVSerializer) ReadByBytes(bytes []byte, backDao any) []any {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("ReadByBytes panic:", err)
+			fmt.Println("ReadByBytes sys.Panic:", err)
 		}
 	}()
 	reader := csv.NewReader(strings.NewReader(string(bytes)))
@@ -24,11 +26,11 @@ func (c CSVSerializer) ReadByBytes(bytes []byte, backDao any) []any {
 	// 获取backDao的类型信息
 	backDaoType := reflect.TypeOf(backDao)
 	if backDaoType.Kind() != reflect.Ptr {
-		panic("backDao必须是指针类型")
+		sys.Panic("backDao必须是指针类型")
 	}
 	elemType := backDaoType.Elem()
 	if elemType.Kind() != reflect.Struct {
-		panic("backDao必须是结构体指针")
+		sys.Panic("backDao必须是结构体指针")
 	}
 
 	// 生成预期的标题行字段名列表
@@ -57,9 +59,9 @@ func (c CSVSerializer) ReadByBytes(bytes []byte, backDao any) []any {
 		line, err := bufReader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
-				panic("未找到CSV标题行")
+				sys.Panic("未找到CSV标题行")
 			}
-			panic(fmt.Errorf("读取文件出错: %v", err))
+			sys.Panic(fmt.Errorf("读取文件出错: %v", err))
 		}
 
 		// 去除行首行尾的空白字符
@@ -155,11 +157,11 @@ func (c CSVSerializer) ReadByFile(file *os.File, backDao any) []any {
 	// 获取backDao的类型信息
 	backDaoType := reflect.TypeOf(backDao)
 	if backDaoType.Kind() != reflect.Ptr {
-		panic("backDao必须是指针类型")
+		sys.Panic("backDao必须是指针类型")
 	}
 	elemType := backDaoType.Elem()
 	if elemType.Kind() != reflect.Struct {
-		panic("backDao必须是结构体指针")
+		sys.Panic("backDao必须是结构体指针")
 	}
 
 	// 生成预期的标题行字段名列表
@@ -188,9 +190,9 @@ func (c CSVSerializer) ReadByFile(file *os.File, backDao any) []any {
 		line, err := bufReader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
-				panic("未找到CSV标题行")
+				sys.Panic("未找到CSV标题行")
 			}
-			panic(fmt.Errorf("读取文件出错: %v", err))
+			sys.Panic(fmt.Errorf("读取文件出错: %v", err))
 		}
 
 		// 去除行首行尾的空白字符
@@ -303,7 +305,7 @@ func (c CSVSerializer) Write(path string, sourceDao any) error {
 
 	sourceValue := reflect.ValueOf(sourceDao)
 	if sourceValue.Kind() != reflect.Slice {
-		panic("sourceDao必须是切片类型")
+		sys.Panic("sourceDao必须是切片类型")
 	}
 
 	if sourceValue.Len() == 0 {
@@ -313,7 +315,7 @@ func (c CSVSerializer) Write(path string, sourceDao any) error {
 	elemType := sourceValue.Index(0).Type()
 
 	if elemType.Kind() != reflect.Struct {
-		panic("sourceDao的元素必须是结构体类型")
+		sys.Panic("sourceDao的元素必须是结构体类型")
 	}
 
 	// 写入标题行

@@ -7,15 +7,15 @@ import (
 type LogMessage struct {
 	Header          string
 	Function        string
-	ApplicationDesc string
+	ApplicationDesc any
 	Type            LogType
-	Format          func(message LogMessage, format string) string
+	Format          func(message LogMessage) string
 }
 
 // String returns the formatted error message
 func (l LogMessage) String() string {
 	if l.Format != nil {
-		return l.Format(l, l.ApplicationDesc)
+		return l.Format(l)
 	}
 	return fmt.Sprintf("%s ==> [%s:%s] == %s",
 		l.Header,

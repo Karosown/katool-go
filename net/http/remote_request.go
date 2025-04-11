@@ -11,9 +11,8 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/karosown/katool-go/log"
-	remote2 "github.com/karosown/katool-go/net/http/format_detail"
-	"github.com/karosown/katool-go/xlog"
-	"go.uber.org/zap"
+	"github.com/karosown/katool-go/net/format"
+	"github.com/karosown/katool-go/sys"
 )
 
 type ReqApi interface {
@@ -25,9 +24,9 @@ type ReqApi interface {
 	Method(method string) ReqApi
 	Headers(headers map[string]string) ReqApi
 	HttpClient(client *resty.Client) ReqApi
-	Format(format remote2.EnDeCodeFormat) ReqApi
+	Format(format format.EnDeCodeFormat) ReqApi
 	ReHeader(k, v string) ReqApi
-	SetLogger(logger *zap.SugaredLogger) ReqApi
+	SetLogger(logger log.Logger) ReqApi
 	Build(backDao any) (any, error)
 }
 
@@ -39,7 +38,7 @@ type Req struct {
 	data        any
 	form        map[string]string
 	files       map[string]string
-	format      remote2.EnDeCodeFormat // 请求格式化解析器（bing使用的是xml进行请求响应，google采用的是json
+	format      format.EnDeCodeFormat // 请求格式化解析器（bing使用的是xml进行请求响应，google采用的是json
 	httpClient  *resty.Client
 	Logger      log.Logger
 }
@@ -60,7 +59,7 @@ func (r *Req) QueryParam(psPair map[string]string) ReqApi {
 	r.queryParams = psPair
 	return r
 }
-func (r *Req) SetLogger(logger *zap.SugaredLogger) ReqApi {
+func (r *Req) SetLogger(logger log.Logger) ReqApi {
 	r.Logger = logger
 	return r
 }
@@ -93,7 +92,7 @@ func (r *Req) HttpClient(client *resty.Client) ReqApi {
 }
 
 // 放置编解码工具链
-func (r *Req) Format(format remote2.EnDeCodeFormat) ReqApi {
+func (r *Req) Format(format format.EnDeCodeFormat) ReqApi {
 	r.format = format
 	if nil == format.GetLogger() {
 		r.format.SetLogger(r.Logger)
@@ -116,8 +115,9 @@ func (r *Req) Build(backDao any) (any, error) {
 		r.httpClient = resty.New()
 		r.httpClient.SetTimeout(30 * time.Second)
 	}
+	// 如果没有传值，那么默认是json解析起
 	if r.format == nil {
-		r.format = &remote2.JSONEnDeCodeFormat{}
+		r.format = &format.JSONEnDeCodeFormat{}
 	}
 	url := r.url
 	data := r.data
@@ -161,9 +161,9 @@ func (r *Req) Build(backDao any) (any, error) {
 			}
 		} else {
 			if res.StatusCode() != http.StatusOK {
-				xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(noOkErr.Error()).Panic()
+				sys.Warn(noOkErr.Error())
 			} else {
-				xlog.KaToolLoggerWrapper.Warn().ApplicationDesc(otherErr).Panic()
+				sys.Warn(otherErr)
 			}
 		}
 		response, err := (r.format).SystemDecode(r.format, body, backDao)

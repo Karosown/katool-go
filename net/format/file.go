@@ -1,4 +1,4 @@
-package remote
+package format
 
 import (
 	"encoding/json"
@@ -7,7 +7,8 @@ import (
 
 	"github.com/duke-git/lancet/v2/fileutil"
 	"github.com/karosown/katool-go/container/xmap"
-	"github.com/karosown/katool-go/xlog"
+	"github.com/karosown/katool-go/lock"
+	"github.com/karosown/katool-go/sys"
 	"github.com/spf13/cast"
 )
 
@@ -32,39 +33,39 @@ func (e *FileSaveFormat) Encode(obj any) (any, error) {
 		fileLock = store
 	}
 	if !fileutil.IsExist(filePath) {
-		fileLock.Lock()
-		if !fileutil.IsExist(filePath) {
-			fileurl := path.Dir(filePath)
-			if !fileutil.IsExist(fileurl) {
-				pathLock, _ := e.FileLockers.LoadOrStore(fileurl, &sync.RWMutex{})
-				pathLock.Lock()
+		lock.Synchronized(fileLock, func() {
+			if !fileutil.IsExist(filePath) {
+				fileurl := path.Dir(filePath)
 				if !fileutil.IsExist(fileurl) {
-					err := fileutil.CreateDir(fileurl)
-					if err != nil {
-						xlog.KaToolLoggerWrapper.ApplicationDesc("create dir has error").Panic()
-					}
+					pathLock, _ := e.FileLockers.LoadOrStore(fileurl, &sync.RWMutex{})
+					lock.Synchronized(pathLock, func() {
+						if !fileutil.IsExist(fileurl) {
+							err := fileutil.CreateDir(fileurl)
+							if err != nil {
+								sys.Panic("create dir has error")
+							}
+						}
+					})
 				}
-				pathLock.Unlock()
+				file := fileutil.CreateFile(filePath)
+				if file == false {
+					sys.Panic("create file is failed")
+				}
 			}
-			file := fileutil.CreateFile(filePath)
-			if file == false {
-				xlog.KaToolLoggerWrapper.ApplicationDesc("create file is failed").Panic()
-			}
-		}
-		fileLock.Unlock()
+		})
 	}
 	toString, err := cast.ToStringE(obj)
 	if err != nil {
 		bytes, err := json.MarshalIndent(obj, "", "  ")
 		if err != nil {
-			xlog.KaToolLoggerWrapper.Warn().ApplicationDesc("encode error").Panic()
+			sys.Warn("encode error")
 			return nil, err
 		}
 		toString, err = string(bytes), nil
 	}
-	fileLock.Lock()
-	fileutil.WriteStringToFile(filePath, toString, e.Append)
-	fileLock.Unlock()
+	lock.Synchronized(fileLock, func() {
+		fileutil.WriteStringToFile(filePath, toString, e.Append)
+	})
 	return filePath, nil
 }
 

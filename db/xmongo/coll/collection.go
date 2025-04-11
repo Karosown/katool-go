@@ -9,7 +9,6 @@ import (
 	"github.com/karosown/katool-go/container/ioc"
 	"github.com/karosown/katool-go/db/pager"
 	"github.com/karosown/katool-go/db/xmongo/mongo_util"
-	"github.com/karosown/katool-go/xlog"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -38,7 +37,7 @@ func (c *Collection) Partition(key string, sizes ...int) *Collection {
 			err = db.CreateCollection(context.Background(), partitionCollName)
 			// todo
 			if err != nil {
-				xlog.KaToolLoggerWrapper.ApplicationDesc(err.Error()).Panic()
+				sys.Panic(err)
 			}
 		}
 		return NewCollection(c.coll.Database().Collection(partitionCollName))

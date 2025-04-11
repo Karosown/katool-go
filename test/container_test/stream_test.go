@@ -12,6 +12,7 @@ import (
 	"github.com/karosown/katool-go/algorithm"
 	"github.com/karosown/katool-go/container/stream"
 	"github.com/karosown/katool-go/convert"
+	"github.com/karosown/katool-go/sys"
 )
 
 type user struct {
@@ -86,8 +87,7 @@ func Test_Map(t *testing.T) {
 	s := userStream.Map(func(item user) any {
 		properties, err := convert.CopyProperties(&item, &userVo{})
 		if err != nil {
-			xlog.KaToolLoggerWrapper.ApplicationDesc(err.Error()).Panic()
-
+			sys.Panic(err)
 		}
 		return properties
 	}).ToOptionList()
