@@ -1,6 +1,7 @@
 package container_test
 
 import (
+	"github.com/karosown/katool-go/util/dateutil"
 	"math/rand"
 	"strings"
 	"testing"
@@ -9,7 +10,6 @@ import (
 	"github.com/karosown/katool-go/container/stream"
 	"github.com/karosown/katool-go/convert"
 	"github.com/karosown/katool-go/sys"
-	"github.com/karosown/katool-go/util"
 )
 
 func orderById(flag bool, ids []int) []int {
@@ -44,12 +44,12 @@ func Test_OrderBy_ID(t *testing.T) {
 		users = append(users, rand.Int()%10000)
 	}
 	var unParallel []int
-	computed := util.BeginEndTimeComputed(func() {
+	computed := dateutil.BeginEndTimeComputed(func() {
 		unParallel = orderById(false, users)
 	})
 	println(computed)
 	var parallel []int
-	computed = util.BeginEndTimeComputed(func() {
+	computed = dateutil.BeginEndTimeComputed(func() {
 		parallel = orderById(true, users)
 	})
 	println(computed)
@@ -67,14 +67,14 @@ func Test_OrderBy(t *testing.T) {
 		users = append(users, userList[:]...)
 	}
 	var unParallel []user
-	computed := util.BeginEndTimeComputed(func() {
+	computed := dateutil.BeginEndTimeComputed(func() {
 		unParallel = stream.ToStream(&users).OrderBy(false, func(u any) algorithm.HashType {
 			return algorithm.HashType(u.(user).Name)
 		}).ToList()
 	})
 	println(computed)
 	var parallel []user
-	computed = util.BeginEndTimeComputed(func() {
+	computed = dateutil.BeginEndTimeComputed(func() {
 		parallel = stream.ToStream(&users).Parallel().OrderBy(false, func(u any) algorithm.HashType {
 			return algorithm.HashType(u.(user).Name)
 		}).ToList()
@@ -93,7 +93,7 @@ func Test_FlatMap(t *testing.T) {
 		users = append(users, userList[:]...)
 	}
 	//print("123")
-	computed := util.BeginEndTimeComputed(func() {
+	computed := dateutil.BeginEndTimeComputed(func() {
 		stream.ToStream(&users).FlatMap(func(user user) *stream.Stream[any, []any] {
 			split := strings.Split(user.Name, "")
 			res := make([]any, len(split))
@@ -107,7 +107,7 @@ func Test_FlatMap(t *testing.T) {
 	})
 	println()
 	println(computed)
-	computed = util.BeginEndTimeComputed(func() {
+	computed = dateutil.BeginEndTimeComputed(func() {
 		stream.ToParallelStream(&users).FlatMap(func(user user) *stream.Stream[any, []any] {
 			split := strings.Split(user.Name, "")
 			res := make([]any, len(split))

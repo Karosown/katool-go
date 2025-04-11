@@ -1,13 +1,13 @@
 package dump
 
 import (
+	"github.com/karosown/katool-go/util/dateutil"
 	"time"
 
 	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/container/stream"
 	"github.com/karosown/katool-go/net/format"
 	"github.com/karosown/katool-go/sys"
-	"github.com/karosown/katool-go/util"
 )
 
 type Util[T any] struct {
@@ -20,7 +20,7 @@ type Util[T any] struct {
 func (d *Util[T]) Period(s, e time.Time, spec time.Duration) *SpecTimeUtil[T] {
 
 	return &SpecTimeUtil[T]{
-		util.GetPeriods(s, e, spec),
+		dateutil.GetPeriods(s, e, spec),
 		d.SyncMode,
 		d.ExcludeEmpty,
 	}

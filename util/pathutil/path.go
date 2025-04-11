@@ -1,4 +1,4 @@
-package util
+package pathutil
 
 import (
 	"path"
@@ -7,20 +7,20 @@ import (
 	"github.com/karosown/katool-go/container/optional"
 )
 
-type PathUtil struct {
+type Wrapper struct {
 	Path string
 }
 
-func NewPathUtil(path string) *PathUtil {
-	return &PathUtil{
+func NewWrapper(path string) *Wrapper {
+	return &Wrapper{
 		Path: path,
 	}
 }
-func (p *PathUtil) Format() *PathUtil {
+func (p *Wrapper) Format() *Wrapper {
 	p.Path = optional.IsTrue(p.Path[len(p.Path)-1] == '/', p.Path, p.Path+"/")
 	return p
 }
-func (p *PathUtil) ForceCreate() bool {
+func (p *Wrapper) ForceCreate() bool {
 	p.Format()
 	exist := fileutil.IsExist(p.Path)
 	if !exist {
@@ -28,7 +28,7 @@ func (p *PathUtil) ForceCreate() bool {
 	}
 	return exist
 }
-func (p *PathUtil) ForceCreateEmptyFile(fileName string) bool {
+func (p *Wrapper) ForceCreateEmptyFile(fileName string) bool {
 	p.Format()
 	p.ForceCreate()
 	exist := fileutil.IsExist(p.Path + fileName)
@@ -37,11 +37,11 @@ func (p *PathUtil) ForceCreateEmptyFile(fileName string) bool {
 	}
 	return exist
 }
-func (p *PathUtil) BeforeLayer() *PathUtil {
-	return &PathUtil{
+func (p *Wrapper) BeforeLayer() *Wrapper {
+	return &Wrapper{
 		Path: optional.IsTrue(p.Path[len(p.Path)-1] == '/', path.Dir(p.Path[:len(p.Path)-1]), path.Dir(p.Path)),
 	}
 }
-func (p *PathUtil) AfterLayer(childlayer string) *PathUtil {
-	return &PathUtil{p.Path + "/" + childlayer}
+func (p *Wrapper) AfterLayer(childlayer string) *Wrapper {
+	return &Wrapper{p.Path + "/" + childlayer}
 }

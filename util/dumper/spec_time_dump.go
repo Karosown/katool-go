@@ -1,24 +1,24 @@
 package dump
 
 import (
+	"github.com/karosown/katool-go/util/dateutil"
 	"time"
 
 	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/container/stream"
 	"github.com/karosown/katool-go/net/format"
 	"github.com/karosown/katool-go/sys"
-	"github.com/karosown/katool-go/util"
 )
 
 type SpecTimeUtil[T any] struct {
-	specTimes    []*util.PeriodTime
+	specTimes    []*dateutil.PeriodTime
 	SyncMode     bool
 	ExcludeEmpty bool
 }
 
 type TimeDumpTask[T any] struct {
 	Util[T]
-	util.PeriodTime
+	dateutil.PeriodTime
 }
 
 func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...format.EnDeCodeFormat) *Util[any] {
@@ -27,7 +27,7 @@ func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...
 		toStream.Parallel()
 	}
 	return &Util[any]{
-		toStream.Map(func(i *util.PeriodTime) any {
+		toStream.Map(func(i *dateutil.PeriodTime) any {
 			ts := exec(i.Start, i.End)
 			d2 := &TimeDumpTask[T]{
 				Util[T]{

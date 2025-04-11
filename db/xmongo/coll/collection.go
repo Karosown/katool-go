@@ -3,6 +3,7 @@ package coll
 //本文件的意义在于，灵活的自定义，可以在对 mongo 进行 curd 添加打印日志、计时等功能
 import (
 	"context"
+	"github.com/karosown/katool-go/sys"
 	"slices"
 	"time"
 
