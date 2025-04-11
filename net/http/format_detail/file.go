@@ -57,14 +57,15 @@ func (e *FileSaveFormat) Encode(obj any) (any, error) {
 	if err != nil {
 		bytes, err := json.MarshalIndent(obj, "", "  ")
 		if err != nil {
-			xlog.KaToolLoggerWrapper.ApplicationDesc("encode error").Panic()
+			xlog.KaToolLoggerWrapper.Warn().ApplicationDesc("encode error").Panic()
+			return nil, err
 		}
-		toString = string(bytes)
+		toString, err = string(bytes), nil
 	}
 	fileLock.Lock()
 	fileutil.WriteStringToFile(filePath, toString, e.Append)
 	fileLock.Unlock()
-	return nil, err
+	return nil, nil
 }
 
 func (e *FileSaveFormat) Decode(encode any, back any) (any, error) {
