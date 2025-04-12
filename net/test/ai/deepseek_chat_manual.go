@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/karosown/katool-go/xlog"
 	"os"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/karosown/katool-go/log"
 	remote "github.com/karosown/katool-go/net/http"
 )
 
@@ -53,7 +53,7 @@ func main() {
 	fmt.Println("输入'exit'或'quit'退出聊天")
 
 	// 创建日志实例
-	logger := log.LogrusAdapter{}
+	logger := xlog.LogrusAdapter{}
 
 	// DeepSeek聊天历史
 	chatHistory := []DeepSeekMessage{

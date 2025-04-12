@@ -1,4 +1,4 @@
-package log
+package xlog
 
 import (
 	"github.com/sirupsen/logrus"

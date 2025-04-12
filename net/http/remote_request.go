@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/karosown/katool-go/net/format/base_format"
+	"github.com/karosown/katool-go/xlog"
 	"net/http"
 	"reflect"
 	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/karosown/katool-go/log"
 	"github.com/karosown/katool-go/net/format"
 	"github.com/karosown/katool-go/sys"
 )
@@ -27,7 +27,7 @@ type ReqApi interface {
 	HttpClient(client *resty.Client) ReqApi
 	DecodeHandler(format format.EnDeCodeFormat) ReqApi
 	ReHeader(k, v string) ReqApi
-	SetLogger(logger log.Logger) ReqApi
+	SetLogger(logger xlog.Logger) ReqApi
 	Build(backDao any) (any, error)
 }
 
@@ -41,7 +41,7 @@ type Req struct {
 	files         map[string]string
 	decodeHandler format.EnDeCodeFormat // 请求格式化解析器（bing使用的是xml进行请求响应，google采用的是json
 	httpClient    *resty.Client
-	Logger        log.Logger
+	Logger        xlog.Logger
 }
 
 func (r *Req) Url(url string) ReqApi {
@@ -60,7 +60,7 @@ func (r *Req) QueryParam(psPair map[string]string) ReqApi {
 	r.queryParams = psPair
 	return r
 }
-func (r *Req) SetLogger(logger log.Logger) ReqApi {
+func (r *Req) SetLogger(logger xlog.Logger) ReqApi {
 	r.Logger = logger
 	return r
 }
@@ -184,6 +184,7 @@ func (r *Req) Build(backDao any) (any, error) {
 		if r.form != nil || r.files != nil {
 			response, err = reqAtomic.SetFormData(r.form).SetFiles(r.files).Execute(r.method, url)
 		} else {
+			// todo: 后续考虑将输入进行encoder转换，目前在考虑两种方案，直接使用decoer（共用，内部逻辑处理交给开发者），或者另外建一个encoder
 			response, err = reqAtomic.SetBody(data).Execute(r.method, url)
 		}
 		if nil != err {

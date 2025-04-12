@@ -2,6 +2,8 @@ package xmongo
 
 import (
 	"context"
+	"fmt"
+	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/sys"
 	"slices"
 
@@ -15,18 +17,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
-type MongoClient struct {
+type MongoClient[T any] struct {
 	*mongo.Client
 	DBName string
 }
 
-func (m *MongoClient) CollName(name string) *coll.Collection {
-	return ioc.GetDefFunc("mongodb:"+":"+m.DBName+":"+name, func() *coll.Collection {
+func (m *MongoClient[T]) CollName(name string) *coll.Collection[T] {
+	return ioc.GetDefFunc("mongodb:"+":"+m.DBName+":"+name, func() *coll.Collection[T] {
 		db := m.Client.Database(m.DBName)
 		background := context.Background()
 		names, err := db.ListCollectionNames(background, bson.D{})
 		if err != nil {
-			return coll.NewCollection(db.Collection(name))
+			return coll.NewCollection[T](db.Collection(name))
 		}
 		if !slices.Contains(names, name) {
 			err = db.CreateCollection(background, name)
@@ -35,11 +37,11 @@ func (m *MongoClient) CollName(name string) *coll.Collection {
 				sys.Panic(err)
 			}
 		}
-		return coll.NewCollection(db.Collection(name))
+		return coll.NewCollection[T](db.Collection(name))
 	})
 }
 
-func (m *MongoClient) Transaction(ctx context.Context, fn func(stx mongo.SessionContext) (any, error)) (any, error) {
+func (m *MongoClient[T]) Transaction(ctx context.Context, fn func(stx mongo.SessionContext) (any, error)) (any, error) {
 	sessionOptions := options.Session().SetDefaultReadPreference(readpref.Primary()).SetCausalConsistency(false)
 	session, err := m.Client.StartSession(sessionOptions)
 	if err != nil {
@@ -52,7 +54,7 @@ func (m *MongoClient) Transaction(ctx context.Context, fn func(stx mongo.Session
 		return fn(sessionCtx)
 	}, transactionOptions)
 }
-func (m *MongoClient) TransactionErr(ctx context.Context, fn func(stx mongo.SessionContext) error) error {
+func (m *MongoClient[T]) TransactionErr(ctx context.Context, fn func(stx mongo.SessionContext) error) error {
 	sessionOptions := options.Session().SetDefaultReadPreference(readpref.Primary()).SetCausalConsistency(false)
 	session, err := m.Client.StartSession(sessionOptions)
 	if err != nil {
@@ -64,4 +66,16 @@ func (m *MongoClient) TransactionErr(ctx context.Context, fn func(stx mongo.Sess
 		return nil, fn(sessionCtx)
 	}, transactionOptions)
 	return err
+}
+
+func NewMongoClient[T any](DBName string, mc ...*mongo.Client) *MongoClient[T] {
+	ik := "katool:xmongdb:" + DBName
+	def := ioc.GetDef(ik, mc[0])
+	if cutil.IsBlank(def) {
+		sys.Panic(fmt.Errorf("empty DB name: %s", ik))
+	}
+	return &MongoClient[T]{
+		def,
+		ik,
+	}
 }

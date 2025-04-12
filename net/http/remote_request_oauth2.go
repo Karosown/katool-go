@@ -3,13 +3,13 @@ package remote
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/karosown/katool-go/xlog"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/karosown/katool-go/log"
 	remote2 "github.com/karosown/katool-go/net/format"
 )
 
@@ -141,7 +141,7 @@ func (O *OAuth2Req) DecodeHandler(format remote2.EnDeCodeFormat) *OAuth2Req {
 	return O
 }
 
-func (O *OAuth2Req) SetLogger(logger log.Logger) *OAuth2Req {
+func (O *OAuth2Req) SetLogger(logger xlog.Logger) *OAuth2Req {
 	O.Logger = logger
 	return O
 }

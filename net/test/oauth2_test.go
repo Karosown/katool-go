@@ -2,11 +2,11 @@ package test
 
 import (
 	rm "github.com/karosown/katool-go/net/format/base_format"
+	"github.com/karosown/katool-go/xlog"
 	"os"
 	"path"
 	"testing"
 
-	"github.com/karosown/katool-go/log"
 	remote "github.com/karosown/katool-go/net/http"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -65,7 +65,7 @@ func TestOAuth2WithZapLog(t *testing.T) {
 }
 func TestOAuth2WithLogrus(t *testing.T) {
 	req := remote.Req{}
-	req.SetLogger(&log.LogrusAdapter{})
+	req.SetLogger(&xlog.LogrusAdapter{})
 	req.Url("http://www.baidu.com").QueryParam(map[string]string{"a": "1"}).Build(&map[string]string{})
 
 	req.Url("http://www.baidu.com").DecodeHandler(&rm.JSONEnDeCodeFormat{}).Build(&map[string]string{})

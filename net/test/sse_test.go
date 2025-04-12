@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/karosown/katool-go/net/format/base_format"
+	"github.com/karosown/katool-go/xlog"
 	"net/http"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/karosown/katool-go/log"
 	remote "github.com/karosown/katool-go/net/http"
 	"github.com/stretchr/testify/assert"
 )
@@ -182,7 +182,7 @@ func TestSSEReqWithMockServer(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	// 创建Logger
-	logger := log.LogrusAdapter{}
+	logger := xlog.LogrusAdapter{}
 
 	var receivedEvents []remote.SSEEvent[map[string]any]
 	var mu sync.Mutex
@@ -282,7 +282,7 @@ func TestSSEReqReconnect(t *testing.T) {
 		currentCount := connectionCount
 		mu.Unlock()
 
-		logger := log.LogrusAdapter{}
+		logger := xlog.LogrusAdapter{}
 
 		sseReq := remote.NewSSEReq[string]().
 			Url("http://localhost:8856/events").

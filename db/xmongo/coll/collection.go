@@ -1,77 +1,52 @@
 package coll
 
-//本文件的意义在于，灵活的自定义，可以在对 mongo 进行 curd 添加打印日志、计时等功能
 import (
 	"context"
-	"github.com/karosown/katool-go/sys"
-	"slices"
-	"time"
-
-	"github.com/karosown/katool-go/container/ioc"
 	"github.com/karosown/katool-go/db/pager"
 	"github.com/karosown/katool-go/db/xmongo/mongo_util"
+	"github.com/karosown/katool-go/db/xmongo/wrapper"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
-type Collection struct {
-	coll           *mongo.Collection
-	collectionPool map[string]*mongo.Collection
+type Collection[T any] struct {
+	coll *mongo.Collection
+	qw   wrapper.QueryWrapper
 }
 
-func NewCollection(coll *mongo.Collection) *Collection {
-	return &Collection{coll: coll}
+func (c *Collection[T]) Query(filter wrapper.QueryWrapper) *Collection[T] {
+	return NewCollection[T](c.coll, filter)
 }
-
-// Partition sizes[0]虚拟节点数量 sizes[1]每个虚拟节点包含的数据量大小
-func (c *Collection) Partition(key string, sizes ...int) *Collection {
-	partitionCollName := mongo_util.NewDefPartitionHelper(c.coll.Name(), sizes...).GetCollName(key)
-	return ioc.GetDefFunc(partitionCollName, func() *Collection {
-		db := c.coll.Database()
-		names, err := db.ListCollectionNames(context.Background(), bson.D{})
-		if err != nil {
-			return NewCollection(db.Collection(c.coll.Name()))
-		}
-		if !slices.Contains(names, partitionCollName) {
-			err = db.CreateCollection(context.Background(), partitionCollName)
-			// todo
-			if err != nil {
-				sys.Panic(err)
-			}
-		}
-		return NewCollection(c.coll.Database().Collection(partitionCollName))
-	})
-}
-func (c *Collection) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+func (c *Collection[T]) InsertOne(ctx context.Context, document *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	return c.coll.InsertOne(ctx, document, opts...)
 }
 
-func (c *Collection) FindOne(ctx context.Context, filter interface{}, result interface{}, opts ...*options.FindOneOptions) error {
-	singleResult := c.coll.FindOne(ctx, filter, opts...)
+func (c *Collection[T]) FindOne(ctx context.Context, result *T, opts ...*options.FindOneOptions) error {
+	singleResult := c.coll.FindOne(ctx, c.filter(), opts...)
 	if singleResult.Err() != nil {
 		return singleResult.Err()
 	}
 	return singleResult.Decode(result)
 }
 
-func (c *Collection) List(ctx context.Context, filter interface{}, result interface{}, opts ...*options.FindOptions) error {
-	cur, err := c.coll.Find(ctx, filter, opts...)
+func (c *Collection[T]) List(ctx context.Context, result *[]T, opts ...*options.FindOptions) error {
+	cur, err := c.coll.Find(ctx, c.filter(), opts...)
 	if err != nil {
 		return err
 	}
 	err = cur.All(ctx, result)
 	return err
 }
-func (c *Collection) Count(ctx context.Context, filter interface {
+func (c *Collection[T]) Count(ctx context.Context, filter interface {
 }, opts ...*options.CountOptions) (int64, error) {
-	return c.coll.CountDocuments(ctx, filter, opts...)
-
+	return c.coll.CountDocuments(ctx, c.filter(), opts...)
 }
 
-func (c *Collection) Page(ctx context.Context, filter interface{}, result interface{}, page *pager.Pager) error {
-	documents, err := c.Count(ctx, filter)
+func (c *Collection[T]) Page(ctx context.Context, result *[]T, page *pager.Pager) error {
+	documents, err := c.Count(ctx, c.filter())
 	if err != nil {
 		return err
 	}
@@ -82,27 +57,27 @@ func (c *Collection) Page(ctx context.Context, filter interface{}, result interf
 		findoptions.SetSkip(int64((page.Page - 1) * page.PageSize))
 		findoptions.SetSort(bson.D{{"created_at", -1}})
 	}
-	err = c.List(ctx, filter, result, findoptions)
+	err = c.List(ctx, result, findoptions)
 	return err
 }
 
-func (c *Collection) UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	return c.coll.UpdateOne(ctx, filter, mongo_util.StructToUpdateBSON(update, true), opts...)
+func (c *Collection[T]) UpdateOne(ctx context.Context, update *T, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	return c.coll.UpdateOne(ctx, c.filter(), mongo_util.StructToUpdateBSON(update, true), opts...)
 }
 
-func (c *Collection) DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
-	return c.coll.DeleteOne(ctx, filter, opts...)
+func (c *Collection[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	return c.coll.DeleteOne(ctx, c.filter(), opts...)
 }
-func (c *Collection) SoftDelete(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+func (c *Collection[T]) SoftDelete(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.DeleteResult, error) {
 	// 新增DeleteTime
 	update := bson.M{
 		"$set": bson.M{
-			"delete_at": primitive.NewDateTimeFromTime(time.Now()),
+			mongo_util.DeletedField: primitive.NewDateTimeFromTime(time.Now()),
 		},
 	}
 
 	// 使用UpdateOne而不是DeleteOne
-	result, err := c.coll.UpdateMany(ctx, filter, update)
+	result, err := c.coll.UpdateMany(ctx, c.filter(), update, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +87,11 @@ func (c *Collection) SoftDelete(ctx context.Context, filter interface{}, opts ..
 		DeletedCount: result.ModifiedCount,
 	}
 	return deleteResult, nil
+}
+
+func (c *Collection[T]) filter() wrapper.QueryWrapper {
+
+	return c.qw
 }
 
 // ... 添加 Find, UpdateMany, DeleteMany 等

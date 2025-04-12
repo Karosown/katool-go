@@ -7,13 +7,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/karosown/katool-go/net/format"
+	"github.com/karosown/katool-go/xlog"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/karosown/katool-go/log"
 )
 
 // SSE事件结构
@@ -34,7 +34,7 @@ type SSEReqApi[T any] interface {
 	QueryParam(psPair map[string]string) SSEReqApi[T]
 	Headers(headers map[string]string) SSEReqApi[T]
 	HttpClient(client *resty.Client) SSEReqApi[T]
-	SetLogger(logger log.Logger) SSEReqApi[T]
+	SetLogger(logger xlog.Logger) SSEReqApi[T]
 	ReHeader(k, v string) SSEReqApi[T]
 	Method(method string) SSEReqApi[T]
 	Data(data interface{}) SSEReqApi[T]
@@ -54,7 +54,7 @@ type SSEReq[T any] struct {
 	method           string
 	data             interface{}
 	httpClient       *resty.Client
-	Logger           log.Logger
+	Logger           xlog.Logger
 	decodeHandler    format.EnDeCodeFormat
 	eventPreHandler  SSEEventPreHandler[T]
 	eventHandler     SSEEventHandler[T]
@@ -91,7 +91,7 @@ func (r *SSEReq[T]) QueryParam(psPair map[string]string) SSEReqApi[T] {
 	return r
 }
 
-func (r *SSEReq[T]) SetLogger(logger log.Logger) SSEReqApi[T] {
+func (r *SSEReq[T]) SetLogger(logger xlog.Logger) SSEReqApi[T] {
 	r.Logger = logger
 	return r
 }
