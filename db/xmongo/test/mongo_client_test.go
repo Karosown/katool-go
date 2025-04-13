@@ -3,7 +3,6 @@ package test
 import (
 	"context"
 	"fmt"
-	"github.com/karosown/katool-go/db/xmongo/mongo_util"
 	"github.com/karosown/katool-go/db/xmongo/wrapper"
 	"github.com/karosown/katool-go/sys"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -25,7 +24,7 @@ type UserInfo struct {
 
 func init() {
 	// 定义软删除字段，默认是delete_at
-	mongo_util.DeletedField = "delete_at"
+	wrapper.DeletedField = "delete_at"
 	// 这个构造器会加上mongo_util.BaseFilter
 	wrapper.NewQuery().Eq("_id", "1").Build()
 	// 如果想要构建原始查询，使用

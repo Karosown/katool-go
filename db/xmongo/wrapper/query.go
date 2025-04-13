@@ -2,6 +2,7 @@ package wrapper
 
 import (
 	"encoding/json"
+	"github.com/duke-git/lancet/v2/maputil"
 	"github.com/karosown/katool-go/db/xmongo/mongo_util"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -71,8 +72,24 @@ func (q *Query) Or(query ...*Query) *Query {
 	return q
 }
 func (q *Query) Build() QueryWrapper {
-	return mongo_util.BuildQueryWrapper(q.query)
+	return BuildQueryWrapper(q.query)
 }
 func (q *Query) Origin() QueryWrapper {
 	return q.query
+}
+
+var DeletedField = "delete_at"
+var BaseFilter = func() QueryWrapper {
+	return QueryWrapper{
+		DeletedField: QueryWrapper{"$exists": false}, // Field doesn't exist
+	}
+}()
+
+func BuildQueryWrapper(queryWrapperMap map[string]any) QueryWrapper {
+	m := QueryWrapper{}
+	queryWrapperMap = maputil.Merge(queryWrapperMap, BaseFilter)
+	for k, v := range queryWrapperMap {
+		m[k] = v
+	}
+	return m
 }
