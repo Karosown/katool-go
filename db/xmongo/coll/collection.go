@@ -5,6 +5,7 @@ import (
 	"github.com/karosown/katool-go/db/pager"
 	"github.com/karosown/katool-go/db/xmongo/mongo_util"
 	"github.com/karosown/katool-go/db/xmongo/wrapper"
+	"github.com/karosown/katool-go/xlog"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,12 +14,16 @@ import (
 )
 
 type Collection[T any] struct {
-	coll *mongo.Collection
-	qw   wrapper.QueryWrapper
+	coll   *mongo.Collection
+	qw     wrapper.QueryWrapper
+	logger xlog.Logger
 }
 
 func (c *Collection[T]) Query(filter wrapper.QueryWrapper) *Collection[T] {
-	return NewCollection[T](c.coll, filter)
+	if c.logger != nil {
+		c.logger.Info("MongoDB/DocumentDB Query Bson is {}", filter.ToJSON())
+	}
+	return newCollection[T](c.coll, c.logger, filter)
 }
 func (c *Collection[T]) InsertOne(ctx context.Context, document *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	return c.coll.InsertOne(ctx, document, opts...)
@@ -90,7 +95,6 @@ func (c *Collection[T]) SoftDelete(ctx context.Context, opts ...*options.UpdateO
 }
 
 func (c *Collection[T]) filter() wrapper.QueryWrapper {
-
 	return c.qw
 }
 

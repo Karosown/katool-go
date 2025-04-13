@@ -1,11 +1,21 @@
 package wrapper
 
 import (
+	"encoding/json"
 	"github.com/karosown/katool-go/db/xmongo/mongo_util"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type QueryWrapper bson.M
+
+func (q *QueryWrapper) ToJSON() string {
+	marshal, err := json.MarshalIndent(q, "", "  ")
+	if err != nil {
+		return ""
+	}
+	return string(marshal)
+}
+
 type Query struct {
 	query QueryWrapper
 }

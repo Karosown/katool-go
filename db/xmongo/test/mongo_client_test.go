@@ -31,7 +31,7 @@ func init() {
 	// 如果想要构建原始查询，使用
 	wrapper.NewQuery().Eq("_id", "1").Origin()
 }
-func setupTestMongoClient(t *testing.T) *xmongo.MongoClient[UserInfo] {
+func setupTestMongoClient(t *testing.T) *xmongo.CollectionFactoryBuilder[UserInfo] {
 	// Connect to a test MongoDB (preferably use a test database or Docker container)
 	// For testing purposes, we connect to a local MongoDB instance
 	ctx := context.Background()
@@ -39,10 +39,10 @@ func setupTestMongoClient(t *testing.T) *xmongo.MongoClient[UserInfo] {
 	assert.NoError(t, err)
 
 	// Create a new client with a test database name
-	return xmongo.NewMongoClient[UserInfo]("test_db", client)
+	return xmongo.NewCollectionFactoryBuilder[UserInfo]("test_db", nil, client)
 }
 
-func cleanupTestMongoClient(t *testing.T, client *xmongo.MongoClient[UserInfo]) {
+func cleanupTestMongoClient(t *testing.T, client *xmongo.CollectionFactoryBuilder[UserInfo]) {
 	ctx := context.Background()
 	err := client.Client.Database("test_db").Drop(ctx)
 	assert.NoError(t, err)
@@ -69,7 +69,7 @@ func TestMongoClientTransaction(t *testing.T) {
 	// Test a successful transaction
 	result, err := client.Transaction(ctx, func(stx mongo.SessionContext) (any, error) {
 		// Do some operations inside the transaction
-		collection := client.CollName("test_collection")
+		collection := client.CollName("test_collection").Identity()
 		_, err := collection.InsertOne(stx, &UserInfo{ID: primitive.NewObjectID(), Name: "Test", Age: 30})
 		return "success", err
 	})
@@ -78,7 +78,7 @@ func TestMongoClientTransaction(t *testing.T) {
 	assert.Equal(t, "success", result)
 
 	// Verify the data was inserted
-	collection := client.CollName("test_collection")
+	collection := client.CollName("test_collection").Identity()
 	var data UserInfo
 	err = collection.Query(wrapper.NewQuery().Eq("_id", "1").Build()).FindOne(ctx, &data)
 	assert.NoError(t, err)
@@ -93,7 +93,7 @@ func TestMongoClientTransactionErr(t *testing.T) {
 
 	// Test transaction with error handling
 	err := client.TransactionErr(ctx, func(stx mongo.SessionContext) error {
-		collection := client.CollName("test_collection")
+		collection := client.CollName("test_collection").Identity()
 		_, err := collection.InsertOne(stx, &UserInfo{ID: primitive.NewObjectID(), Name: "Another Test", Age: 25})
 		return err
 	})
@@ -101,7 +101,7 @@ func TestMongoClientTransactionErr(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Verify the data was inserted
-	collection := client.CollName("test_collection")
+	collection := client.CollName("test_collection").Identity()
 	var data UserInfo
 	err = collection.Query(wrapper.NewQuery().Eq("_id", "2").Build()).FindOne(ctx, &data)
 	assert.NoError(t, err)
@@ -115,7 +115,7 @@ func TestNewMongoClient(t *testing.T) {
 	defer client.Disconnect(ctx)
 
 	// Test creating a new client
-	mongoClient := xmongo.NewMongoClient[UserInfo]("test_db", client)
+	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("test_db", nil, client)
 	assert.NotNil(t, mongoClient)
 	assert.Equal(t, "katool:xmongdb:test_db", mongoClient.DBName)
 }
@@ -129,10 +129,10 @@ func TestAll(t *testing.T) {
 	defer client.Disconnect(ctx)
 
 	// 创建MongoClient
-	mongoClient := xmongo.NewMongoClient[UserInfo]("eshop", client)
+	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("eshop", nil, client)
 
 	// 获取集合
-	collection := mongoClient.CollName("userinfos")
+	collection := mongoClient.CollName("userinfos").Identity()
 
 	// 插入数据
 	userData := UserInfo{
@@ -212,10 +212,10 @@ func TestTransaction(t *testing.T) {
 	defer client.Disconnect(ctx)
 
 	// 创建MongoClient
-	mongoClient := xmongo.NewMongoClient[UserInfo]("eshop", client)
+	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("eshop", nil, client)
 
 	// 获取集合
-	collection := mongoClient.CollName("userinfos")
+	collection := mongoClient.CollName("userinfos").Identity()
 
 	// 插入数据
 	userData := UserInfo{

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/sys"
+	"github.com/karosown/katool-go/xlog"
 	"slices"
 
 	"github.com/karosown/katool-go/container/ioc"
@@ -17,18 +18,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
-type MongoClient[T any] struct {
+type CollectionFactoryBuilder[T any] struct {
 	*mongo.Client
 	DBName string
+	logger xlog.Logger
 }
 
-func (m *MongoClient[T]) CollName(name string) *coll.Collection[T] {
-	return ioc.GetDefFunc("mongodb:"+":"+m.DBName+":"+name, func() *coll.Collection[T] {
+func (m *CollectionFactoryBuilder[T]) CollName(name string) *coll.CollectionFactory[T] {
+	return ioc.GetDefFunc("mongodb:"+":"+m.DBName+":"+name, func() *coll.CollectionFactory[T] {
 		db := m.Client.Database(m.DBName)
 		background := context.Background()
 		names, err := db.ListCollectionNames(background, bson.D{})
 		if err != nil {
-			return coll.NewCollection[T](db.Collection(name))
+			return coll.NewCollectionFactory[T](db.Collection(name), m.logger)
 		}
 		if !slices.Contains(names, name) {
 			err = db.CreateCollection(background, name)
@@ -37,11 +39,11 @@ func (m *MongoClient[T]) CollName(name string) *coll.Collection[T] {
 				sys.Panic(err)
 			}
 		}
-		return coll.NewCollection[T](db.Collection(name))
+		return coll.NewCollectionFactory[T](db.Collection(name), m.logger)
 	})
 }
 
-func (m *MongoClient[T]) Transaction(ctx context.Context, fn func(stx mongo.SessionContext) (any, error)) (any, error) {
+func (m *CollectionFactoryBuilder[T]) Transaction(ctx context.Context, fn func(stx mongo.SessionContext) (any, error)) (any, error) {
 	sessionOptions := options.Session().SetDefaultReadPreference(readpref.Primary()).SetCausalConsistency(false)
 	session, err := m.Client.StartSession(sessionOptions)
 	if err != nil {
@@ -54,7 +56,7 @@ func (m *MongoClient[T]) Transaction(ctx context.Context, fn func(stx mongo.Sess
 		return fn(sessionCtx)
 	}, transactionOptions)
 }
-func (m *MongoClient[T]) TransactionErr(ctx context.Context, fn func(stx mongo.SessionContext) error) error {
+func (m *CollectionFactoryBuilder[T]) TransactionErr(ctx context.Context, fn func(stx mongo.SessionContext) error) error {
 	sessionOptions := options.Session().SetDefaultReadPreference(readpref.Primary()).SetCausalConsistency(false)
 	session, err := m.Client.StartSession(sessionOptions)
 	if err != nil {
@@ -68,14 +70,15 @@ func (m *MongoClient[T]) TransactionErr(ctx context.Context, fn func(stx mongo.S
 	return err
 }
 
-func NewMongoClient[T any](DBName string, mc ...*mongo.Client) *MongoClient[T] {
+func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, mc ...*mongo.Client) *CollectionFactoryBuilder[T] {
 	ik := "katool:xmongdb:" + DBName
 	def := ioc.GetDef(ik, mc[0])
 	if cutil.IsBlank(def) {
 		sys.Panic(fmt.Errorf("empty DB name: %s", ik))
 	}
-	return &MongoClient[T]{
+	return &CollectionFactoryBuilder[T]{
 		def,
 		ik,
+		logger,
 	}
 }

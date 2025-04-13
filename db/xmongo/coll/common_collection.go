@@ -9,17 +9,22 @@ import (
 	"github.com/karosown/katool-go/db/xmongo/mongo_util"
 	"github.com/karosown/katool-go/db/xmongo/wrapper"
 	"github.com/karosown/katool-go/sys"
+	"github.com/karosown/katool-go/xlog"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"slices"
 )
 
-type CommonCollection[T any] struct {
-	coll *mongo.Collection
+type CollectionFactory[T any] struct {
+	coll   *mongo.Collection
+	logger xlog.Logger
 }
 
-func NewCollection[T any](coll *mongo.Collection, filter ...wrapper.QueryWrapper) *Collection[T] {
-	identity := (&CommonCollection[T]{coll: coll}).Identity()
+func NewCollectionFactory[T any](coll *mongo.Collection, logger xlog.Logger) *CollectionFactory[T] {
+	return &CollectionFactory[T]{coll: coll, logger: logger}
+}
+func newCollection[T any](coll *mongo.Collection, logger xlog.Logger, filter ...wrapper.QueryWrapper) *Collection[T] {
+	identity := (&CollectionFactory[T]{coll: coll, logger: logger}).Identity()
 	return optional.IsTrueByFunc(cutil.IsEmpty(filter), optional.Identity(identity), func() *Collection[T] {
 		if len(filter) != 1 {
 			sys.Panic("the filter must be a single filter")
@@ -29,21 +34,22 @@ func NewCollection[T any](coll *mongo.Collection, filter ...wrapper.QueryWrapper
 	})
 }
 
-func (c *CommonCollection[T]) Identity() *Collection[T] {
+func (c *CollectionFactory[T]) Identity() *Collection[T] {
 	return &Collection[T]{
 		c.coll,
 		nil,
+		c.logger,
 	}
 }
 
 // Partition sizes[0]虚拟节点数量 sizes[1]每个虚拟节点包含的数据量大小
-func (c *CommonCollection[T]) Partition(key string, sizes ...int) *Collection[T] {
+func (c *CollectionFactory[T]) Partition(key string, sizes ...int) *Collection[T] {
 	partitionCollName := mongo_util.NewDefPartitionHelper(c.coll.Name(), sizes...).GetCollName(key)
 	return ioc.GetDefFunc(partitionCollName, func() *Collection[T] {
 		db := c.coll.Database()
 		names, err := db.ListCollectionNames(context.Background(), bson.D{})
 		if err != nil {
-			return NewCollection[T](db.Collection(c.coll.Name()))
+			return newCollection[T](db.Collection(c.coll.Name()), c.logger)
 		}
 		if !slices.Contains(names, partitionCollName) {
 			err = db.CreateCollection(context.Background(), partitionCollName)
@@ -52,6 +58,6 @@ func (c *CommonCollection[T]) Partition(key string, sizes ...int) *Collection[T]
 				sys.Panic(err)
 			}
 		}
-		return NewCollection[T](c.coll.Database().Collection(partitionCollName))
+		return newCollection[T](c.coll.Database().Collection(partitionCollName), c.logger)
 	})
 }
