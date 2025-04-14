@@ -28,40 +28,53 @@ func NewQuery() *Query {
 	}
 }
 func (q *Query) Eq(clomn string, value any) *Query {
-	q.query[clomn] = bson.M{
+	wrapper := q.validWrapper(clomn)
+	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
 		"$eq": value,
-	}
+	})
 	return q
 }
 
 func (q *Query) Ne(clomn string, value any) *Query {
-	q.query[clomn] = bson.M{
+	wrapper := q.validWrapper(clomn)
+	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
 		"$ne": value,
-	}
+	})
 	return q
 }
 func (q *Query) Gt(clomn string, value any) *Query {
-	q.query[clomn] = bson.M{
+	wrapper := q.validWrapper(clomn)
+	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
 		"$gt": value,
-	}
+	})
 	return q
 }
 func (q *Query) Gte(clomn string, value any) *Query {
-	q.query[clomn] = bson.M{
+	wrapper := q.validWrapper(clomn)
+	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
 		"$gte": value,
-	}
+	})
 	return q
 }
-func (q *Query) Lt(clomn string, value any) *Query {
-	q.query[clomn] = bson.M{
-		"$lt": value,
+func (q *Query) validWrapper(clomn string) QueryWrapper {
+	wrapper, ok := q.query[clomn].(QueryWrapper)
+	if !ok || wrapper == nil {
+		wrapper = QueryWrapper{}
 	}
+	return wrapper
+}
+func (q *Query) Lt(clomn string, value any) *Query {
+	wrapper := q.validWrapper(clomn)
+	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
+		"$lt": value,
+	})
 	return q
 }
 func (q *Query) Lte(clomn string, value any) *Query {
-	q.query[clomn] = bson.M{
+	wrapper := q.validWrapper(clomn)
+	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
 		"$lte": value,
-	}
+	})
 	return q
 }
 func (q *Query) And(query ...*Query) *Query {
