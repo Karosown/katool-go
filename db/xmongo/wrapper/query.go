@@ -56,14 +56,14 @@ func (q *Query) Gte(clomn string, value any) *Query {
 	})
 	return q
 }
-func (q *Query) validWrapper(clomn string) QueryWrapper {
+func (q *Query) validWrapper(clomn string) map[string]any {
 	switch q.query[clomn].(type) {
 	case QueryWrapper:
 		return q.query[clomn].(QueryWrapper)
 	case map[string]interface{}:
-		return q.query[clomn].(QueryWrapper)
+		return q.query[clomn].(map[string]interface{})
 	case bson.M:
-		return q.query[clomn].(QueryWrapper)
+		return q.query[clomn].(bson.M)
 	default:
 		return QueryWrapper{}
 	}
