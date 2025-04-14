@@ -118,9 +118,6 @@ var BaseFilter = func(deletedField ...string) QueryWrapper {
 }
 
 func BuildQueryWrapper(queryWrapperMap QueryWrapper, deletedField ...string) QueryWrapper {
-	if cutil.IsEmpty(deletedField) {
-		return queryWrapperMap
-	}
 	m := QueryWrapper{}
 	queryWrapperMap = maputil.Merge(queryWrapperMap, BaseFilter(deletedField...))
 	for k, v := range queryWrapperMap {
