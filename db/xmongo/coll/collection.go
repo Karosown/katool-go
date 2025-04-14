@@ -2,18 +2,21 @@ package coll
 
 import (
 	"context"
+	"time"
+
 	"github.com/karosown/katool-go/db/pager"
-	"github.com/karosown/katool-go/db/xmongo/mongo_util"
+	"github.com/karosown/katool-go/db/xmongo"
+	"github.com/karosown/katool-go/db/xmongo/mongoutil"
 	"github.com/karosown/katool-go/db/xmongo/wrapper"
 	"github.com/karosown/katool-go/xlog"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
 )
 
 type Collection[T any] struct {
+	*xmongo.Client
 	coll   *mongo.Collection
 	qw     wrapper.QueryWrapper
 	logger xlog.Logger
@@ -67,7 +70,7 @@ func (c *Collection[T]) Page(ctx context.Context, result *[]T, page *pager.Pager
 }
 
 func (c *Collection[T]) UpdateOne(ctx context.Context, update *T, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	return c.coll.UpdateOne(ctx, c.filter(), mongo_util.StructToUpdateBSON(update, true), opts...)
+	return c.coll.UpdateOne(ctx, c.filter(), mongoutil.StructToUpdateBSON(update, true), opts...)
 }
 
 func (c *Collection[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
@@ -77,7 +80,7 @@ func (c *Collection[T]) SoftDelete(ctx context.Context, opts ...*options.UpdateO
 	// 新增DeleteTime
 	update := bson.M{
 		"$set": bson.M{
-			mongo_util.DeletedField: primitive.NewDateTimeFromTime(time.Now()),
+			wrapper.DeletedField: primitive.NewDateTimeFromTime(time.Now()),
 		},
 	}
 

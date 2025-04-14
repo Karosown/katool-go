@@ -3,11 +3,12 @@ package test
 import (
 	"context"
 	"fmt"
+	"log"
+	"testing"
+
 	"github.com/karosown/katool-go/db/xmongo/wrapper"
 	"github.com/karosown/katool-go/sys"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
-	"testing"
 
 	"github.com/karosown/katool-go/db/xmongo"
 	"github.com/stretchr/testify/assert"
@@ -43,10 +44,10 @@ func setupTestMongoClient(t *testing.T) *xmongo.CollectionFactoryBuilder[UserInf
 
 func cleanupTestMongoClient(t *testing.T, client *xmongo.CollectionFactoryBuilder[UserInfo]) {
 	ctx := context.Background()
-	err := client.Client.Database("test_db").Drop(ctx)
+	err := client.DB.Client.Database("test_db").Drop(ctx)
 	assert.NoError(t, err)
 
-	err = client.Client.Disconnect(ctx)
+	err = client.DB.Client.Disconnect(ctx)
 	assert.NoError(t, err)
 }
 
@@ -66,7 +67,7 @@ func TestMongoClientTransaction(t *testing.T) {
 	ctx := context.Background()
 
 	// Test a successful transaction
-	result, err := client.Transaction(ctx, func(stx mongo.SessionContext) (any, error) {
+	result, err := client.DB.Transaction(ctx, func(stx mongo.SessionContext) (any, error) {
 		// Do some operations inside the transaction
 		collection := client.CollName("test_collection").Identity()
 		_, err := collection.InsertOne(stx, &UserInfo{ID: primitive.NewObjectID(), Name: "Test", Age: 30})
@@ -91,7 +92,7 @@ func TestMongoClientTransactionErr(t *testing.T) {
 	ctx := context.Background()
 
 	// Test transaction with error handling
-	err := client.TransactionErr(ctx, func(stx mongo.SessionContext) error {
+	err := client.DB.TransactionErr(ctx, func(stx mongo.SessionContext) error {
 		collection := client.CollName("test_collection").Identity()
 		_, err := collection.InsertOne(stx, &UserInfo{ID: primitive.NewObjectID(), Name: "Another Test", Age: 25})
 		return err
@@ -224,7 +225,7 @@ func TestTransaction(t *testing.T) {
 	}
 
 	//使用事务插入数据
-	_, err = mongoClient.Transaction(ctx, func(stx mongo.SessionContext) (interface{}, error) {
+	_, err = collection.Transaction(ctx, func(stx mongo.SessionContext) (interface{}, error) {
 		_, err = collection.InsertOne(stx, &userData)
 		if err != nil {
 			sys.Panic("插入数据失败: " + err.Error())
@@ -250,7 +251,7 @@ func TestTransaction(t *testing.T) {
 	fmt.Printf("查询结果: ID=%s, Name=%s, Age=%d\n", result.ID, result.Name, result.Age)
 
 	// 更新数据
-	err = mongoClient.TransactionErr(ctx, func(stx mongo.SessionContext) error {
+	err = collection.TransactionErr(ctx, func(stx mongo.SessionContext) error {
 		_, err = collection.Query(map[string]interface{}{"_id": result.ID}).UpdateOne(
 			stx,
 			&UserInfo{Age: 78},
@@ -272,7 +273,7 @@ func TestTransaction(t *testing.T) {
 	fmt.Printf("更新后结果: ID=%s, Name=%s, Age=%d\n", result.ID, result.Name, result.Age)
 
 	// 删除数据
-	err = mongoClient.TransactionErr(ctx, func(stx mongo.SessionContext) error {
+	err = collection.TransactionErr(ctx, func(stx mongo.SessionContext) error {
 		_, err = collection.Query(wrapper.QueryWrapper{"_id": result.ID}).DeleteOne(stx)
 		return err
 	})

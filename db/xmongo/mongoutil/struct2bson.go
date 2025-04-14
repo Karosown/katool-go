@@ -1,4 +1,4 @@
-package mongo_util
+package mongoutil
 
 import (
 	"reflect"
