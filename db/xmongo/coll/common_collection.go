@@ -26,8 +26,8 @@ type CollectionFactory[T any] struct {
 func NewCollectionFactory[T any](client *options.Client, coll *mongo.Collection, logger xlog.Logger) *CollectionFactory[T] {
 	return &CollectionFactory[T]{Client: client, coll: coll, logger: logger}
 }
-func newCollection[T any](coll *mongo.Collection, logger xlog.Logger, filter ...wrapper.QueryWrapper) *Collection[T] {
-	identity := (&CollectionFactory[T]{coll: coll, logger: logger}).Identity()
+func newCollection[T any](client *options.Client, coll *mongo.Collection, logger xlog.Logger, filter ...wrapper.QueryWrapper) *Collection[T] {
+	identity := (&CollectionFactory[T]{Client: client, coll: coll, logger: logger}).Identity()
 	return optional.IsTrueByFunc(cutil.IsEmpty(filter), optional.Identity(identity), func() *Collection[T] {
 		if len(filter) != 1 {
 			sys.Panic("the filter must be a single filter")
@@ -53,7 +53,7 @@ func (c *CollectionFactory[T]) Partition(key string, sizes ...int) *Collection[T
 		db := c.coll.Database()
 		names, err := db.ListCollectionNames(context.Background(), bson.D{})
 		if err != nil {
-			return newCollection[T](db.Collection(c.coll.Name()), c.logger)
+			return newCollection[T](c.Client, db.Collection(c.coll.Name()), c.logger)
 		}
 		if !slices.Contains(names, partitionCollName) {
 			err = db.CreateCollection(context.Background(), partitionCollName)
@@ -62,6 +62,6 @@ func (c *CollectionFactory[T]) Partition(key string, sizes ...int) *Collection[T
 				sys.Panic(err)
 			}
 		}
-		return newCollection[T](c.coll.Database().Collection(partitionCollName), c.logger)
+		return newCollection[T](c.Client, c.coll.Database().Collection(partitionCollName), c.logger)
 	})
 }

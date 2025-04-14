@@ -26,7 +26,7 @@ func (c *Collection[T]) Query(filter wrapper.QueryWrapper) *Collection[T] {
 	if c.logger != nil {
 		c.logger.Info("MongoDB/DocumentDB Query Bson is {}", filter.ToJSON())
 	}
-	return newCollection[T](c.coll, c.logger, filter)
+	return newCollection[T](c.Client, c.coll, c.logger, filter)
 }
 func (c *Collection[T]) InsertOne(ctx context.Context, document *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	return c.coll.InsertOne(ctx, document, opts...)
