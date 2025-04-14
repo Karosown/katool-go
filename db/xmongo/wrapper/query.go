@@ -57,11 +57,16 @@ func (q *Query) Gte(clomn string, value any) *Query {
 	return q
 }
 func (q *Query) validWrapper(clomn string) QueryWrapper {
-	wrapper, ok := q.query[clomn].(QueryWrapper)
-	if !ok || wrapper == nil {
-		wrapper = QueryWrapper{}
+	switch q.query[clomn].(type) {
+	case QueryWrapper:
+		return q.query[clomn].(QueryWrapper)
+	case map[string]interface{}:
+		return q.query[clomn].(QueryWrapper)
+	case bson.M:
+		return q.query[clomn].(QueryWrapper)
+	default:
+		return QueryWrapper{}
 	}
-	return wrapper
 }
 func (q *Query) Lt(clomn string, value any) *Query {
 	wrapper := q.validWrapper(clomn)
