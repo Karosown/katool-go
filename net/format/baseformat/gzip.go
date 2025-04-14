@@ -1,10 +1,11 @@
-package base_format
+package baseformat
 
 import (
 	"bytes"
 	"compress/gzip"
-	"github.com/karosown/katool-go/net/format"
 	"io"
+
+	"github.com/karosown/katool-go/net/format"
 )
 
 type GzipEnDecodeFormat struct {

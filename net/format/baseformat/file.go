@@ -1,9 +1,10 @@
-package base_format
+package baseformat
 
 import (
-	"github.com/karosown/katool-go/net/format"
 	"path"
 	"sync"
+
+	"github.com/karosown/katool-go/net/format"
 
 	"github.com/duke-git/lancet/v2/fileutil"
 	"github.com/karosown/katool-go/container/xmap"

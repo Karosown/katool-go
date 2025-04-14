@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/karosown/katool-go/db/pager"
-	"github.com/karosown/katool-go/db/xmongo"
 	"github.com/karosown/katool-go/db/xmongo/mongoutil"
+	options2 "github.com/karosown/katool-go/db/xmongo/options"
 	"github.com/karosown/katool-go/db/xmongo/wrapper"
 	"github.com/karosown/katool-go/xlog"
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,7 +16,7 @@ import (
 )
 
 type Collection[T any] struct {
-	*xmongo.Client
+	*options2.Client
 	coll   *mongo.Collection
 	qw     wrapper.QueryWrapper
 	logger xlog.Logger

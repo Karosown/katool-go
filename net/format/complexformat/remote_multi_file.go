@@ -1,4 +1,4 @@
-package complex_format
+package complexformat
 
 import (
 	"bytes"

@@ -1,7 +1,8 @@
-package base_format
+package baseformat
 
 import (
 	"fmt"
+
 	"github.com/karosown/katool-go/net/format"
 
 	"github.com/karosown/katool-go/file/file_serialize"

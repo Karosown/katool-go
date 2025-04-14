@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/karosown/katool-go/net/format/base_format"
-	"github.com/karosown/katool-go/xlog"
 	"net/http"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/karosown/katool-go/net/format/baseformat"
+	"github.com/karosown/katool-go/xlog"
 
 	remote "github.com/karosown/katool-go/net/http"
 	"github.com/stretchr/testify/assert"
@@ -199,7 +200,7 @@ func TestSSEReqWithMockServer(t *testing.T) {
 		mu.Lock()
 		receivedEvents = append(receivedEvents, event)
 		mu.Unlock()
-		i, err := (&base_format.JSONEnDeCodeFormat{}).Decode([]byte(event.Data), &map[string]any{})
+		i, err := (&baseformat.JSONEnDeCodeFormat{}).Decode([]byte(event.Data), &map[string]any{})
 		return i.(*map[string]any), err
 	})
 	sseReq.OnEvent(func(event map[string]any) error {

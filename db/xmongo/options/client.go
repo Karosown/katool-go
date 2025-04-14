@@ -1,4 +1,4 @@
-package xmongo
+package options
 
 import (
 	"context"

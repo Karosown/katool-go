@@ -1,10 +1,11 @@
-package base_format
+package baseformat
 
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/karosown/katool-go/net/format"
 	"reflect"
+
+	"github.com/karosown/katool-go/net/format"
 )
 
 type JSONEnDeCodeFormat struct {

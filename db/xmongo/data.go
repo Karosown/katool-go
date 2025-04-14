@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/karosown/katool-go/container/cutil"
+	"github.com/karosown/katool-go/db/xmongo/options"
 	"github.com/karosown/katool-go/sys"
 	"github.com/karosown/katool-go/xlog"
 
@@ -16,7 +17,7 @@ import (
 )
 
 type CollectionFactoryBuilder[T any] struct {
-	DB     *Client
+	DB     *options.Client
 	DBName string
 	logger xlog.Logger
 }
@@ -47,7 +48,7 @@ func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, mc ..
 		sys.Panic(fmt.Errorf("empty DB name: %s", ik))
 	}
 	return &CollectionFactoryBuilder[T]{
-		&Client{def},
+		&options.Client{def},
 		ik,
 		logger,
 	}

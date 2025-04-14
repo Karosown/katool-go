@@ -1,8 +1,9 @@
-package base_format
+package baseformat
 
 import (
 	"bytes"
 	"encoding/xml"
+
 	"github.com/karosown/katool-go/net/format"
 )
 

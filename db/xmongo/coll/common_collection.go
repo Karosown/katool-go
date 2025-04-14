@@ -8,8 +8,8 @@ import (
 	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/container/ioc"
 	"github.com/karosown/katool-go/container/optional"
-	"github.com/karosown/katool-go/db/xmongo"
 	"github.com/karosown/katool-go/db/xmongo/mongoutil"
+	"github.com/karosown/katool-go/db/xmongo/options"
 	"github.com/karosown/katool-go/db/xmongo/wrapper"
 	"github.com/karosown/katool-go/sys"
 	"github.com/karosown/katool-go/xlog"
@@ -18,12 +18,12 @@ import (
 )
 
 type CollectionFactory[T any] struct {
-	*xmongo.Client
+	*options.Client
 	coll   *mongo.Collection
 	logger xlog.Logger
 }
 
-func NewCollectionFactory[T any](client *xmongo.Client, coll *mongo.Collection, logger xlog.Logger) *CollectionFactory[T] {
+func NewCollectionFactory[T any](client *options.Client, coll *mongo.Collection, logger xlog.Logger) *CollectionFactory[T] {
 	return &CollectionFactory[T]{Client: client, coll: coll, logger: logger}
 }
 func newCollection[T any](coll *mongo.Collection, logger xlog.Logger, filter ...wrapper.QueryWrapper) *Collection[T] {
