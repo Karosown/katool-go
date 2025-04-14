@@ -1,8 +1,9 @@
-package dump
+package dumper
 
 import (
-	"github.com/karosown/katool-go/util/dateutil"
 	"time"
+
+	"github.com/karosown/katool-go/util/dateutil"
 
 	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/container/stream"
