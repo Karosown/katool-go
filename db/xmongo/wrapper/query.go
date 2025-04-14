@@ -85,6 +85,13 @@ func (q *Query) Or(query ...*Query) *Query {
 	q.query["$or"] = query
 	return q
 }
+func (q *Query) Exists(clomn string, est bool) *Query {
+	wrapper := q.validWrapper(clomn)
+	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
+		"$exists": est,
+	})
+	return q
+}
 func (q *Query) Build(deletedField ...string) QueryWrapper {
 	return BuildQueryWrapper(q.query, deletedField...)
 }
