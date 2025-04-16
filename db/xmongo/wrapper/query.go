@@ -86,32 +86,23 @@ func (q *Query) Lte(clomn string, value any) *Query {
 }
 func (q *Query) And(query ...*Query) *Query {
 	query = append(query, q)
-	q.query["$and"] = func(query ...*Query) []QueryWrapper {
+	newQuery := NewQuery()
+	newQuery.query["$and"] = func(query ...*Query) []QueryWrapper {
 		return convert.FromAnySlice[QueryWrapper](stream.ToStream(&query).Map(func(item *Query) any {
 			return item.Origin()
 		}).ToList())
 	}(query...)
-	for s, _ := range q.query {
-		if s != "$and" {
-			delete(q.query, s)
-		}
-	}
-	return q
+	return newQuery
 }
 func (q *Query) Or(query ...*Query) *Query {
 	query = append(query, q)
-	q.query["$or"] = func(query ...*Query) []QueryWrapper {
+	newQuery := NewQuery()
+	newQuery.query["$or"] = func(query ...*Query) []QueryWrapper {
 		return convert.FromAnySlice[QueryWrapper](stream.ToStream(&query).Map(func(item *Query) any {
 			return item.Origin()
 		}).ToList())
 	}(query...)
-	for s, _ := range q.query {
-		if s != "$or" {
-			delete(q.query, s)
-
-		}
-	}
-	return q
+	return newQuery
 }
 func (q *Query) Exists(clomn string, est bool) *Query {
 	wrapper := q.validWrapper(clomn)
