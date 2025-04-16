@@ -229,52 +229,26 @@ func (q *Query) Regex(column string, pattern string, options string) *Query {
 
 // And 逻辑与操作
 func (q *Query) And(queries ...*Query) *Query {
-	expressions := make([]bson.M, 0, len(queries)+1)
-
-	// 添加当前查询条件（如果不为空）
-	if len(q.query) > 0 {
-		expressions = append(expressions, bson.M(q.query))
-	}
-
+	qar := []QueryWrapper{}
 	// 添加其他查询条件
+	qar = append(qar, q.query["$and"].(QueryWrapper))
 	for _, query := range queries {
-		if query != nil && len(query.query) > 0 {
-			expressions = append(expressions, bson.M(query.query))
-		}
+		qar = append(qar, query.query)
 	}
-
-	// 创建新的查询对象
-	result := NewQuery()
-	if len(expressions) > 0 {
-		result.query["$and"] = expressions
-	}
-
-	return result
+	q.query["$and"] = qar
+	return q
 }
 
 // Or 逻辑或操作
 func (q *Query) Or(queries ...*Query) *Query {
-	expressions := make([]bson.M, 0, len(queries)+1)
-
-	// 添加当前查询条件（如果不为空）
-	if len(q.query) > 0 {
-		expressions = append(expressions, bson.M(q.query))
-	}
-
+	qar := []QueryWrapper{}
 	// 添加其他查询条件
+	qar = append(qar, q.query["$or"].(QueryWrapper))
 	for _, query := range queries {
-		if query != nil && len(query.query) > 0 {
-			expressions = append(expressions, bson.M(query.query))
-		}
+		qar = append(qar, query.query)
 	}
-
-	// 创建新的查询对象
-	result := NewQuery()
-	if len(expressions) > 0 {
-		result.query["$or"] = expressions
-	}
-
-	return result
+	q.query["$or"] = qar
+	return q
 }
 
 // Build 构建最终查询条件，包含软删除过滤
