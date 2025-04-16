@@ -91,7 +91,9 @@ func (q *Query) And(query ...*Query) *Query {
 		}).ToList()
 	}(query...)
 	for s, _ := range q.query {
-		delete(q.query, s)
+		if s != "$and" {
+			delete(q.query, s)
+		}
 	}
 	return q
 }
@@ -103,7 +105,10 @@ func (q *Query) Or(query ...*Query) *Query {
 		}).ToList()
 	}(query...)
 	for s, _ := range q.query {
-		delete(q.query, s)
+		if s != "$or" {
+			delete(q.query, s)
+
+		}
 	}
 	return q
 }
