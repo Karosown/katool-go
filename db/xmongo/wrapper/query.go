@@ -286,5 +286,15 @@ func BaseFilter(deletedFields ...string) QueryWrapper {
 // BuildQueryWrapper 构建查询包装器，合并基础过滤条件
 func BuildQueryWrapper(queryWrapperMap QueryWrapper, deletedFields ...string) QueryWrapper {
 	// 直接合并用户查询和软删除过滤器
-	return maputil.Merge(queryWrapperMap, BaseFilter(deletedFields...))
+	filter := BaseFilter(deletedFields...)
+	if queryWrapperMap["$and"] == nil {
+		return maputil.Merge(queryWrapperMap, filter)
+	} else {
+		wrappers := queryWrapperMap["$and"].([]QueryWrapper)
+		for k, v := range filter {
+			wrappers = append(wrappers, QueryWrapper{k: v})
+		}
+		queryWrapperMap["$and"] = wrappers
+		return queryWrapperMap
+	}
 }
