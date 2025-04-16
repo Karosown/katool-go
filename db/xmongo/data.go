@@ -49,7 +49,7 @@ func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, mc ..
 	}
 	return &CollectionFactoryBuilder[T]{
 		&options.Client{def},
-		ik,
+		DBName,
 		logger,
 	}
 }
