@@ -231,7 +231,9 @@ func (q *Query) Regex(column string, pattern string, options string) *Query {
 func (q *Query) And(queries ...*Query) *Query {
 	qar := []QueryWrapper{}
 	// 添加其他查询条件
-	qar = append(qar, q.query["$and"].(QueryWrapper))
+	if q.query["$and"] != nil {
+		qar = append(qar, q.query["$and"].([]QueryWrapper)...)
+	}
 	for _, query := range queries {
 		qar = append(qar, query.query)
 	}
@@ -243,7 +245,9 @@ func (q *Query) And(queries ...*Query) *Query {
 func (q *Query) Or(queries ...*Query) *Query {
 	qar := []QueryWrapper{}
 	// 添加其他查询条件
-	qar = append(qar, q.query["$or"].(QueryWrapper))
+	if q.query["$or"] != nil {
+		qar = append(qar, q.query["$or"].([]QueryWrapper)...)
+	}
 	for _, query := range queries {
 		qar = append(qar, query.query)
 	}
