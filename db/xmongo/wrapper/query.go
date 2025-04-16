@@ -84,15 +84,27 @@ func (q *Query) Lte(clomn string, value any) *Query {
 	return q
 }
 func (q *Query) And(query ...*Query) *Query {
+	query = append(query, q)
 	q.query["$and"] = func(query ...*Query) []any {
 		return stream.ToStream(&query).Map(func(item *Query) any {
 			return item.Origin()
 		}).ToList()
 	}(query...)
+	for s, _ := range q.query {
+		delete(q.query, s)
+	}
 	return q
 }
 func (q *Query) Or(query ...*Query) *Query {
-	q.query["$or"] = query
+	query = append(query, q)
+	q.query["$or"] = func(query ...*Query) []any {
+		return stream.ToStream(&query).Map(func(item *Query) any {
+			return item.Origin()
+		}).ToList()
+	}(query...)
+	for s, _ := range q.query {
+		delete(q.query, s)
+	}
 	return q
 }
 func (q *Query) Exists(clomn string, est bool) *Query {
