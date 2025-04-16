@@ -256,8 +256,8 @@ func (q *Query) Or(queries ...*Query) *Query {
 }
 
 // Build 构建最终查询条件，包含软删除过滤
-func (q *Query) Build(deletedFields ...string) bson.M {
-	return bson.M(BuildQueryWrapper(q.query, deletedFields...))
+func (q *Query) Build(deletedFields ...string) QueryWrapper {
+	return BuildQueryWrapper(q.query, deletedFields...)
 }
 
 // Origin 获取原始查询条件
