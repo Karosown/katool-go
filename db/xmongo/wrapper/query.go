@@ -29,96 +29,98 @@ func NewQuery() *Query {
 		query: QueryWrapper{},
 	}
 }
-func (q *Query) Eq(clomn string, value any) *Query {
-	wrapper := q.validWrapper(clomn)
-	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
+
+func (q *Query) Eq(column string, value any) *Query {
+	wrapper := q.validWrapper(column)
+	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
 		"$eq": value,
 	})
 	return q
 }
 
-func (q *Query) Ne(clomn string, value any) *Query {
-	wrapper := q.validWrapper(clomn)
-	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
+func (q *Query) Ne(column string, value any) *Query {
+	wrapper := q.validWrapper(column)
+	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
 		"$ne": value,
 	})
 	return q
 }
-func (q *Query) Gt(clomn string, value any) *Query {
-	wrapper := q.validWrapper(clomn)
-	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
+
+func (q *Query) Gt(column string, value any) *Query {
+	wrapper := q.validWrapper(column)
+	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
 		"$gt": value,
 	})
 	return q
 }
-func (q *Query) Gte(clomn string, value any) *Query {
-	wrapper := q.validWrapper(clomn)
-	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
+
+func (q *Query) Gte(column string, value any) *Query {
+	wrapper := q.validWrapper(column)
+	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
 		"$gte": value,
 	})
 	return q
 }
-func (q *Query) validWrapper(clomn string) map[string]any {
-	switch q.query[clomn].(type) {
-	case QueryWrapper:
-		return q.query[clomn].(QueryWrapper)
-	case map[string]interface{}:
-		return q.query[clomn].(map[string]interface{})
-	case bson.M:
-		return q.query[clomn].(bson.M)
-	default:
-		return QueryWrapper{}
+
+func (q *Query) validWrapper(column string) map[string]any {
+	if w, ok := q.query[column].(map[string]any); ok {
+		return w
 	}
+	return QueryWrapper{}
 }
-func (q *Query) Lt(clomn string, value any) *Query {
-	wrapper := q.validWrapper(clomn)
-	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
+
+func (q *Query) Lt(column string, value any) *Query {
+	wrapper := q.validWrapper(column)
+	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
 		"$lt": value,
 	})
 	return q
 }
-func (q *Query) Lte(clomn string, value any) *Query {
-	wrapper := q.validWrapper(clomn)
-	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
+
+func (q *Query) Lte(column string, value any) *Query {
+	wrapper := q.validWrapper(column)
+	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
 		"$lte": value,
 	})
 	return q
 }
-func (q *Query) And(query ...*Query) *Query {
-	query = append(query, q)
+
+func (q *Query) And(queries ...*Query) *Query {
+	allQueries := append([]*Query{q}, queries...) // Corrected the order
 	newQuery := NewQuery()
-	newQuery.query["$and"] = func(query ...*Query) []QueryWrapper {
-		return convert.FromAnySlice[QueryWrapper](stream.ToStream(&query).Map(func(item *Query) any {
-			return item.Origin()
-		}).ToList())
-	}(query...)
+	newQuery.query["$and"] = convert.FromAnySlice[QueryWrapper](stream.ToStream(&allQueries).Map(func(item *Query) any {
+		return item.Origin()
+	}).ToList())
 	return newQuery
 }
-func (q *Query) Or(query ...*Query) *Query {
-	query = append(query, q)
+
+func (q *Query) Or(queries ...*Query) *Query {
+	allQueries := append([]*Query{q}, queries...) // Corrected the order
 	newQuery := NewQuery()
-	newQuery.query["$or"] = func(query ...*Query) []QueryWrapper {
-		return convert.FromAnySlice[QueryWrapper](stream.ToStream(&query).Map(func(item *Query) any {
-			return item.Origin()
-		}).ToList())
-	}(query...)
+	newQuery.query["$or"] = convert.FromAnySlice[QueryWrapper](stream.ToStream(&allQueries).Map(func(item *Query) any {
+		return item.Origin()
+	}).ToList())
 	return newQuery
 }
-func (q *Query) Exists(clomn string, est bool) *Query {
-	wrapper := q.validWrapper(clomn)
-	q.query[clomn] = maputil.Merge(wrapper, QueryWrapper{
-		"$exists": est,
+
+func (q *Query) Exists(column string, exists bool) *Query {
+	wrapper := q.validWrapper(column)
+	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
+		"$exists": exists,
 	})
 	return q
 }
+
 func (q *Query) Build(deletedField ...string) QueryWrapper {
 	return BuildQueryWrapper(q.query, deletedField...)
 }
+
 func (q *Query) Origin() QueryWrapper {
 	return q.query
 }
 
 var DeletedField = "delete_at"
+
 var BaseFilter = func(deletedField ...string) QueryWrapper {
 	wrapper := QueryWrapper{}
 	if cutil.IsEmpty(deletedField) {
