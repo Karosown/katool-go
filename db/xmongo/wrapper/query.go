@@ -6,6 +6,7 @@ import (
 	"github.com/duke-git/lancet/v2/maputil"
 	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/container/stream"
+	"github.com/karosown/katool-go/convert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -85,10 +86,10 @@ func (q *Query) Lte(clomn string, value any) *Query {
 }
 func (q *Query) And(query ...*Query) *Query {
 	query = append(query, q)
-	q.query["$and"] = func(query ...*Query) []any {
-		return stream.ToStream(&query).Map(func(item *Query) any {
+	q.query["$and"] = func(query ...*Query) []QueryWrapper {
+		return convert.FromAnySlice[QueryWrapper](stream.ToStream(&query).Map(func(item *Query) any {
 			return item.Origin()
-		}).ToList()
+		}).ToList())
 	}(query...)
 	for s, _ := range q.query {
 		if s != "$and" {
@@ -99,10 +100,10 @@ func (q *Query) And(query ...*Query) *Query {
 }
 func (q *Query) Or(query ...*Query) *Query {
 	query = append(query, q)
-	q.query["$or"] = func(query ...*Query) []any {
-		return stream.ToStream(&query).Map(func(item *Query) any {
+	q.query["$or"] = func(query ...*Query) []QueryWrapper {
+		return convert.FromAnySlice[QueryWrapper](stream.ToStream(&query).Map(func(item *Query) any {
 			return item.Origin()
-		}).ToList()
+		}).ToList())
 	}(query...)
 	for s, _ := range q.query {
 		if s != "$or" {
