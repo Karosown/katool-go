@@ -2,17 +2,18 @@ package wrapper
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/duke-git/lancet/v2/maputil"
 	"github.com/karosown/katool-go/container/cutil"
-	"github.com/karosown/katool-go/container/stream"
-	"github.com/karosown/katool-go/convert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+// QueryWrapper 封装bson.M以提供更好的类型支持
 type QueryWrapper bson.M
 
-func (q *QueryWrapper) ToJSON() string {
+// ToJSON 将查询条件转换为格式化的JSON字符串
+func (q QueryWrapper) ToJSON() string {
 	marshal, err := json.MarshalIndent(q, "", "  ")
 	if err != nil {
 		return ""
@@ -20,124 +21,292 @@ func (q *QueryWrapper) ToJSON() string {
 	return string(marshal)
 }
 
+// Query 查询构建器
 type Query struct {
 	query QueryWrapper
 }
 
+// NewQuery 创建新的查询构建器
 func NewQuery() *Query {
 	return &Query{
 		query: QueryWrapper{},
 	}
 }
 
-func (q *Query) Eq(column string, value any) *Query {
-	wrapper := q.validWrapper(column)
-	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
-		"$eq": value,
-	})
-	return q
-}
-
-func (q *Query) Ne(column string, value any) *Query {
-	wrapper := q.validWrapper(column)
-	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
-		"$ne": value,
-	})
-	return q
-}
-
-func (q *Query) Gt(column string, value any) *Query {
-	wrapper := q.validWrapper(column)
-	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
-		"$gt": value,
-	})
-	return q
-}
-
-func (q *Query) Gte(column string, value any) *Query {
-	wrapper := q.validWrapper(column)
-	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
-		"$gte": value,
-	})
-	return q
-}
-
-func (q *Query) validWrapper(column string) map[string]any {
-	if w, ok := q.query[column].(map[string]any); ok {
-		return w
+// getOperatorWrapper 安全地获取或创建字段的操作符包装器
+func (q *Query) getOperatorWrapper(column string) bson.M {
+	// 处理嵌套字段
+	if strings.Contains(column, ".") {
+		return q.createNestedFieldQuery(column, nil, "")
 	}
-	return QueryWrapper{}
+
+	// 检查字段是否已存在
+	if val, exists := q.query[column]; exists {
+		switch v := val.(type) {
+		case bson.M:
+			return v
+		case map[string]interface{}:
+			return bson.M(v)
+		case QueryWrapper:
+			return bson.M(v)
+		default:
+			// 字段存在但不是操作符结构，需要重置
+			delete(q.query, column)
+		}
+	}
+
+	// 创建新的操作符包装器
+	wrapper := bson.M{}
+	q.query[column] = wrapper
+	return wrapper
 }
 
+// createNestedFieldQuery 创建嵌套字段查询
+func (q *Query) createNestedFieldQuery(path string, value interface{}, operator string) bson.M {
+	parts := strings.Split(path, ".")
+	if len(parts) == 1 {
+		if operator == "" {
+			return bson.M{path: value}
+		}
+		return bson.M{path: bson.M{operator: value}}
+	}
+
+	field := parts[0]
+	remainingPath := strings.Join(parts[1:], ".")
+
+	var nestedQuery bson.M
+	if operator == "" {
+		nestedQuery = q.createNestedFieldQuery(remainingPath, value, operator)
+	} else {
+		nestedQuery = q.createNestedFieldQuery(remainingPath, value, operator)
+	}
+
+	return bson.M{field: nestedQuery}
+}
+
+// Eq 等于条件
+func (q *Query) Eq(column string, value any) *Query {
+	if strings.Contains(column, ".") {
+		nestedQuery := q.createNestedFieldQuery(column, value, "$eq")
+		q.query = maputil.Merge(q.query, QueryWrapper(nestedQuery))
+		return q
+	}
+
+	wrapper := q.getOperatorWrapper(column)
+	wrapper["$eq"] = value
+	q.query[column] = wrapper
+	return q
+}
+
+// Ne 不等于条件
+func (q *Query) Ne(column string, value any) *Query {
+	if strings.Contains(column, ".") {
+		nestedQuery := q.createNestedFieldQuery(column, value, "$ne")
+		q.query = maputil.Merge(q.query, QueryWrapper(nestedQuery))
+		return q
+	}
+
+	wrapper := q.getOperatorWrapper(column)
+	wrapper["$ne"] = value
+	q.query[column] = wrapper
+	return q
+}
+
+// Gt 大于条件
+func (q *Query) Gt(column string, value any) *Query {
+	if strings.Contains(column, ".") {
+		nestedQuery := q.createNestedFieldQuery(column, value, "$gt")
+		q.query = maputil.Merge(q.query, QueryWrapper(nestedQuery))
+		return q
+	}
+
+	wrapper := q.getOperatorWrapper(column)
+	wrapper["$gt"] = value
+	q.query[column] = wrapper
+	return q
+}
+
+// Gte 大于等于条件
+func (q *Query) Gte(column string, value any) *Query {
+	if strings.Contains(column, ".") {
+		nestedQuery := q.createNestedFieldQuery(column, value, "$gte")
+		q.query = maputil.Merge(q.query, QueryWrapper(nestedQuery))
+		return q
+	}
+
+	wrapper := q.getOperatorWrapper(column)
+	wrapper["$gte"] = value
+	q.query[column] = wrapper
+	return q
+}
+
+// Lt 小于条件
 func (q *Query) Lt(column string, value any) *Query {
-	wrapper := q.validWrapper(column)
-	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
-		"$lt": value,
-	})
+	if strings.Contains(column, ".") {
+		nestedQuery := q.createNestedFieldQuery(column, value, "$lt")
+		q.query = maputil.Merge(q.query, QueryWrapper(nestedQuery))
+		return q
+	}
+
+	wrapper := q.getOperatorWrapper(column)
+	wrapper["$lt"] = value
+	q.query[column] = wrapper
 	return q
 }
 
+// Lte 小于等于条件
 func (q *Query) Lte(column string, value any) *Query {
-	wrapper := q.validWrapper(column)
-	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
-		"$lte": value,
-	})
+	if strings.Contains(column, ".") {
+		nestedQuery := q.createNestedFieldQuery(column, value, "$lte")
+		q.query = maputil.Merge(q.query, QueryWrapper(nestedQuery))
+		return q
+	}
+
+	wrapper := q.getOperatorWrapper(column)
+	wrapper["$lte"] = value
+	q.query[column] = wrapper
 	return q
 }
 
-func (q *Query) And(queries ...*Query) *Query {
-	allQueries := append([]*Query{q}, queries...) // Corrected the order
-	newQuery := NewQuery()
-	newQuery.query["$and"] = convert.FromAnySlice[QueryWrapper](stream.ToStream(&allQueries).Map(func(item *Query) any {
-		return item.Origin()
-	}).ToList())
-	return newQuery
-}
-
-func (q *Query) Or(queries ...*Query) *Query {
-	allQueries := append([]*Query{q}, queries...) // Corrected the order
-	newQuery := NewQuery()
-	newQuery.query["$or"] = convert.FromAnySlice[QueryWrapper](stream.ToStream(&allQueries).Map(func(item *Query) any {
-		return item.Origin()
-	}).ToList())
-	return newQuery
-}
-
+// Exists 字段存在性条件
 func (q *Query) Exists(column string, exists bool) *Query {
-	wrapper := q.validWrapper(column)
-	q.query[column] = maputil.Merge(wrapper, QueryWrapper{
-		"$exists": exists,
-	})
+	if strings.Contains(column, ".") {
+		nestedQuery := q.createNestedFieldQuery(column, exists, "$exists")
+		q.query = maputil.Merge(q.query, QueryWrapper(nestedQuery))
+		return q
+	}
+
+	wrapper := q.getOperatorWrapper(column)
+	wrapper["$exists"] = exists
+	q.query[column] = wrapper
 	return q
 }
 
-func (q *Query) Build(deletedField ...string) QueryWrapper {
-	return BuildQueryWrapper(q.query, deletedField...)
+// In 包含条件
+func (q *Query) In(column string, values ...any) *Query {
+	if strings.Contains(column, ".") {
+		nestedQuery := q.createNestedFieldQuery(column, values, "$in")
+		q.query = maputil.Merge(q.query, QueryWrapper(nestedQuery))
+		return q
+	}
+
+	wrapper := q.getOperatorWrapper(column)
+	wrapper["$in"] = values
+	q.query[column] = wrapper
+	return q
 }
 
+// Nin 不包含条件
+func (q *Query) Nin(column string, values ...any) *Query {
+	if strings.Contains(column, ".") {
+		nestedQuery := q.createNestedFieldQuery(column, values, "$nin")
+		q.query = maputil.Merge(q.query, QueryWrapper(nestedQuery))
+		return q
+	}
+
+	wrapper := q.getOperatorWrapper(column)
+	wrapper["$nin"] = values
+	q.query[column] = wrapper
+	return q
+}
+
+// Regex 正则表达式匹配
+func (q *Query) Regex(column string, pattern string, options string) *Query {
+	regexObj := bson.M{"$regex": pattern}
+	if options != "" {
+		regexObj["$options"] = options
+	}
+
+	if strings.Contains(column, ".") {
+		nestedQuery := q.createNestedFieldQuery(column, regexObj, "")
+		q.query = maputil.Merge(q.query, QueryWrapper(nestedQuery))
+		return q
+	}
+
+	q.query[column] = regexObj
+	return q
+}
+
+// And 逻辑与操作
+func (q *Query) And(queries ...*Query) *Query {
+	expressions := make([]bson.M, 0, len(queries)+1)
+
+	// 添加当前查询条件（如果不为空）
+	if len(q.query) > 0 {
+		expressions = append(expressions, bson.M(q.query))
+	}
+
+	// 添加其他查询条件
+	for _, query := range queries {
+		if query != nil && len(query.query) > 0 {
+			expressions = append(expressions, bson.M(query.query))
+		}
+	}
+
+	// 创建新的查询对象
+	result := NewQuery()
+	if len(expressions) > 0 {
+		result.query["$and"] = expressions
+	}
+
+	return result
+}
+
+// Or 逻辑或操作
+func (q *Query) Or(queries ...*Query) *Query {
+	expressions := make([]bson.M, 0, len(queries)+1)
+
+	// 添加当前查询条件（如果不为空）
+	if len(q.query) > 0 {
+		expressions = append(expressions, bson.M(q.query))
+	}
+
+	// 添加其他查询条件
+	for _, query := range queries {
+		if query != nil && len(query.query) > 0 {
+			expressions = append(expressions, bson.M(query.query))
+		}
+	}
+
+	// 创建新的查询对象
+	result := NewQuery()
+	if len(expressions) > 0 {
+		result.query["$or"] = expressions
+	}
+
+	return result
+}
+
+// Build 构建最终查询条件，包含软删除过滤
+func (q *Query) Build(deletedFields ...string) bson.M {
+	return bson.M(BuildQueryWrapper(q.query, deletedFields...))
+}
+
+// Origin 获取原始查询条件
 func (q *Query) Origin() QueryWrapper {
 	return q.query
 }
 
-var DeletedField = "delete_at"
+// DeletedField 软删除字段名称
+var DeletedField = "deleted_at"
 
-var BaseFilter = func(deletedField ...string) QueryWrapper {
+// BaseFilter 创建基础过滤条件（排除已删除文档）
+func BaseFilter(deletedFields ...string) QueryWrapper {
 	wrapper := QueryWrapper{}
-	if cutil.IsEmpty(deletedField) {
-		deletedField = append(deletedField, DeletedField)
+
+	if cutil.IsEmpty(deletedFields) {
+		deletedFields = []string{DeletedField}
 	}
 
-	for _, field := range deletedField {
-		wrapper[field] = QueryWrapper{"$exists": false}
+	for _, field := range deletedFields {
+		wrapper[field] = bson.M{"$exists": false}
 	}
+
 	return wrapper
 }
 
-func BuildQueryWrapper(queryWrapperMap QueryWrapper, deletedField ...string) QueryWrapper {
-	m := QueryWrapper{}
-	queryWrapperMap = maputil.Merge(queryWrapperMap, BaseFilter(deletedField...))
-	for k, v := range queryWrapperMap {
-		m[k] = v
-	}
-	return m
+// BuildQueryWrapper 构建查询包装器，合并基础过滤条件
+func BuildQueryWrapper(queryWrapperMap QueryWrapper, deletedFields ...string) QueryWrapper {
+	// 直接合并用户查询和软删除过滤器
+	return maputil.Merge(queryWrapperMap, BaseFilter(deletedFields...))
 }
