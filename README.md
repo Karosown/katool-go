@@ -47,7 +47,7 @@
 
 ## 📝 简介
 
-> **Katool-Go** 是一个综合性的 Go 语言工具库，旨在提供丰富的功能组件和实用工具，帮助开发者提高开发效率。它借鉴了 Java 生态中的成熟设计模式和经验，同时充分利用 Go 语言的特性，如并发、泛型等，提供了一系列易用且高效的工具。
+**Katool-Go** 是一个综合性的 Go 语言工具库，旨在提供丰富的功能组件和实用工具，帮助开发者提高开发效率。它借鉴了 Java 生态中的成熟设计模式和经验，同时充分利用 Go 语言的特性，如并发、泛型等，提供了一系列易用且高效的工具。
 
 本库的设计理念是：**模块化、可组合、高性能**，适用于各种规模的 Go 项目。无论是构建微服务、Web应用，还是数据处理系统，Katool-Go 都能提供有力支持。
 
@@ -769,11 +769,11 @@ resp, err = client.GetWithFormat("/data", format.Json)
 <summary><b>📋 基本日志</b></summary>
 
 ```go
-import "github.com/karosown/katool-go/log"
+import "github.com/karosown/katool-go/xlog"
 
 // 基本日志
-log.Info("这是一条信息")
-log.Errorf("错误: %v", err)
+xlog.Info("这是一条信息")
+xlog.Errorf("错误: %v", err)
 ```
 </details>
 
