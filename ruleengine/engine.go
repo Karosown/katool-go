@@ -1,5 +1,10 @@
 package ruleengine
 
+import (
+	"github.com/karosown/katool-go/container/cutil"
+	"github.com/karosown/katool-go/container/optional"
+)
+
 // RuleNodeMeta 如果需要做类型转换，可以使用SourceType
 type RuleNodeMeta[T any] struct {
 	SourceTypeData T
@@ -57,6 +62,9 @@ func (r *RuleNode[T]) LayerToQueue(queue chan *RuleNode[T]) bool {
 }
 func (r *RuleNode[T]) LayerData(data T, cvntData any) bool {
 	for _, item := range r.NxtLayer {
+		if nil == item {
+			return true
+		}
 		item.SourceTypeData = data
 		item.ConvertData = cvntData
 	}
@@ -68,13 +76,13 @@ type RuleTree[T any] struct {
 	waitQueue chan *RuleNode[T]
 }
 
-func NewRuleNode[T any](valid func(T, any) bool, exec func(T, any) (T, any, error), nxtlayer []*RuleNode[T]) *RuleNode[T] {
+func NewRuleNode[T any](valid func(T, any) bool, exec func(T, any) (T, any, error), nxtlayer ...*RuleNode[T]) *RuleNode[T] {
 	return &RuleNode[T]{
 		RuleNodeMeta: RuleNodeMeta[T]{
 			Valid: valid,
 			Exec:  exec,
 		},
-		NxtLayer: nxtlayer,
+		NxtLayer: optional.IsTrue(cutil.IsBlank[*[]*RuleNode[T]](&nxtlayer), nil, nxtlayer),
 	}
 }
 func NewRuleTree[T any](root *RuleNode[T]) *RuleTree[T] {

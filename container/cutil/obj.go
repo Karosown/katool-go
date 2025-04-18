@@ -1,6 +1,8 @@
 package cutil
 
-import "reflect"
+import (
+	"reflect"
+)
 
 func IsBlank[T comparable](obj T) bool {
 	v := reflect.ValueOf(obj)
@@ -8,7 +10,15 @@ func IsBlank[T comparable](obj T) bool {
 	case reflect.String:
 		return v.String() == ""
 	case reflect.Slice, reflect.Array:
-		return v.Len() == 0
+		if v.Len() == 0 {
+			return true
+		}
+		for i := 0; i < v.Len(); i++ {
+			if !IsBlank(v.Index(i).Interface()) {
+				return false
+			}
+		}
+		return true
 	case reflect.Map:
 		return v.Len() == 0
 	case reflect.Chan:

@@ -50,7 +50,7 @@ func TestRuleTreeExecution(t *testing.T) {
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value * 2}, data.Value, nil
 		},
-		[]*ruleengine.RuleNode[TestData]{leafNode},
+		[]*ruleengine.RuleNode[TestData]{leafNode}...,
 	)
 
 	// 创建根节点
@@ -58,7 +58,7 @@ func TestRuleTreeExecution(t *testing.T) {
 		func(data TestData, _ any) (TestData, any, error) {
 			return data, data, nil
 		},
-		[]*ruleengine.RuleNode[TestData]{midNode},
+		[]*ruleengine.RuleNode[TestData]{midNode}...,
 	)
 
 	// 创建规则树
@@ -105,7 +105,7 @@ func TestRuleTreeWithError(t *testing.T) {
 		func(data TestData, _ any) (TestData, any, error) {
 			return data, data, nil
 		},
-		[]*ruleengine.RuleNode[TestData]{errorNode},
+		[]*ruleengine.RuleNode[TestData]{errorNode}...,
 	)
 
 	// 创建规则树
@@ -204,7 +204,7 @@ func TestMultiBranchRuleTree(t *testing.T) {
 		func(data TestData, _ any) (TestData, any, error) {
 			return data, "root", nil
 		},
-		[]*ruleengine.RuleNode[TestData]{branch1, branch2, branch3},
+		[]*ruleengine.RuleNode[TestData]{branch1, branch2, branch3}...,
 	)
 
 	// Create the rule tree
@@ -286,7 +286,7 @@ func TestMultiBranchMultiLevelRuleTree(t *testing.T) {
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value * 2}, "b1_1", nil
 		},
-		[]*ruleengine.RuleNode[TestData]{b1_1_1, b1_1_2},
+		[]*ruleengine.RuleNode[TestData]{b1_1_1, b1_1_2}...,
 	)
 
 	b1_2 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return data.Value >= 50 },
@@ -307,7 +307,7 @@ func TestMultiBranchMultiLevelRuleTree(t *testing.T) {
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value + 5}, "b3_1", nil
 		},
-		[]*ruleengine.RuleNode[TestData]{b3_1_1},
+		[]*ruleengine.RuleNode[TestData]{b3_1_1}...,
 	)
 
 	b3_2 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return data.Value%5 != 0 },
@@ -322,21 +322,21 @@ func TestMultiBranchMultiLevelRuleTree(t *testing.T) {
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value + 1}, "branch1", nil
 		},
-		[]*ruleengine.RuleNode[TestData]{b1_1, b1_2},
+		[]*ruleengine.RuleNode[TestData]{b1_1, b1_2}...,
 	)
 
 	branch2 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return data.Value < 0 },
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value * -1}, "branch2", nil
 		},
-		[]*ruleengine.RuleNode[TestData]{b2_1},
+		[]*ruleengine.RuleNode[TestData]{b2_1}...,
 	)
 
 	branch3 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return data.Value >= 100 },
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value / 2}, "branch3", nil
 		},
-		[]*ruleengine.RuleNode[TestData]{b3_1, b3_2},
+		[]*ruleengine.RuleNode[TestData]{b3_1, b3_2}...,
 	)
 
 	// Create root node
@@ -344,7 +344,7 @@ func TestMultiBranchMultiLevelRuleTree(t *testing.T) {
 		func(data TestData, _ any) (TestData, any, error) {
 			return data, "root", nil
 		},
-		[]*ruleengine.RuleNode[TestData]{branch1, branch2, branch3},
+		[]*ruleengine.RuleNode[TestData]{branch1, branch2, branch3}...,
 	)
 
 	// Create the rule tree
