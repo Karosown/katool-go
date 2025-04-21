@@ -50,6 +50,17 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 		source:  source,
 	}
 }
+func fromAnySlice[T any, Slice ~[]T](source []any) Slice {
+	res := make([]T, len(source))
+	for i, v := range source {
+		res[i] = v.(T)
+	}
+	return res
+}
+func FromAnySlice[T any, Slice ~[]T](source *[]any) *Stream[T, Slice] {
+	slice := fromAnySlice[T, Slice](*source)
+	return ToStream(&slice)
+}
 
 // Of creates a stream from the given slice.
 func Of[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {

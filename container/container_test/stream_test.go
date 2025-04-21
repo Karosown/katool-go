@@ -168,3 +168,10 @@ func Test_Distinct(t *testing.T) {
 		fmt.Println(item)
 	})
 }
+
+func Test_FromAnySlice(t *testing.T) {
+	slice := convert.ToAnySlice(userList)
+	stream.FromAnySlice[user, []user](&slice).ForEach(func(item user) {
+		fmt.Println(item)
+	})
+}
