@@ -60,6 +60,11 @@ func (r *RuleNode[T]) LayerToQueue(queue chan *RuleNode[T]) bool {
 	}
 	return true
 }
+func (r *RuleNode[T]) Else(exec func(T, any) (T, any, error)) *RuleNode[T] {
+	return NewRuleNode[T](func(t T, a any) bool {
+		return !r.Valid(t, a)
+	}, exec)
+}
 func (r *RuleNode[T]) LayerData(data T, cvntData any) bool {
 	for _, item := range r.NxtLayer {
 		if nil == item {
