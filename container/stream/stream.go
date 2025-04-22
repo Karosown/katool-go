@@ -57,8 +57,8 @@ func fromAnySlice[T any, Slice ~[]T](source []any) Slice {
 	}
 	return res
 }
-func FromAnySlice[T any, Slice ~[]T](source *[]any) *Stream[T, Slice] {
-	slice := fromAnySlice[T, Slice](*source)
+func FromAnySlice[T any, Slice ~[]T](source []any) *Stream[T, Slice] {
+	slice := fromAnySlice[T, Slice](source)
 	return ToStream(&slice)
 }
 
