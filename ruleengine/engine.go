@@ -1,8 +1,16 @@
 package ruleengine
 
 import (
+	"errors"
+
 	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/container/optional"
+)
+
+type RuleErr error
+
+var (
+	EOF RuleErr = errors.New("RULETREE EOF")
 )
 
 // RuleNodeMeta 如果需要做类型转换，可以使用SourceType
@@ -109,8 +117,14 @@ func (r *RuleTree[T]) Run(data T) (T, any, error) {
 		case node := <-r.waitQueue:
 			orginData, cvtDara, err = node.Exec(node.SourceTypeData, r.Root.ConvertData)
 			if err != nil {
+				if errors.Is(err, EOF) {
+					close(r.waitQueue)
+					r.waitQueue = make(chan *RuleNode[T], r.Root.NxtLayer.Len()+0x11)
+					return orginData, cvtDara, nil
+				}
 				break
 			}
+			// 这里直接进行状态转移，把这一层的状态移交给下一层，从而避免了不同逻辑之间的影响，也不用管使用深度遍历还是广度遍历
 			node.LayerData(orginData, cvtDara)
 			node.LayerToQueue(r.waitQueue)
 		default:

@@ -259,21 +259,21 @@ func TestMultiBranchRuleTree(t *testing.T) {
 	}
 }
 func TestMultiBranchMultiLevelRuleTree(t *testing.T) {
-	// Create the deepest level nodes (level 3)
+	// Create the deepest level nodes (level 3) +100
 	b1_1_1 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return data.Value%2 == 0 },
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value + 100}, "b1_1_1", nil
 		},
 		nil,
 	)
-
+	// +200
 	b1_1_2 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return data.Value%2 != 0 },
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value + 200}, "b1_1_2", nil
 		},
 		nil,
 	)
-
+	// *3
 	b3_1_1 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return true },
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value * 3}, "b3_1_1", nil
@@ -281,35 +281,35 @@ func TestMultiBranchMultiLevelRuleTree(t *testing.T) {
 		nil,
 	)
 
-	// Create level 2 nodes
+	// Create level 2 nodes *2
 	b1_1 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return data.Value < 50 },
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value * 2}, "b1_1", nil
 		},
 		[]*ruleengine.RuleNode[TestData]{b1_1_1, b1_1_2}...,
 	)
-
+	// -20
 	b1_2 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return data.Value >= 50 },
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value - 20}, "b1_2", nil
 		},
 		nil,
 	)
-
+	// +10
 	b2_1 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return true },
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value + 10}, "b2_1", nil
 		},
 		nil,
 	)
-
+	// +5
 	b3_1 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return data.Value%5 == 0 },
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value + 5}, "b3_1", nil
 		},
 		[]*ruleengine.RuleNode[TestData]{b3_1_1}...,
 	)
-
+	// -5
 	b3_2 := ruleengine.NewRuleNode[TestData](func(data TestData, _ any) bool { return data.Value%5 != 0 },
 		func(data TestData, _ any) (TestData, any, error) {
 			return TestData{Value: data.Value - 5}, "b3_2", nil
