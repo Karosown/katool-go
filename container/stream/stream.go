@@ -53,7 +53,9 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 func fromAnySlice[T any, Slice ~[]T](source []any) Slice {
 	res := make([]T, len(source))
 	for i, v := range source {
-		res[i] = v.(T)
+		res[i] = optional.IsTrueByFunc(v == nil, optional.Identity[T](nil), func() T {
+			return v.(T)
+		})
 	}
 	return res
 }
@@ -361,7 +363,9 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 	mergeSorted := toStream.Reduce(re, algorithm.MergeSortedArrayWithPrimaryData[T](desc, orderBy), algorithm.MergeSortedArrayWithPrimaryData[T](desc, orderBy)).([]any)
 	result := make(Slice, 0)
 	for i := 0; i < len(mergeSorted); i++ {
-		result = append(result, mergeSorted[i].(T))
+		result = append(result, optional.IsTrueByFunc(mergeSorted[i] == nil, optional.Identity[T](nil), func() T {
+			return mergeSorted[i].(T)
+		}))
 	}
 	//stream := ToStream(&result)
 	stream := ToStream(&result)
@@ -418,7 +422,9 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 	mergeSorted := toStream.Reduce(re, algorithm.MergeSortedArrayWithPrimaryId[T](desc, orderBy), algorithm.MergeSortedArrayWithPrimaryId[T](desc, orderBy)).([]any)
 	result := make(Slice, 0)
 	for i := 0; i < len(mergeSorted); i++ {
-		result = append(result, mergeSorted[i].(T))
+		result = append(result, optional.IsTrueByFunc(mergeSorted[i] == nil, optional.Identity[T](nil), func() T {
+			return mergeSorted[i].(T)
+		}))
 	}
 	//stream := ToStream(&result)
 	stream := ToStream(&result)
@@ -446,7 +452,11 @@ func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 	optionsStream.parallel = s.parallel
 	sortedMap := optionsStream.Map(func(options Options[any]) any {
 		sort.SliceStable(options, func(i, j int) bool {
-			return orderBy(options[i].opt.(T), options[j].opt.(T))
+			return orderBy(optional.IsTrueByFunc(options[i].opt == nil, optional.Identity[T](nil), func() T {
+				return options[i].opt.(T)
+			}), optional.IsTrueByFunc(options[j].opt == nil, optional.Identity[T](nil), func() T {
+				return options[j].opt.(T)
+			}))
 		})
 		return options
 	})
@@ -464,7 +474,9 @@ func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 	mergeSorted := toStream.Reduce(re, algorithm.MergeSortedArrayWithEntity[T](orderBy), algorithm.MergeSortedArrayWithEntity[T](orderBy)).([]any)
 	result := make(Slice, 0)
 	for i := 0; i < len(mergeSorted); i++ {
-		result = append(result, mergeSorted[i].(T))
+		result = append(result, optional.IsTrueByFunc(mergeSorted[i] == nil, optional.Identity[T](nil), func() T {
+			return mergeSorted[i].(T)
+		}))
 	}
 	//stream := ToStream(&result)
 	stream := ToStream(&result)
