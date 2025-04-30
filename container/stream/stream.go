@@ -114,7 +114,7 @@ func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 		parallel: true,
 	}
 }
-func (s *Stream[T, Slice]) Join(source *Slice) *Stream[T, []T] {
+func (s *Stream[T, Slice]) Join(source *Slice) *Stream[T, Slice] {
 	list := s.ToList()
 	list = append(list, *source...)
 	return ToStream(&list)
@@ -247,7 +247,7 @@ func (s *Stream[T, Slice]) Filter(fn func(i T) bool) *Stream[T, Slice] {
 func (s *Stream[T, Slice]) ToOptionList() Options[T] {
 	return *s.options
 }
-func (s *Stream[T, Slice]) ToList() []T {
+func (s *Stream[T, Slice]) ToList() Slice {
 	res := make([]T, 0)
 	size := len(*s.options)
 	resChan := make(chan T, size)
