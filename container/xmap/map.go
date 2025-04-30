@@ -14,6 +14,13 @@ func NewMap[K comparable, V any]() Map[K, V] {
 func CopyMap[K comparable, V any, M ~map[K]V](m M) Map[K, V] {
 	return Map[K, V](m)
 }
+func MapFromAny[K comparable, V any, M ~map[any]any](m M) Map[K, V] {
+	mp := map[K]V{}
+	for k, v := range m {
+		mp[k] = v
+	}
+	return mp
+}
 
 // Get 获取指定键的值
 func (m Map[K, V]) Get(key K) (V, bool) {

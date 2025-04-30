@@ -27,6 +27,13 @@ func CopySortedMap[K constraints.Ordered, V any, M ~map[K]V](mp M) *SortedMap[K,
 		mapper: Map[K, V](mp),
 	}
 }
+func SortedMapFromAny[K constraints.Ordered, V any, M ~map[any]any](m M) *SortedMap[K, V] {
+	mp := map[K]V{}
+	for k, v := range m {
+		mp[k] = v
+	}
+	return CopySortedMap(mp)
+}
 
 // Set 添加或更新一个键值对
 func (sm *SortedMap[K, V]) Set(key K, value V) {

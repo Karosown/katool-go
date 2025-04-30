@@ -24,6 +24,13 @@ func CopySafeMap[K comparable, V any, M ~map[K]V](mp M) *SafeMap[K, V] {
 		internal: internal,
 	}
 }
+func SafeMapFromAny[K comparable, V any, M ~map[any]any](m M) *SafeMap[K, V] {
+	mp := map[K]V{}
+	for k, v := range m {
+		mp[k] = v
+	}
+	return CopySafeMap(mp)
+}
 
 // Get 获取指定键的值
 func (m *SafeMap[K, V]) Get(key K) (V, bool) {
