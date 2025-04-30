@@ -15,6 +15,15 @@ type SafeMap[K comparable, V any] struct {
 func NewSafeMap[K comparable, V any]() *SafeMap[K, V] {
 	return &SafeMap[K, V]{}
 }
+func CopySafeMap[K comparable, V any, M ~map[K]V](mp M) *SafeMap[K, V] {
+	internal := sync.Map{}
+	for k, v := range mp {
+		internal.Store(k, v)
+	}
+	return &SafeMap[K, V]{
+		internal: internal,
+	}
+}
 
 // Get 获取指定键的值
 func (m *SafeMap[K, V]) Get(key K) (V, bool) {

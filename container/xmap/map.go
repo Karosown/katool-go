@@ -11,6 +11,9 @@ type Map[K comparable, V any] map[K]V
 func NewMap[K comparable, V any]() Map[K, V] {
 	return make(Map[K, V])
 }
+func CopyMap[K comparable, V any, M ~map[K]V](m M) Map[K, V] {
+	return Map[K, V](m)
+}
 
 // Get 获取指定键的值
 func (m Map[K, V]) Get(key K) (V, bool) {
