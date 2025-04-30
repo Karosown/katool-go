@@ -51,8 +51,8 @@ func (sm *SortedMap[K, V]) SortedKeys() []K {
 	})
 	return keys
 }
-func (sm *SortedMap[K, V]) ToStream() stream.Entries[K, V] {
-	return stream.EntrySet(sm.mapper)
+func (sm *SortedMap[K, V]) ToStream() *stream.Stream[stream.Entry[K, V], []stream.Entry[K, V]] {
+	return stream.EntrySet(sm.mapper).ToStream()
 }
 
 // MarshalJSON 实现 json.Marshaler 接口，确保按照 SortedKeys 顺序输出
