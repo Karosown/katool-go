@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/karosown/katool-go/container/stream"
 	"golang.org/x/exp/constraints"
 )
 
@@ -49,6 +50,9 @@ func (sm *SortedMap[K, V]) SortedKeys() []K {
 		return keys[i] < keys[j]
 	})
 	return keys
+}
+func (sm *SortedMap[K, V]) ToStream() stream.Entries[K, V] {
+	return stream.EntrySet(sm.mapper)
 }
 
 // MarshalJSON 实现 json.Marshaler 接口，确保按照 SortedKeys 顺序输出
