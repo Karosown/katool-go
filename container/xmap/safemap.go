@@ -27,7 +27,15 @@ func CopySafeMap[K comparable, V any, M ~map[K]V](mp M) *SafeMap[K, V] {
 func SafeMapFromAny[K comparable, V any, M ~map[any]any](m M) *SafeMap[K, V] {
 	mp := map[K]V{}
 	for k, v := range m {
-		mp[k] = v
+		k2, ok := k.(K)
+		if !ok {
+			continue
+		}
+		v2, ok := v.(V)
+		if !ok {
+			continue
+		}
+		mp[k2] = v2
 	}
 	return CopySafeMap(mp)
 }

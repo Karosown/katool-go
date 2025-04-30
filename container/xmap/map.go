@@ -17,7 +17,15 @@ func CopyMap[K comparable, V any, M ~map[K]V](m M) Map[K, V] {
 func MapFromAny[K comparable, V any, M ~map[any]any](m M) Map[K, V] {
 	mp := map[K]V{}
 	for k, v := range m {
-		mp[k] = v
+		k2, ok := k.(K)
+		if !ok {
+			continue
+		}
+		v2, ok := v.(V)
+		if !ok {
+			continue
+		}
+		mp[k2] = v2
 	}
 	return mp
 }
