@@ -1,9 +1,21 @@
 package words
 
 import (
+	"strings"
 	"unicode"
 )
 
+func SubString(s, start, end string) string {
+	fi := strings.Index(s, start)
+	if fi == -1 {
+		fi = 0
+	}
+	li := strings.LastIndex(s, end)
+	if li == -1 {
+		li = len(s)
+	}
+	return s[fi+len(start) : li]
+}
 func ContainsLanguage(s string, languages ...*unicode.RangeTable) bool {
 	for _, v := range s {
 		for _, language := range languages {
