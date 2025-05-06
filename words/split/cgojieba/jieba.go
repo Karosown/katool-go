@@ -29,7 +29,7 @@ func (j *Client) Cut(text string) split.SplitStrings {
 
 // CutAll 全模式分词
 func (j *Client) CutAll(text string) split.SplitStrings {
-	return j.jieba.Cut(text, false)
+	return j.jieba.CutAll(text)
 }
 
 // CutForSearch 搜索引擎模式分词

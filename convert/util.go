@@ -153,7 +153,13 @@ func ChanToArray[T any](source <-chan T) []T {
 	}
 	return res
 }
-
+func AwaitChanToArray[T any](source <-chan T) []T {
+	res := make([]T, 0, cap(source))
+	for v := range source {
+		res = append(res, v)
+	}
+	return res
+}
 func ChanToFlatArray[T any](source <-chan []T) []T {
 	size := len(source)
 	res := make([]T, 0, size)
@@ -162,7 +168,13 @@ func ChanToFlatArray[T any](source <-chan []T) []T {
 	}
 	return res
 }
-
+func AwaitChanToFlatArray[T any](source <-chan []T) []T {
+	res := make([]T, 0, cap(source))
+	for v := range source {
+		res = append(res, v...)
+	}
+	return res
+}
 func ToMap(dao any) (res map[string]string) {
 	if dao == nil {
 		return nil
