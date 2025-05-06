@@ -2,9 +2,8 @@ package test
 
 import (
 	"errors"
-	"testing"
-
 	"github.com/karosown/katool-go/ruleengine"
+	"testing"
 )
 
 // 测试用的简单数据类型

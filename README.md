@@ -38,6 +38,7 @@
   - [🌐 网络通信](#网络通信)
   - [📝 日志系统](#日志系统)
   - [⚙️ 算法工具](#算法工具)
+  - [🔤 文本处理](#文本处理)
   - [🧰 辅助工具](#辅助工具)
 - [💡 最佳实践](#最佳实践)
 - [👥 贡献指南](#贡献指南)
@@ -103,6 +104,10 @@ Katool-Go 提供以下核心特性：
     <td>数组操作、哈希计算、二进制处理等</td>
   </tr>
   <tr>
+    <td><b>🔤 文本处理</b></td>
+    <td>中文分词、文本分析等</td>
+  </tr>
+  <tr>
     <td><b>🧰 辅助工具</b></td>
     <td>日期、随机数、调试等实用工具</td>
   </tr>
@@ -118,7 +123,7 @@ Katool-Go 提供以下核心特性：
 go get -u github.com/karosown/katool-go
 ```
 
-> ⚠️ 要求 Go 版本 >= 1.18 (支持泛型)
+> ⚠️ 要求 Go 版本 >= 1.23.1
 
 <hr>
 
@@ -135,97 +140,241 @@ package main
 import (
 	"fmt"
 	"github.com/karosown/katool-go/container/stream"
+	"github.com/karosown/katool-go/algorithm"
+	"github.com/karosown/katool-go/convert"
+	"strconv"
 )
 
+// 定义用户结构
+type user struct {
+	Name  string `json:"name"`
+	Age   int    `json:"age"`
+	Sex   int    `json:"sex"`
+	Money int    `json:"money"`
+	Class string `json:"class"`
+	Id    int    `json:"id"`
+}
+
 func main() {
-	// 准备数据
-	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	users := []user{
+		{Name: "Alice", Age: 25, Sex: 1, Money: 1000, Class: "A", Id: 1},
+		{Name: "Bob", Age: 30, Sex: 0, Money: 1500, Class: "B", Id: 2},
+		{Name: "Charlie", Age: 35, Sex: 0, Money: 2000, Class: "A", Id: 3},
+		{Name: "David", Age: 40, Sex: 1, Money: 2500, Class: "B", Id: 4},
+	}
 	
-	// 使用流式操作：过滤偶数、乘以2、求和
-	result := stream.ToStream(&numbers).
-		Filter(func(n int) bool {
-			return n%2 == 0 // 过滤偶数
-		}).
-		Map(func(n int) any {
-			return n * 2 // 乘以2
-		}).
-		Reduce(0, func(sum any, n int) any {
-			return sum.(int) + n.(int) // 求和
-		}, func(sum1, sum2 any) any {
-			return sum1.(int) + sum2.(int)
+	// 并行流处理
+	userStream := stream.ToStream(&users).Parallel()
+	
+	// 计算总人数
+	fmt.Println("总人数:", userStream.Count())
+	
+	// 按ID排序
+	stream.ToStream(&users).Parallel().
+		Sort(func(a, b user) bool { 
+			return a.Id < b.Id 
+		}).ForEach(func(item user) { 
+			fmt.Println(item.Id, item.Name) 
 		})
 	
-	fmt.Println("结果:", result) // 输出: 结果: 60
+	// 计算总金额
+	totalMoney := userStream.Reduce(int64(0), 
+		func(sum any, u user) any { 
+			return sum.(int64) + int64(u.Money) 
+		}, 
+		func(sum1, sum2 any) any {
+			return sum1.(int64) + sum2.(int64)
+		})
+	fmt.Println("总金额:", totalMoney)
+	
+	// 按班级分组
+	groups := stream.ToStream(&users).GroupBy(func(u user) any {
+		return u.Class
+	})
+	
+	// 输出各班级成员
+	for class, members := range groups {
+		fmt.Printf("班级: %s, 人数: %d\n", class, len(members))
+	}
+
+	// 过滤操作
+	filtered := userStream.Filter(func(u user) bool {
+		return u.Age > 30
+	}).ToList()
+
+	// 映射操作
+	userStream.Map(func(u user) any {
+		return u.Name
+	}).ForEach(func(name any) {
+		fmt.Println(name)
+	})
+
+	// 排序操作
+	sorted := stream.ToStream(&users).Sort(func(a, b user) bool {
+		return a.Age < b.Age
+	}).ToList()
+
+	// 元素去重
+	numbers := []int{1, 2, 3, 1, 2, 3, 4, 5}
+	stream.ToStream(&numbers).Distinct().ToList()
+
+	// 自定义去重
+	userStream.DistinctBy(algorithm.HASH_WITH_JSON_MD5).ToList()
+
+	// 字符串操作
+	arr := []int{1, 2, 3}
+	result := stream.ToStream(&arr).Map(func(i int) any {
+		return strconv.Itoa(i) + "w"
+	}).Reduce("", func(sum any, item any) any {
+		return sum.(string) + item.(string)
+	}, func(sum1, sum2 any) any {
+		return sum1.(string) + sum2.(string)
+	})
+	fmt.Println(result)
 }
 ```
 </details>
 
 <details>
-<summary><b>💉 依赖注入</b></summary>
+<summary><b>📚 容器操作</b></summary>
 
 ```go
 package main
 
 import (
 	"fmt"
-	"github.com/karosown/katool-go/container/ioc"
+	"github.com/karosown/katool-go/container/xmap"
+	"encoding/json"
 )
 
-type UserService interface {
-	GetUsername() string
-}
-
-type UserServiceImpl struct {
-	username string
-}
-
-func (u *UserServiceImpl) GetUsername() string {
-	return u.username
-}
-
 func main() {
-	// 注册服务
-	ioc.RegisterValue("userService", &UserServiceImpl{username: "admin"})
+	// 创建普通Map
+	m := xmap.NewMap[string, int]()
+	m.Set("one", 1)
+	m.Set("two", 2)
+	m.Set("three", 3)
 	
-	// 获取服务
-	service := ioc.Get("userService").(UserService)
+	// 获取和验证
+	val, exists := m.Get("one")
+	fmt.Printf("键'one'存在: %v, 值: %d\n", exists, val) // true, 1
 	
-	fmt.Println("用户名:", service.GetUsername()) // 输出: 用户名: admin
+	// 删除元素
+	m.Delete("two")
+	fmt.Printf("Map大小: %d\n", m.Len()) // 2
+	
+	// 遍历
+	m.ForEach(func(k string, v int) {
+		fmt.Printf("%s: %d\n", k, v)
+	})
+	
+	// 创建线程安全Map
+	sm := xmap.NewSafeMap[string, int]()
+	sm.Set("a", 1)
+	sm.Set("b", 2)
+	
+	// 安全地获取或存储
+	val, loaded := sm.LoadOrStore("a", 100)
+	fmt.Printf("键'a'已存在: %v, 值: %d\n", loaded, val) // true, 1
+	
+	val, loaded = sm.LoadOrStore("c", 3)
+	fmt.Printf("键'c'已存在: %v, 值: %d\n", loaded, val) // false, 3
+	
+	// 创建有序Map
+	sortedMap := xmap.NewSortedMap[string, string]()
+	sortedMap.Set("3", "three")
+	sortedMap.Set("1", "one")
+	sortedMap.Set("2", "two")
+	
+	// 序列化为JSON (按键排序)
+	jsonBytes, _ := json.Marshal(sortedMap) 
 }
 ```
 </details>
 
 <details>
-<summary><b>🔄 数据转换</b></summary>
+<summary><b>🔒 并发控制</b></summary>
 
 ```go
 package main
 
 import (
 	"fmt"
-	"github.com/karosown/katool-go/convert"
+	"github.com/karosown/katool-go/lock"
+	"github.com/karosown/katool-go/container/stream"
+	"time"
 )
 
-type User struct {
-	ID   int
-	Name string
-	Age  int
+func main() {
+	// 单个锁支持
+	support := lock.NewLockSupport()
+	
+	go func() {
+		fmt.Println("即将进入阻塞，等待异步唤醒")
+		support.Park() // 阻塞当前协程，直到有人调用Unpark
+		fmt.Println("唤醒成功")
+	}()
+	
+	time.Sleep(time.Second) // 等待协程启动
+	fmt.Println("主协程准备唤醒子协程")
+	support.Unpark() // 解除阻塞
+	
+	// 多个LockSupport的管理
+	locks := make([]*lock.LockSupport, 5)
+	for i := 0; i < 5; i++ {
+		locks[i] = lock.NewLockSupport()
+		idx := i
+		go func() {
+			fmt.Printf("协程 %d 等待唤醒\n", idx)
+			locks[idx].Park()
+			fmt.Printf("协程 %d 被唤醒\n", idx)
+		}()
+	}
+	
+	// 依次唤醒所有协程
+	for i, ls := range locks {
+		fmt.Printf("唤醒协程 %d\n", i)
+		ls.Unpark()
+		time.Sleep(100 * time.Millisecond) // 间隔唤醒
+	}
 }
+```
+</details>
 
-type UserDTO struct {
-	ID   int
-	Name string
-	Age  int
-}
+<details>
+<summary><b>🔤 文本处理</b></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/karosown/katool-go/words/jieba"
+)
 
 func main() {
-	user := User{ID: 1, Name: "Alice", Age: 30}
+	// 创建分词客户端
+	jb := jieba.New()
+	defer jb.Free() // 使用完必须释放资源
 	
-	// 属性复制
-	userDTO, _ := convert.CopyProperties(user, &UserDTO{})
+	// 精确模式分词
+	text := "我测试一下中文分词 Hello World"
+	words := jb.Cut(text)
+	fmt.Println(words) // ["我", "测试", "一下", "中文", "分词", "Hello", "World"]
 	
-	fmt.Printf("原始用户: %+v\n", user)     // 输出: 原始用户: {ID:1 Name:Alice Age:30}
-	fmt.Printf("转换后DTO: %+v\n", userDTO) // 输出: 转换后DTO: &{ID:1 Name:Alice Age:30}
+	// 全模式分词
+	text = "下面是一个简洁的Go语言SDK"
+	allWords := jb.CutAll(text)
+	fmt.Println(allWords) // 包含所有可能的分词结果
+	
+	// 搜索引擎模式分词 (更细粒度，适合搜索)
+	searchWords := jb.CutForSearch("清华大学位于北京市")
+	fmt.Println(searchWords) // ["清华", "华大", "大学", "位于", "北京", "北京市"]
+	
+	// 词频统计
+	wordFreq := jb.CutAll("重复的词重复的词重复的词").Frequency()
+	for word, count := range wordFreq {
+		fmt.Printf("%s: %d次\n", word, count)
+	}
 }
 ```
 </details>
@@ -244,23 +393,35 @@ XMap 提供了比标准 map 更丰富的功能：
 ```go
 import "github.com/karosown/katool-go/container/xmap"
 
-// 创建XMap
-m := xmap.New[string, int]()
+// 创建不同类型的Map
+regularMap := xmap.NewMap[string, int]()      // 普通Map
+safeMap := xmap.NewSafeMap[string, int]()     // 线程安全Map
+sortedMap := xmap.NewSortedMap[string, int]() // 有序Map
 
 // 设置值
-m.Put("one", 1)
-m.Put("two", 2)
+regularMap.Set("one", 1)
+safeMap.Set("one", 1)
+sortedMap.Set("one", 1)
 
-// 获取值
-val, exists := m.Get("one") // val=1, exists=true
+// 安全地获取或存储 (仅SafeMap支持)
+value, loaded := safeMap.LoadOrStore("two", 2) // 如果不存在则存储
+if !loaded {
+	fmt.Println("键'two'不存在，已存储值:", value) // 2
+}
+
+// 获取和删除 (仅SafeMap支持)
+value, exists := safeMap.LoadAndDelete("one")
+if exists {
+	fmt.Println("获取并删除键'one'的值:", value) // 1
+}
 
 // 遍历
-m.ForEach(func(k string, v int) {
-    fmt.Printf("%s: %d\n", k, v)
+regularMap.ForEach(func(k string, v int) {
+	fmt.Printf("%s: %d\n", k, v)
 })
 
-// 转换为流
-stream := m.Stream()
+// JSON序列化 (SortedMap按键排序)
+jsonBytes, _ := json.Marshal(sortedMap) 
 ```
 </details>
 
@@ -322,35 +483,59 @@ opt.IfPresent(func(v string) {
 <summary><b>🔄 基本操作</b></summary>
 
 ```go
-import "github.com/karosown/katool-go/container/stream"
+import (
+	"github.com/karosown/katool-go/container/stream"
+	"github.com/karosown/katool-go/algorithm"
+	"strconv"
+)
 
 // 准备数据
-users := []User{
-    {ID: 1, Name: "Alice", Age: 25},
-    {ID: 2, Name: "Bob", Age: 30},
-    {ID: 3, Name: "Charlie", Age: 35},
-    {ID: 4, Name: "David", Age: 40},
+users := []user{
+	{Name: "Alice", Age: 25, Class: "A"},
+	{Name: "Bob", Age: 30, Class: "B"},
+	{Name: "Charlie", Age: 35, Class: "A"},
+	{Name: "David", Age: 40, Class: "B"},
 }
 
-// 创建流
-s := stream.ToStream(&users)
+// 创建流 (可选并行处理)
+s := stream.ToStream(&users).Parallel()
 
 // 过滤操作
-filtered := s.Filter(func(u User) bool {
-    return u.Age > 30
-}).ToList() // [{ID:3 Name:Charlie Age:35}, {ID:4 Name:David Age:40}]
+filtered := s.Filter(func(u user) bool {
+	return u.Age > 30
+}).ToList() // [{Name:Charlie Age:35...}, {Name:David Age:40...}]
 
 // 映射操作
-names := stream.ToStream(&users).
-    Map(func(u User) any {
-        return u.Name
-    }).ToList() // ["Alice", "Bob", "Charlie", "David"]
+s.Map(func(u user) any {
+	return u.Name
+}).ForEach(func(name any) {
+	fmt.Println(name) // 输出所有名字
+})
 
 // 排序操作
-sorted := stream.ToStream(&users).
-    Sort(func(a, b User) bool {
-        return a.Age < b.Age // 按年龄升序
-    }).ToList()
+sorted := stream.ToStream(&users).Sort(func(a, b user) bool {
+	return a.Age < b.Age // 按年龄升序
+}).ToList()
+
+// 元素去重
+numbers := []int{1, 2, 3, 1, 2, 3, 4, 5}
+stream.ToStream(&numbers).Distinct().ToList() // [1, 2, 3, 4, 5]
+
+// 自定义去重 (使用自定义哈希函数)
+s.DistinctBy(algorithm.HASH_WITH_JSON_MD5).ToList()
+
+// 字符串操作
+arr := []int{1, 2, 3}
+result := stream.ToStream(&arr)
+	.Map(func(i int) any {
+		return strconv.Itoa(i) + "w" // 转为字符串并添加后缀
+	})
+	.Reduce("", func(sum any, item any) any {
+		return sum.(string) + item.(string) // 拼接字符串
+	}, func(sum1, sum2 any) any {
+		return sum1.(string) + sum2.(string) // 拼接结果合并
+	})
+// result = "1w2w3w"
 ```
 </details>
 
@@ -359,39 +544,49 @@ sorted := stream.ToStream(&users).
 
 ```go
 // 分组操作
-groups := stream.ToStream(&users).
-    GroupBy(func(u User) any {
-        if u.Age < 30 {
-            return "young"
-        }
-        return "senior"
-    }) // map[young:[{ID:1 Name:Alice Age:25}] senior:[{ID:2 Name:Bob Age:30}, ...]]
+classGroups := stream.ToStream(&users).GroupBy(func(u user) any {
+	return u.Class
+}) // map["A":[用户列表], "B":[用户列表]]
 
-// 并行处理
-result := stream.ToStream(&users).
-    Parallel(). // 启用并行处理
-    Filter(func(u User) bool {
-        return u.Age > 25
-    }).
-    Map(func(u User) any {
-        // 模拟耗时操作
-        time.Sleep(100 * time.Millisecond)
-        return u.Name
-    }).ToList()
-
-// 扁平化映射
-departments := []Department{
-    {Name: "Engineering", Members: []User{{Name: "Alice"}, {Name: "Bob"}}},
-    {Name: "Marketing", Members: []User{{Name: "Charlie"}, {Name: "David"}}},
+// 对每个分组进行统计
+for class, members := range classGroups {
+	fmt.Printf("班级: %s, 人数: %d\n", class, len(members))
+	
+	// 对每个分组创建流进行处理
+	maleCount := stream.ToStream(&members).Reduce(0, 
+		func(count any, u user) any {
+			return count.(int) + u.Sex // 假设Sex=0为女性，Sex=1为男性
+		}, 
+		func(a, b any) any {
+			return a.(int) + b.(int)
+		})
+	
+	fmt.Printf("  男生人数: %d\n", maleCount)
+	fmt.Printf("  女生人数: %d\n", len(members) - maleCount.(int))
 }
 
-allMembers := stream.ToStream(&departments).
-    FlatMap(func(d Department) *stream.Stream[any, []any] {
-        members := d.Members
-        return stream.ToStream(&members).Map(func(u User) any {
-            return u.Name
-        })
-    }).ToList() // ["Alice", "Bob", "Charlie", "David"]
+// 扁平化操作 (将多个集合合并处理)
+nameChars := stream.ToStream(&users).FlatMap(func(u user) *stream.Stream[any, []any] {
+	// 将每个用户名拆分为字符
+	chars := []rune(u.Name)
+	array := convert.ToAnySlice(chars)
+	return stream.ToStream(&array)
+}).ToList()
+// 结果为所有用户名中的字符列表
+
+// 转换为Map
+userMap := stream.ToStream(&users).ToMap(
+	func(index int, u user) any {
+		return u.Id // 键
+	}, 
+	func(index int, u user) any {
+		return u.Name // 值
+	}
+) // map[1:"Alice" 2:"Bob" 3:"Charlie" 4:"David"]
+
+// 类型安全转换
+anySlice := convert.ToAnySlice(users)
+typedUsers := stream.FromAnySlice[user, []user](anySlice).ToList()
 ```
 </details>
 
@@ -399,35 +594,36 @@ allMembers := stream.ToStream(&departments).
 <summary><b>📊 收集操作</b></summary>
 
 ```go
-// 转换为列表
-list := stream.ToStream(&users).ToList()
+// 求和统计
+sum := stream.ToStream(&users).Reduce(0, 
+	func(acc any, u user) any {
+		return acc.(int) + u.Age
+	}, 
+	func(a, b any) any {
+		return a.(int) + b.(int)
+	}
+).(int) // sum=130
 
-// 转换为映射
-userMap := stream.ToStream(&users).
-    ToMap(func(i int, u User) any {
-        return u.ID // 键
-    }, func(i int, u User) any {
-        return u.Name // 值
-    }) // map[1:"Alice" 2:"Bob" 3:"Charlie" 4:"David"]
+// 统计元素数量
+count := stream.ToStream(&users).Count() // 4
 
-// 汇总统计
-sum := stream.ToStream(&users).
-    Reduce(0, func(acc any, u User) any {
-        return acc.(int) + u.Age
-    }, func(a, b any) any {
-        return a.(int) + b.(int)
-    }).(int) // sum=130
+// 条件统计
+seniorCount := stream.ToStream(&users)
+	.Filter(func(u user) bool { 
+		return u.Age >= 60 
+	})
+	.Count() // 年龄大于等于60的人数
 
-// 自定义收集
-result := stream.ToStream(&users).
-    Collect(func(data stream.Options[User], srcData []User) any {
-        // 自定义收集逻辑
-        total := 0
-        for _, opt := range data {
-            total += opt.opt.Age
-        }
-        return total / len(data)
-    }).(int) // 平均年龄
+// 聚合统计
+totalMoney := stream.ToStream(&users).Reduce(int64(0),
+	func(sum any, u user) any {
+		return sum.(int64) + int64(u.Money)
+	},
+	func(sum1, sum2 any) any {
+		return sum1.(int64) + sum2.(int64)
+	}
+).(int64)
+fmt.Printf("总金额: %d\n", totalMoney)
 ```
 </details>
 
@@ -441,16 +637,16 @@ import "github.com/karosown/katool-go/convert"
 
 // 源对象和目标对象
 type Source struct {
-    ID   int
-    Name string
-    Age  int
+	ID   int
+	Name string
+	Age  int
 }
 
 type Destination struct {
-    ID   int
-    Name string
-    Age  int
-    Extra string // 额外字段
+	ID   int
+	Name string
+	Age  int
+	Extra string // 额外字段
 }
 
 // 复制属性
@@ -473,17 +669,17 @@ str = convert.ToString([]int{1, 2, 3}) // "[1,2,3]"
 
 // 类型批量转换
 type UserDTO struct {
-    ID   string
-    Name string
+	ID   string
+	Name string
 }
 
 users := []User{{ID: 1, Name: "Alice"}, {ID: 2, Name: "Bob"}}
 
 dtos := convert.Convert(users, func(u User) UserDTO {
-    return UserDTO{
-        ID:   convert.ToString(u.ID),
-        Name: u.Name,
-    }
+	return UserDTO{
+		ID:   convert.ToString(u.ID),
+		Name: u.Name,
+	}
 })
 // dtos=[{ID:"1" Name:"Alice"}, {ID:"2" Name:"Bob"}]
 
@@ -503,25 +699,25 @@ import "github.com/karosown/katool-go/container/ioc"
 
 // 定义接口和实现
 type UserRepository interface {
-    FindByID(id int) string
+	FindByID(id int) string
 }
 
 type UserRepositoryImpl struct{}
 
 func (r *UserRepositoryImpl) FindByID(id int) string {
-    return fmt.Sprintf("User %d", id)
+	return fmt.Sprintf("User %d", id)
 }
 
 type UserService interface {
-    GetUser(id int) string
+	GetUser(id int) string
 }
 
 type UserServiceImpl struct {
-    Repository UserRepository
+	Repository UserRepository
 }
 
 func (s *UserServiceImpl) GetUser(id int) string {
-    return s.Repository.FindByID(id)
+	return s.Repository.FindByID(id)
 }
 
 // 注册组件
@@ -529,8 +725,8 @@ ioc.RegisterValue("userRepo", &UserRepositoryImpl{})
 
 // 注册工厂方法
 ioc.Register("userService", func() any {
-    repo := ioc.Get("userRepo").(UserRepository)
-    return &UserServiceImpl{Repository: repo}
+	repo := ioc.Get("userRepo").(UserRepository)
+	return &UserServiceImpl{Repository: repo}
 })
 
 // 获取服务
@@ -547,24 +743,47 @@ repo := ioc.GetDef("missingRepo", &UserRepositoryImpl{})
 <details>
 <summary><b>⏱️ LockSupport</b></summary>
 
+LockSupport 提供了类似 Java 的 park/unpark 机制，用于协程间的精确控制：
+
 ```go
-import "github.com/karosown/katool-go/lock"
+import (
+	"github.com/karosown/katool-go/lock"
+	"fmt"
+	"time"
+)
 
 // 创建LockSupport
 ls := lock.NewLockSupport()
 
-// 在协程中使用
+// 在单个协程中使用
 go func() {
-    fmt.Println("协程开始")
-    ls.Park() // 阻塞协程
-    fmt.Println("协程继续")
+	fmt.Println("协程开始")
+	ls.Park() // 阻塞当前协程，直到有人调用Unpark
+	fmt.Println("协程继续执行") // 只有在Unpark后才会执行
 }()
 
-// 等待一段时间
-time.Sleep(time.Second)
-
-// 恢复协程
+time.Sleep(time.Second) // 等待协程启动
+fmt.Println("主协程准备唤醒子协程")
 ls.Unpark() // 解除阻塞
+
+// 多个LockSupport的管理
+locks := make([]*lock.LockSupport, 10)
+for i := 0; i < 10; i++ {
+	locks[i] = lock.NewLockSupport()
+	
+	go func(i int, support *lock.LockSupport) {
+		fmt.Printf("协程 %d 等待唤醒\n", i)
+		support.Park()
+		fmt.Printf("协程 %d 被唤醒\n", i)
+	}(i, locks[i])
+}
+
+// 使用流式API依次唤醒
+stream.ToStream(&locks).ForEach(func(support *lock.LockSupport) {
+	fmt.Println("准备唤醒")
+	support.Unpark()
+	time.Sleep(100 * time.Millisecond) // 间隔唤醒
+})
 ```
 </details>
 
@@ -572,17 +791,23 @@ ls.Unpark() // 解除阻塞
 <summary><b>🔐 同步工具</b></summary>
 
 ```go
+import (
+	"github.com/karosown/katool-go/lock"
+	"sync"
+)
+
 // 同步代码块
 mutex := &sync.Mutex{}
 counter := 0
 
 lock.Synchronized(mutex, func() {
-    // 临界区代码
-    counter++
+	// 临界区代码
+	counter++
 })
 
 // 锁映射
-lockMap := lock.LockMap{}
+lockMap := lock.NewLockMap()
+// 适用于需要对不同对象分别加锁的场景
 ```
 </details>
 
@@ -597,18 +822,18 @@ import "github.com/karosown/katool-go/web_crawler"
 // 获取文章内容
 article, err := web_crawler.FromURL("https://example.com", 30*time.Second)
 if err == nil {
-    fmt.Println("标题:", article.Title)
-    fmt.Println("内容:", article.Content)
-    fmt.Println("长度:", article.Length)
-    fmt.Println("摘要:", article.Excerpt)
+	fmt.Println("标题:", article.Title)
+	fmt.Println("内容:", article.Content)
+	fmt.Println("长度:", article.Length)
+	fmt.Println("摘要:", article.Excerpt)
 }
 
 // 使用自定义请求选项
 article, err = web_crawler.FromURLWithOptions("https://example.com", 
-    30*time.Second, 
-    func(r *http.Request) {
-        r.Header.Set("User-Agent", "Mozilla/5.0...")
-    })
+	30*time.Second, 
+	func(r *http.Request) {
+		r.Header.Set("User-Agent", "Mozilla/5.0...")
+	})
 
 // 解析路径
 absolutePath := web_crawler.ParsePath("https://example.com/page", "./image.jpg")
@@ -625,14 +850,14 @@ import "github.com/karosown/katool-go/web_crawler/rss"
 // 解析RSS源
 feed, err := rss.ParseURL("https://example.com/feed.xml")
 if err == nil {
-    fmt.Println("源标题:", feed.Title)
-    
-    // 遍历条目
-    for _, item := range feed.Items {
-        fmt.Println("- 文章:", item.Title)
-        fmt.Println("  链接:", item.Link)
-        fmt.Println("  发布时间:", item.PubDate)
-    }
+	fmt.Println("源标题:", feed.Title)
+	
+	// 遍历条目
+	for _, item := range feed.Items {
+		fmt.Println("- 文章:", item.Title)
+		fmt.Println("  链接:", item.Link)
+		fmt.Println("  发布时间:", item.PubDate)
+	}
 }
 ```
 </details>
@@ -647,8 +872,8 @@ import "github.com/karosown/katool-go/file/file_downloader"
 
 // 下载文件
 downloader := file_downloader.NewDownloader(
-    file_downloader.WithTimeout(30*time.Second),
-    file_downloader.WithRetries(3),
+	file_downloader.WithTimeout(30*time.Second),
+	file_downloader.WithRetries(3),
 )
 err := downloader.Download("https://example.com/file.zip", "local.zip")
 ```
@@ -677,8 +902,8 @@ err = file_serialize.DeserializeFromFile("data.json", &result)
 
 ```go
 import (
-    "github.com/karosown/katool-go/db/xmongo"
-    "go.mongodb.org/mongo-driver/bson"
+	"github.com/karosown/katool-go/db/xmongo"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // 创建MongoDB客户端
@@ -687,8 +912,8 @@ coll := client.Database("test").Collection("users")
 
 // 插入文档
 _, err := coll.InsertOne(context.Background(), bson.M{
-    "name": "Alice",
-    "age":  30,
+	"name": "Alice",
+	"age":  30,
 })
 ```
 </details>
@@ -704,10 +929,10 @@ p := pager.NewPager(1, 10) // 第1页，每页10条
 query := bson.M{"age": bson.M{"$gt": 25}}
 
 cursor, err := coll.Find(context.Background(), query).
-    Skip(p.Skip()).
-    Limit(p.Limit()).
-    Sort(bson.M{"name": 1}).
-    Cursor()
+	Skip(p.Skip()).
+	Limit(p.Limit()).
+	Sort(bson.M{"name": 1}).
+	Cursor()
 ```
 </details>
 
@@ -723,8 +948,8 @@ import "github.com/karosown/katool-go/net/http"
 client := http.NewRemoteRequest("https://api.example.com")
 resp, err := client.Get("/users")
 if err == nil {
-    var users []User
-    resp.UnmarshalJson(&users)
+	var users []User
+	resp.UnmarshalJson(&users)
 }
 
 // POST请求与JSON
@@ -738,10 +963,10 @@ resp, err = client.PostJson("/users", User{Name: "Alice", Age: 30})
 ```go
 // OAuth2支持
 oauth := http.NewOAuth2Request(
-    "https://api.example.com",
-    "client_id",
-    "client_secret",
-    "https://auth.example.com/token",
+	"https://api.example.com",
+	"client_id",
+	"client_secret",
+	"https://auth.example.com/token",
 )
 resp, err = oauth.Get("/protected-resource")
 ```
@@ -785,15 +1010,15 @@ import "github.com/karosown/katool-go/xlog"
 
 // 创建自定义logger
 logger := xlog.NewLogger(
-    xlog.WithLevel(xlog.InfoLevel),
-    xlog.WithFormat(xlog.JSONFormat),
-    xlog.WithOutput("app.log"),
+	xlog.WithLevel(xlog.InfoLevel),
+	xlog.WithFormat(xlog.JSONFormat),
+	xlog.WithOutput("app.log"),
 )
 
 logger.Info("应用启动")
 logger.WithFields(xlog.Fields{
-    "user": "admin",
-    "action": "login",
+	"user": "admin",
+	"action": "login",
 }).Info("用户登录")
 ```
 </details>
@@ -810,9 +1035,13 @@ import "github.com/karosown/katool-go/algorithm"
 arr1 := []int{1, 3, 5}
 arr2 := []int{2, 4, 6}
 merged := algorithm.MergeSortedArrayWithEntity[int](func(a, b int) bool {
-    return a < b // 升序
+	return a < b // 升序
 })(arr1, arr2)
 // merged = [1, 2, 3, 4, 5, 6]
+
+// 更多合并函数
+result := algorithm.MergeSortedArrayWithPrimaryData[MyType](false, hashFunc)(array1, array2)
+result := algorithm.MergeSortedArrayWithPrimaryId[MyType](false, idFunc)(array1, array2)
 ```
 </details>
 
@@ -824,6 +1053,41 @@ merged := algorithm.MergeSortedArrayWithEntity[int](func(a, b int) bool {
 data := map[string]any{"id": 123, "name": "test"}
 hash := algorithm.HASH_WITH_JSON(data) // 使用JSON序列化计算哈希
 md5Hash := algorithm.HASH_WITH_JSON_MD5(data) // 使用MD5计算哈希
+sumHash := algorithm.HASH_WITH_JSON_SUM(data) // 使用累加计算哈希
+```
+</details>
+
+### 🔤 文本处理
+
+<details>
+<summary><b>📝 中文分词</b></summary>
+
+```go
+import "github.com/karosown/katool-go/words/cgojieba"
+
+// 创建分词客户端
+jb := jieba.New()
+defer jb.Free() // 使用完必须释放资源
+
+// 精确模式分词
+text := "我测试一下中文分词 Hello World"
+words := jb.Cut(text)
+fmt.Println(words) // ["我", "测试", "一下", "中文", "分词", "Hello", "World"]
+
+// 全模式分词
+text = "下面是一个简洁的Go语言SDK"
+allWords := jb.CutAll(text)
+fmt.Println(allWords) // 包含所有可能的分词结果
+
+// 搜索引擎模式分词 (更细粒度，适合搜索)
+searchWords := jb.CutForSearch("清华大学位于北京市")
+fmt.Println(searchWords) // ["清华", "华大", "大学", "位于", "北京", "北京市"]
+
+// 词频统计
+wordFreq := jb.CutAll("下面是一个简洁的Go语言SDK，封装了 gojieba 库以简化中文分词的调用").Frequency()
+for word, count := range wordFreq {
+	fmt.Printf("%s: %d次\n", word, count)
+}
 ```
 </details>
 
@@ -873,8 +1137,8 @@ exists := pathutil.Exists("data.json")
 
 ```go
 import (
-    "github.com/karosown/katool-go/util/dumper"
-    "github.com/karosown/katool-go/sys"
+	"github.com/karosown/katool-go/util/dumper"
+	"github.com/karosown/katool-go/sys"
 )
 
 // 调试工具
@@ -896,50 +1160,32 @@ sys.Panic("发生严重错误") // 会导致panic
 - 对于大数据集，使用 `Parallel()` 开启并行处理
 - 使用 `Reduce` 时注意提供合适的初始值和合并函数
 - 在链式操作中，尽量将过滤操作放在前面，减少后续处理的数据量
+- 根据实际测试案例，流式处理在处理大量数据时比传统循环更具可读性
 
 ```go
-// ✅ 推荐写法
-result := stream.ToStream(&largeDataset).
-    Parallel().                // 启用并行处理
-    Filter(func(d Data) bool { // 先过滤，减少数据量
-        return d.IsValid
-    }).
-    Map(func(d Data) any {     // 然后转换
-        return d.Value
-    }).
-    ToList()
+// ✅ 推荐写法：先过滤再转换
+result := stream.ToStream(&users).
+	Parallel().  // 启用并行处理
+	Filter(func(u user) bool { 
+		return u.Sex != 0 // 先过滤，减少数据量
+	}).
+	Map(func(u user) any {
+		// 对过滤后的数据进行转换
+		return u.Name
+	}).
+	ToList()
 
-// ❌ 不推荐写法
-result := stream.ToStream(&largeDataset).
-    Map(func(d Data) any {     // 先转换所有数据
-        return d.Value
-    }).
-    Filter(func(d Data) bool { // 再过滤
-        return d.IsValid
-    }).
-    ToList()
-```
-</details>
-
-<details>
-<summary><b>💉 依赖注入</b></summary>
-
-- 优先注册接口而非具体实现
-- 使用工厂方法注册有依赖关系的组件
-- 注意避免循环依赖
-
-```go
-// ✅ 推荐写法
-ioc.RegisterValue("userRepo", &UserRepositoryImpl{})
-ioc.Register("userService", func() any {
-    repo := ioc.Get("userRepo").(UserRepository)
-    return &UserServiceImpl{Repository: repo}
-})
-
-// ❌ 不推荐写法: 硬编码依赖
-ioc.RegisterValue("userService", &UserServiceImpl{
-    Repository: &UserRepositoryImpl{},
-})
+// ❌ 不推荐写法：先转换再过滤
+result := stream.ToStream(&users).
+	Map(func(u user) any {
+		// 转换所有数据，包括最终会被过滤掉的
+		return u.Name
+	}).
+	Filter(func(name any) bool {
+		// 过滤转换后的数据，浪费了转换资源
+		return someCondition
+	}).
+	ToList()
 ```
 </details>
 
@@ -948,45 +1194,70 @@ ioc.RegisterValue("userService", &UserServiceImpl{
 
 - 使用 `Synchronized` 替代直接操作锁，减少忘记解锁的风险
 - 注意协程泄漏，确保每个 `Park()` 都有对应的 `Unpark()`
-- 在高并发场景下，考虑使用 `LockMap` 减少锁冲突
+- 推荐使用 `defer` 语句确保资源被正确释放
+- 对于多个 `LockSupport` 的管理，可结合流式处理进行批量操作
 
 ```go
-// ✅ 推荐写法
-mutex := &sync.Mutex{}
-lock.Synchronized(mutex, func() {
-    // 临界区代码
+// ✅ 推荐写法：使用流式API管理多个LockSupport
+supports := make([]*lock.LockSupport, n)
+for i := 0; i < n; i++ {
+	supports[i] = lock.NewLockSupport()
+	// 启动工作协程...
+}
+
+// 批量唤醒所有协程
+stream.ToStream(&supports).ForEach(func(ls *lock.LockSupport) {
+	ls.Unpark()
 })
 
-// ❌ 不推荐写法: 容易忘记解锁
-mutex.Lock()
-// 临界区代码
-mutex.Unlock()
+// ✅ 推荐写法：使用defer确保Unpark
+func someFunction() {
+	ls := lock.NewLockSupport()
+	done := false
+	
+	go func() {
+		defer func() { done = true }()
+		// 执行某些操作...
+		ls.Park() // 阻塞等待信号
+		// 继续操作...
+	}()
+	
+	// 等待条件满足
+	for !done {
+		// 检查条件...
+		if conditionMet {
+			ls.Unpark() // 发送信号
+			break
+		}
+		time.Sleep(checkInterval)
+	}
+}
 ```
 </details>
 
 <details>
-<summary><b>🔄 数据转换</b></summary>
+<summary><b>🔤 文本处理</b></summary>
 
-- 使用 `CopyProperties` 时注意字段类型和名称匹配
-- 对于复杂对象，考虑实现自定义转换逻辑
-- 使用泛型版本的 `Convert` 函数处理批量转换
+- 使用 `jieba` 分词时，记得使用 `defer` 确保调用 `Free()` 释放资源
+- 根据不同需求选择合适的分词模式：
+  - `Cut`: 精确模式，适合文本分析和提取关键信息
+  - `CutAll`: 全模式，会把句子中所有可能的词都扫描出来
+  - `CutForSearch`: 搜索引擎模式，在精确模式基础上对长词再次切分
+- 使用 `Frequency()` 方法可以快速获取文本中的词频统计
 
 ```go
-// ✅ 推荐写法: 使用泛型Convert
-dtos := convert.Convert(users, func(u User) UserDTO {
-    return UserDTO{
-        ID:   convert.ToString(u.ID),
-        Name: u.Name,
-    }
-})
-
-// ❌ 不推荐写法: 手动循环转换
-dtos := make([]UserDTO, len(users))
-for i, u := range users {
-    dtos[i] = UserDTO{
-        ID:   convert.ToString(u.ID),
-        Name: u.Name,
-    }
+// ✅ 推荐写法：资源管理
+func processText(text string) map[string]int {
+	client := jieba.New()
+	defer client.Free() // 确保资源释放
+	
+	// 根据需求选择合适的分词模式
+	words := client.Cut(text)      // 一般场景
+	// 或
+	words = client.CutForSearch(text) // 搜索场景
+	
+	// 词频统计
+	return words.Frequency()
 }
 ```
 </details>

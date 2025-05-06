@@ -1,6 +1,7 @@
-package jieba
+package cgojieba
 
 import (
+	"github.com/karosown/katool-go/words/split"
 	"github.com/yanyiwu/gojieba"
 )
 
@@ -22,16 +23,16 @@ func (j *Client) Free() {
 }
 
 // Cut 精确模式分词
-func (j *Client) Cut(text string) SplitStrings {
+func (j *Client) Cut(text string) split.SplitStrings {
 	return j.jieba.Cut(text, true)
 }
 
 // CutAll 全模式分词
-func (j *Client) CutAll(text string) SplitStrings {
+func (j *Client) CutAll(text string) split.SplitStrings {
 	return j.jieba.Cut(text, false)
 }
 
 // CutForSearch 搜索引擎模式分词
-func (j *Client) CutForSearch(text string) SplitStrings {
+func (j *Client) CutForSearch(text string) split.SplitStrings {
 	return j.jieba.CutForSearch(text, true)
 }
