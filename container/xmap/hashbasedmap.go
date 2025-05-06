@@ -1,4 +1,4 @@
-package hash_based_map
+package xmap
 
 type HashBasedMap[K1, K2, V comparable] struct {
 	m map[K1]map[K2]V

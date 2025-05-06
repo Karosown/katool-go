@@ -18,4 +18,8 @@ func TestLanguate(t *testing.T) {
 	println(words.OnlyLanguage("卧槽", unicode.Han))
 	println(words.OnlyLanguage("卧槽12313", unicode.Han))
 	println(words.OnlyLanguage("卧槽12313", unicode.Han, unicode.Number))
+	println("------")
+	println(words.SubString("```json\n"+
+		"{测试}\n"+
+		"```", "```json", "```"))
 }
