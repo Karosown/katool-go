@@ -21,10 +21,10 @@ type CollectionFactory[T any] struct {
 	*options.Client
 	coll   *mongo.Collection
 	logger xlog.Logger
-	before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper) context.Context
+	before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper) (context.Context, error)
 }
 
-func NewCollectionFactory[T any](client *options.Client, coll *mongo.Collection, logger xlog.Logger, before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper) context.Context) *CollectionFactory[T] {
+func NewCollectionFactory[T any](client *options.Client, coll *mongo.Collection, logger xlog.Logger, before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper) (context.Context, error)) *CollectionFactory[T] {
 	return &CollectionFactory[T]{Client: client, coll: coll, logger: logger, before: before}
 }
 func newCollection[T any](client *options.Client, coll *mongo.Collection, logger xlog.Logger, filter ...wrapper.QueryWrapper) *Collection[T] {
