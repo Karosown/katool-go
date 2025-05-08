@@ -2,6 +2,8 @@ package lock
 
 import (
 	"sync"
+
+	"github.com/karosown/katool-go/container/xmap"
 )
 
 type LockSupport struct {
@@ -48,5 +50,20 @@ func Synchronized(locker sync.Locker, f func()) {
 	defer locker.Unlock()
 	f()
 }
+func SynchronizedErr(locker sync.Locker, f func() error) error {
+	locker.Lock()
+	defer locker.Unlock()
+	return f()
+}
+func SynchronizedT[T any](locker sync.Locker, f func() T) T {
+	locker.Lock()
+	defer locker.Unlock()
+	return f()
+}
+func SynchronizedTErr[T any](locker sync.Locker, f func() T, err error) T {
+	locker.Lock()
+	defer locker.Unlock()
+	return f()
+}
 
-type LockMap map[string]sync.Locker
+type LockMap xmap.SafeMap[string, sync.Locker]
