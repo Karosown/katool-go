@@ -105,7 +105,18 @@ func (c *Collection[T]) Page(ctx context.Context, result *[]T, page *pager.Pager
 }
 
 func (c *Collection[T]) UpdateOne(ctx context.Context, update *T, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	return c.coll.UpdateOne(ctx, c.filter(), mongoutil.StructToUpdateBSON(update, true), opts...)
+	if c.before != nil {
+		transaction, err := c.Transaction(ctx, func(stx mongo.SessionContext) (any, error) {
+			ctx, err := c.before(stx, "UpdateOne", c.coll.Database().Name(), c.coll.Name(), &c.qw, update)
+			if err != nil {
+				return ctx, err
+			}
+			return c.coll.UpdateOne(ctx, c.filter(), mongoutil.StructToUpdateBSON(update, true), opts...)
+		})
+		return transaction.(*mongo.UpdateResult), err
+	} else {
+		return c.coll.UpdateOne(ctx, c.filter(), mongoutil.StructToUpdateBSON(update, true), opts...)
+	}
 }
 
 func (c *Collection[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
