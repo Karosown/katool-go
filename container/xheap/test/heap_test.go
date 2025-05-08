@@ -68,7 +68,7 @@ func TestFixAndRemove(t *testing.T) {
 	h.Fix(2)
 
 	if top, _ := h.Peek(); top != 0 {
-		t.Fatalf("after Fix, top=%d, want 0", top)
+		t.Fatalf("before Fix, top=%d, want 0", top)
 	}
 
 	// 删除索引 1（任意位置）并检测数量

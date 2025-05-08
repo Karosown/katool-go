@@ -39,7 +39,7 @@ func setupTestMongoClient(t *testing.T) *xmongo.CollectionFactoryBuilder[UserInf
 	assert.NoError(t, err)
 
 	// Create a new client with a test database name
-	return xmongo.NewCollectionFactoryBuilder[UserInfo]("test_db", nil, client)
+	return xmongo.NewCollectionFactoryBuilder[UserInfo]("test_db", nil, nil, client)
 }
 
 func cleanupTestMongoClient(t *testing.T, client *xmongo.CollectionFactoryBuilder[UserInfo]) {
@@ -115,7 +115,7 @@ func TestNewMongoClient(t *testing.T) {
 	defer client.Disconnect(ctx)
 
 	// Test creating a new client
-	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("test_db", nil, client)
+	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("test_db", nil, nil, client)
 	assert.NotNil(t, mongoClient)
 	assert.Equal(t, "katool:xmongdb:test_db", mongoClient.DBName)
 }
@@ -129,7 +129,7 @@ func TestAll(t *testing.T) {
 	defer client.Disconnect(ctx)
 
 	// 创建MongoClient
-	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("eshop", nil, client)
+	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("eshop", nil, nil, client)
 
 	// 获取集合
 	collection := mongoClient.CollName("userinfos").Identity()
@@ -212,7 +212,7 @@ func TestTransaction(t *testing.T) {
 	defer client.Disconnect(ctx)
 
 	// 创建MongoClient
-	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("eshop", nil, client)
+	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("eshop", nil, nil, client)
 
 	// 获取集合
 	collection := mongoClient.CollName("userinfos").Identity()

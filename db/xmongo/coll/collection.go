@@ -20,6 +20,7 @@ type Collection[T any] struct {
 	coll   *mongo.Collection
 	qw     wrapper.QueryWrapper
 	logger xlog.Logger
+	before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper) context.Context
 }
 
 func (c *Collection[T]) Query(filter wrapper.QueryWrapper) *Collection[T] {
@@ -28,7 +29,11 @@ func (c *Collection[T]) Query(filter wrapper.QueryWrapper) *Collection[T] {
 	}
 	return newCollection[T](c.Client, c.coll, c.logger, filter)
 }
+
 func (c *Collection[T]) InsertOne(ctx context.Context, document *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+	if c.before != nil {
+		ctx = c.before(ctx, "InsertOne", c.coll.Database().Name(), c.coll.Name(), &c.qw)
+	}
 	return c.coll.InsertOne(ctx, document, opts...)
 }
 
@@ -41,6 +46,9 @@ func (c *Collection[T]) FindOne(ctx context.Context, result *T, opts ...*options
 }
 
 func (c *Collection[T]) List(ctx context.Context, result *[]T, opts ...*options.FindOptions) error {
+	if c.before != nil {
+		ctx = c.before(ctx, "InsertOne", c.coll.Database().Name(), c.coll.Name(), &c.qw)
+	}
 	cur, err := c.coll.Find(ctx, c.filter(), opts...)
 	if err != nil {
 		return err
@@ -48,13 +56,15 @@ func (c *Collection[T]) List(ctx context.Context, result *[]T, opts ...*options.
 	err = cur.All(ctx, result)
 	return err
 }
-func (c *Collection[T]) Count(ctx context.Context, filter interface {
-}, opts ...*options.CountOptions) (int64, error) {
+func (c *Collection[T]) Count(ctx context.Context, opts ...*options.CountOptions) (int64, error) {
+	if c.before != nil {
+		ctx = c.before(ctx, "InsertOne", c.coll.Database().Name(), c.coll.Name(), &c.qw)
+	}
 	return c.coll.CountDocuments(ctx, c.filter(), opts...)
 }
 
 func (c *Collection[T]) Page(ctx context.Context, result *[]T, page *pager.Pager) error {
-	documents, err := c.Count(ctx, c.filter())
+	documents, err := c.Count(ctx)
 	if err != nil {
 		return err
 	}
@@ -74,6 +84,9 @@ func (c *Collection[T]) UpdateOne(ctx context.Context, update *T, opts ...*optio
 }
 
 func (c *Collection[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	if c.before != nil {
+		ctx = c.before(ctx, "InsertOne", c.coll.Database().Name(), c.coll.Name(), &c.qw)
+	}
 	return c.coll.DeleteOne(ctx, c.filter(), opts...)
 }
 func (c *Collection[T]) SoftDelete(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.DeleteResult, error) {
@@ -83,7 +96,9 @@ func (c *Collection[T]) SoftDelete(ctx context.Context, opts ...*options.UpdateO
 			wrapper.DeletedField: primitive.NewDateTimeFromTime(time.Now()),
 		},
 	}
-
+	if c.before != nil {
+		ctx = c.before(ctx, "InsertOne", c.coll.Database().Name(), c.coll.Name(), &c.qw)
+	}
 	// 使用UpdateOne而不是DeleteOne
 	result, err := c.coll.UpdateMany(ctx, c.filter(), update, opts...)
 	if err != nil {

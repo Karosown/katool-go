@@ -3,6 +3,7 @@ package xmongo
 import (
 	"context"
 	"fmt"
+	"github.com/karosown/katool-go/db/xmongo/wrapper"
 	"slices"
 
 	"github.com/karosown/katool-go/container/cutil"
@@ -20,6 +21,7 @@ type CollectionFactoryBuilder[T any] struct {
 	DB     *options.Client
 	DBName string
 	logger xlog.Logger
+	before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper) context.Context
 }
 
 func (m *CollectionFactoryBuilder[T]) CollName(name string) *coll.CollectionFactory[T] {
@@ -28,7 +30,7 @@ func (m *CollectionFactoryBuilder[T]) CollName(name string) *coll.CollectionFact
 		background := context.Background()
 		names, err := db.ListCollectionNames(background, bson.D{})
 		if err != nil {
-			return coll.NewCollectionFactory[T](m.DB, db.Collection(name), m.logger)
+			return coll.NewCollectionFactory[T](m.DB, db.Collection(name), m.logger, m.before)
 		}
 		if !slices.Contains(names, name) {
 			err = db.CreateCollection(background, name)
@@ -37,11 +39,11 @@ func (m *CollectionFactoryBuilder[T]) CollName(name string) *coll.CollectionFact
 				sys.Panic(err)
 			}
 		}
-		return coll.NewCollectionFactory[T](m.DB, db.Collection(name), m.logger)
+		return coll.NewCollectionFactory[T](m.DB, db.Collection(name), m.logger, m.before)
 	})
 }
 
-func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, mc ...*mongo.Client) *CollectionFactoryBuilder[T] {
+func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper) context.Context, mc ...*mongo.Client) *CollectionFactoryBuilder[T] {
 	ik := "katool:xmongdb:" + DBName
 	def := ioc.GetDef(ik, mc[0])
 	if cutil.IsBlank(def) {
@@ -51,5 +53,6 @@ func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, mc ..
 		&options.Client{def},
 		DBName,
 		logger,
+		before,
 	}
 }
