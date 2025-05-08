@@ -60,7 +60,7 @@ func SynchronizedT[T any](locker sync.Locker, f func() T) T {
 	defer locker.Unlock()
 	return f()
 }
-func SynchronizedTErr[T any](locker sync.Locker, f func() T, err error) T {
+func SynchronizedTErr[T any](locker sync.Locker, f func() (T, error)) (T, error) {
 	locker.Lock()
 	defer locker.Unlock()
 	return f()
