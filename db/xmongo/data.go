@@ -21,7 +21,7 @@ type CollectionFactoryBuilder[T any] struct {
 	DB     *options.Client
 	DBName string
 	logger xlog.Logger
-	before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper) (context.Context, error)
+	before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper, entity *T) (context.Context, error)
 }
 
 func (m *CollectionFactoryBuilder[T]) CollName(name string) *coll.CollectionFactory[T] {
@@ -43,7 +43,7 @@ func (m *CollectionFactoryBuilder[T]) CollName(name string) *coll.CollectionFact
 	})
 }
 
-func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper) (context.Context, error), mc ...*mongo.Client) *CollectionFactoryBuilder[T] {
+func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper, entity *T) (context.Context, error), mc ...*mongo.Client) *CollectionFactoryBuilder[T] {
 	ik := "katool:xmongdb:" + DBName
 	def := ioc.GetDef(ik, mc[0])
 	if cutil.IsBlank(def) {
