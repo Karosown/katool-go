@@ -66,4 +66,4 @@ func SynchronizedTErr[T any](locker sync.Locker, f func() (T, error)) (T, error)
 	return f()
 }
 
-type LockMap xmap.SafeMap[string, sync.Locker]
+type LockMap = xmap.SafeMap[string, sync.Locker]
