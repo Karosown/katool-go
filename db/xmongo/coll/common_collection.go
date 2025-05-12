@@ -13,6 +13,7 @@ import (
 	"github.com/karosown/katool-go/db/xmongo/wrapper"
 	"github.com/karosown/katool-go/sys"
 	"github.com/karosown/katool-go/xlog"
+	"github.com/spf13/cast"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -66,4 +67,17 @@ func (c *CollectionFactory[T]) Partition(key string, sizes ...int) *Collection[T
 		}
 		return newCollection[T](c.Client, c.coll.Database().Collection(partitionCollName), c.logger)
 	})
+}
+
+func (c *CollectionFactory[T]) All(sizes ...int) []*Collection[T] {
+	size := sizes[0]
+	if cutil.IsEmpty(sizes) {
+		size = 20
+	}
+	var res []*Collection[T]
+	for i := 0; i < size; i++ {
+		collection := newCollection[T](c.Client, c.coll.Database().Collection(c.coll.Name()+"_"+cast.ToString(i)), c.logger)
+		res = append(res, collection)
+	}
+	return res
 }
