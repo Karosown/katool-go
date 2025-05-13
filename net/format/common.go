@@ -7,7 +7,10 @@ type EmptyEnDecodeFormatNode struct {
 }
 
 func (c *EmptyEnDecodeFormatNode) ValidDecode(encode any) (bool, error) {
-	return c.BytesDecodeFormatValid.ValidDecode(encode)
+	return true, nil
+}
+func (c *EmptyEnDecodeFormatNode) ValidEncode(encode any) (bool, error) {
+	return true, nil
 }
 func (c *EmptyEnDecodeFormatNode) Encode(obj any) (any, error) {
 	return nil, nil
