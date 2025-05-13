@@ -13,8 +13,8 @@ func (c *EmptyEnDecodeFormatNode) ValidEncode(encode any) (bool, error) {
 	return true, nil
 }
 func (c *EmptyEnDecodeFormatNode) Encode(obj any) (any, error) {
-	return nil, nil
+	return obj, nil
 }
 func (c *EmptyEnDecodeFormatNode) Decode(encode any, back any) (any, error) {
-	return nil, nil
+	return encode, nil
 }
