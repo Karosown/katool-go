@@ -46,7 +46,7 @@ func (d *Util[T]) Dump(dumpNode ...format.EnDeCodeFormat) (any, error) {
 		head, iter := dumpNode[0], dumpNode[0]
 		reduce := stream.ToStream(&dumpNode).Reduce(iter, func(cntValue any, nxt format.EnDeCodeFormat) any {
 			iter = cntValue.(format.EnDeCodeFormat)
-			iter.Decode(d.data, nil)
+			//iter.Decode(d.data, nil)
 			iter.Then(nxt)
 			iter = nxt
 			return iter
