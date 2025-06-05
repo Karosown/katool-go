@@ -84,6 +84,59 @@ func (q *Query) createNestedFieldQuery(path string, value interface{}, operator 
 	return bson.M{field: nestedQuery}
 }
 
+// SortDirection defines the sort direction type
+type SortDirection int
+
+const (
+	// ASC for ascending order
+	ASC SortDirection = 1
+	// DESC for descending order
+	DESC SortDirection = -1
+)
+
+// Sort contains sorting information
+type Sort struct {
+	Field     string
+	Direction SortDirection
+}
+
+// OrderBy sets the sorting order for query results
+func (q *Query) OrderBy(column string, direction SortDirection) *Query {
+	// Initialize sort array if it doesn't exist
+	if q.query["$sort"] == nil {
+		q.query["$sort"] = []Sort{}
+	}
+
+	// Add the sort criteria
+	sorts := q.query["$sort"].([]Sort)
+	sorts = append(sorts, Sort{Field: column, Direction: direction})
+	q.query["$sort"] = sorts
+
+	return q
+}
+
+// ClearOrder removes all sorting criteria
+func (q *Query) ClearOrder() *Query {
+	delete(q.query, "$sort")
+	return q
+}
+
+// GetSortBson returns the sort specification in BSON format
+func (q *Query) GetSortBson() bson.D {
+	if q.query["$sort"] == nil {
+		return bson.D{}
+	}
+
+	sorts := q.query["$sort"].([]Sort)
+	sortDoc := bson.D{}
+
+	for _, sort := range sorts {
+		sortDoc = append(sortDoc, bson.E{Key: sort.Field, Value: sort.Direction})
+	}
+
+	return sortDoc
+}
+
 // Eq 等于条件
 func (q *Query) Eq(column string, value any) *Query {
 	if strings.Contains(column, ".") {
