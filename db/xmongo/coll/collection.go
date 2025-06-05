@@ -23,6 +23,10 @@ type Collection[T any] struct {
 	before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper, entity *T) (context.Context, error)
 }
 
+func (c *Collection[T]) Coll() *mongo.Collection {
+	return c.coll
+}
+
 func (c *Collection[T]) Query(filter wrapper.QueryWrapper) *Collection[T] {
 	if c.logger != nil {
 		c.logger.Info("MongoDB/DocumentDB Query Bson is {}", filter.ToJSON())

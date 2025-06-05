@@ -43,13 +43,11 @@ func (d *Util[T]) Dump(dumpNode ...format.EnDeCodeFormat) (any, error) {
 		sys.Panic("Must Not Nil of Dump Node Chain.")
 	}
 	if !cutil.IsEmpty(dumpNode) {
-		head, iter := dumpNode[0], dumpNode[0]
-		reduce := stream.ToStream(&dumpNode).Reduce(iter, func(cntValue any, nxt format.EnDeCodeFormat) any {
-			iter = cntValue.(format.EnDeCodeFormat)
-			iter.Decode(d.data, nil)
+		head := &format.EmptyEnDecodeFormatNode{}
+		reduce := stream.ToStream(&dumpNode).Reduce(head, func(cntValue any, nxt format.EnDeCodeFormat) any {
+			iter := cntValue.(format.EnDeCodeFormat)
 			iter.Then(nxt)
-			iter = nxt
-			return iter
+			return nxt
 		}, nil)
 		if reduce == nil {
 			sys.Panic("reduce is nil")

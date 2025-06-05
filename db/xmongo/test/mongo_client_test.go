@@ -210,7 +210,6 @@ func TestTransaction(t *testing.T) {
 		log.Fatalf("连接MongoDB失败: %v", err)
 	}
 	defer client.Disconnect(ctx)
-
 	// 创建MongoClient
 	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("eshop", nil, nil, client)
 
