@@ -32,6 +32,7 @@ func ReadRSS(xmlURL string) rss.RSS {
 	err := xml.Unmarshal([]byte(code.String()), r)
 	return *r.SetErr(err)
 }
+
 func ReadFeed(xmlURL string) rss.RSS {
 	code := ReadSourceCode(xmlURL, rss.SourceCodeGetFunc, func(page *rod.Page) {
 		page.MustWaitLoad()

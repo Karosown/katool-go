@@ -3,8 +3,9 @@ package xmongo
 import (
 	"context"
 	"fmt"
-	"github.com/karosown/katool-go/db/xmongo/wrapper"
 	"slices"
+
+	"github.com/karosown/katool-go/db/xmongo/wrapper"
 
 	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/db/xmongo/options"
@@ -21,6 +22,7 @@ type CollectionFactoryBuilder[T any] struct {
 	DB     *options.Client
 	DBName string
 	logger xlog.Logger
+	force  bool
 	before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper, entity *T) (context.Context, error)
 }
 
@@ -43,7 +45,7 @@ func (m *CollectionFactoryBuilder[T]) CollName(name string) *coll.CollectionFact
 	})
 }
 
-func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper, entity *T) (context.Context, error), mc ...*mongo.Client) *CollectionFactoryBuilder[T] {
+func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, force bool, before func(ctx context.Context, funcName, dbName, collName string, filter *wrapper.QueryWrapper, entity *T) (context.Context, error), mc ...*mongo.Client) *CollectionFactoryBuilder[T] {
 	ik := "katool:xmongdb:" + DBName
 	def := ioc.GetDef(ik, mc[0])
 	if cutil.IsBlank(def) {
@@ -53,6 +55,7 @@ func NewCollectionFactoryBuilder[T any](DBName string, logger xlog.Logger, befor
 		&options.Client{def},
 		DBName,
 		logger,
+		force,
 		before,
 	}
 }
