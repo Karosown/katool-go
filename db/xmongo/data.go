@@ -37,7 +37,7 @@ func (m *CollectionFactoryBuilder[T]) CollName(name string) *coll.CollectionFact
 		if !slices.Contains(names, name) {
 			err = db.CreateCollection(background, name)
 			// todo
-			if err != nil {
+			if m.force && err != nil {
 				sys.Panic(err)
 			}
 		}
