@@ -35,8 +35,12 @@ type DocumentPartitionHelper struct {
 }
 
 func NewDefPartitionHelper(tableName string, sizes ...int) *DocumentPartitionHelper {
-	replicas := optional.IsTrue(len(sizes) == 1 && sizes[0] != 0, sizes[0], 100000)
-	ringSize := optional.IsTrue(len(sizes) == 2 && sizes[1] != 0, sizes[1], 20)
+	replicas := optional.IsTrueByFunc(len(sizes) == 1 && sizes[0] != 0, func() int {
+		return sizes[0]
+	}, optional.Identity(100000))
+	ringSize := optional.IsTrueByFunc(len(sizes) == 2 && sizes[1] != 0, func() int {
+		return sizes[1]
+	}, optional.Identity(20))
 	return NewDocumentPartitionHelper(replicas, ringSize, tableName)
 }
 func NewDocumentPartitionHelper(replicas, ringSize int, tableBaseName string) *DocumentPartitionHelper {
