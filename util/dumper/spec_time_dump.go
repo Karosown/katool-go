@@ -27,30 +27,31 @@ func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...
 	if d.SyncMode {
 		toStream.Parallel()
 	}
-	return &Util[T]{
-		stream.FromAnySlice[T, []T](toStream.Map(func(i *dateutil.PeriodTime) any {
-			ts := exec(i.Start, i.End)
-			d2 := &TimeDumpTask[T]{
-				Util[T]{
-					ts,
-					nil,
-					d.SyncMode,
-					d.ExcludeEmpty,
-				},
-				*i,
-			}
+	list := stream.FromAnySlice[T, []T](toStream.Map(func(i *dateutil.PeriodTime) any {
+		ts := exec(i.Start, i.End)
+		d2 := &TimeDumpTask[T]{
+			Util[T]{
+				ts,
+				nil,
+				d.SyncMode,
+				d.ExcludeEmpty,
+			},
+			*i,
+		}
 
-			dump, err := d2.Dump(dumpNode...)
-			if err != nil {
-				return err
-			}
-			t, ok := dump.([]T)
-			if !ok {
-				sys.Panic("The Exec Handler Back Type Need Consistent Of SpecTimeUtil[T]，also []T")
-				return nil
-			}
-			return t
-		}).ToList()).ToList(),
+		dump, err := d2.Dump(dumpNode...)
+		if err != nil {
+			return err
+		}
+		t, ok := dump.([]T)
+		if !ok {
+			sys.Panic("The Exec Handler Back Type Need Consistent Of SpecTimeUtil[T]，also []T")
+			return nil
+		}
+		return t
+	}).ToList()).ToList()
+	return &Util[T]{
+		list,
 		nil,
 		d.SyncMode,
 		d.ExcludeEmpty,
