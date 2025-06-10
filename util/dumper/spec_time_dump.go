@@ -33,7 +33,7 @@ func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...
 			d2 := &TimeDumpTask[T]{
 				Util[T]{
 					ts,
-					nil,
+					&format.EmptyEnDecodeFormatNode{},
 					d.SyncMode,
 					d.ExcludeEmpty,
 				},
