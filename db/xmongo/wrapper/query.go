@@ -270,10 +270,7 @@ func BaseFilter(deletedFields ...string) QueryWrapper {
 	}
 
 	for _, field := range deletedFields {
-		wrapper[field] = bson.M{"$or": []bson.M{
-			{"$exists": false},
-			{"$eq": nil},
-		}}
+		wrapper[field] = bson.M{"$exists": false}
 	}
 
 	return wrapper
