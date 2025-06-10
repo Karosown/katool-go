@@ -50,7 +50,7 @@ func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...
 		}
 		return t
 	}).ToList()).Reduce([]T{}, func(cntValue any, nxt []T) any {
-		return append([]T{cntValue}, nxt...)
+		return append(cntValue.([]T), nxt...)
 	}, func(sum1, sum2 any) any {
 		return append(sum1.([]T), sum2.([]T)...)
 	}).([]T)
