@@ -44,9 +44,9 @@ func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...
 			if err != nil {
 				return err
 			}
-			t, ok := dump.(T)
+			t, ok := dump.([]T)
 			if !ok {
-				sys.Panic("The Exec Handler Back Type Need Consistent Of SpecTimeUtil[T]")
+				sys.Panic("The Exec Handler Back Type Need Consistent Of SpecTimeUtil[T]，also []T")
 			}
 			return t
 		}).ToList()).ToList(),
