@@ -11,7 +11,7 @@ import (
 	"github.com/karosown/katool-go/sys"
 )
 
-type SpecTimeUtil[T any] struct {
+type SpecTimeUtil[T any, R any] struct {
 	specTimes    []*dateutil.PeriodTime
 	SyncMode     bool
 	ExcludeEmpty bool
@@ -22,13 +22,13 @@ type TimeDumpTask[T any] struct {
 	dateutil.PeriodTime
 }
 
-func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...format.EnDeCodeFormat) *Util[any] {
+func (d *SpecTimeUtil[T, R]) Exec(exec func(start, end time.Time) []T, dumpNode ...format.EnDeCodeFormat) *Util[R] {
 	toStream := stream.ToStream(&d.specTimes)
 	if d.SyncMode {
 		toStream.Parallel()
 	}
-	return &Util[any]{
-		toStream.Map(func(i *dateutil.PeriodTime) any {
+	return &Util[R]{
+		stream.FromAnySlice[R, []R](toStream.Map(func(i *dateutil.PeriodTime) any {
 			ts := exec(i.Start, i.End)
 			d2 := &TimeDumpTask[T]{
 				Util[T]{
@@ -44,15 +44,15 @@ func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...
 			if err != nil {
 				return err
 			}
-			return dump
-		}).ToList(),
+			return dump.(R)
+		}).ToList()).ToList(),
 		nil,
 		d.SyncMode,
 		d.ExcludeEmpty,
 	}
 }
 
-func (d *SpecTimeUtil[T]) Sync() *SpecTimeUtil[T] {
+func (d *SpecTimeUtil[T, R]) Sync() *SpecTimeUtil[T, R] {
 	d.SyncMode = true
 	return d
 }
