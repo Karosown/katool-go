@@ -27,7 +27,7 @@ func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...
 	if d.SyncMode {
 		toStream.Parallel()
 	}
-	list := stream.FromAnySlice[T, []T](toStream.Map(func(i *dateutil.PeriodTime) any {
+	list := stream.FromAnySlice[[]T, [][]T](toStream.Map(func(i *dateutil.PeriodTime) any {
 		ts := exec(i.Start, i.End)
 		d2 := &TimeDumpTask[T]{
 			Util[T]{
@@ -49,7 +49,11 @@ func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...
 			return nil
 		}
 		return t
-	}).ToList()).ToList()
+	}).ToList()).Reduce([]T{}, func(cntValue any, nxt []T) any {
+		return append([]T{cntValue}, nxt...)
+	}, func(sum1, sum2 any) any {
+		return append(sum1.([]T), sum2.([]T)...)
+	}).([]T)
 	return &Util[T]{
 		list,
 		nil,
