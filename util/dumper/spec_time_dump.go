@@ -33,7 +33,7 @@ func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...
 			d2 := &TimeDumpTask[T]{
 				Util[T]{
 					ts,
-					&format.EmptyEnDecodeFormatNode{},
+					nil,
 					d.SyncMode,
 					d.ExcludeEmpty,
 				},
@@ -76,5 +76,8 @@ func (d *TimeDumpTask[T]) Dump(dumpNode ...format.EnDeCodeFormat) (any, error) {
 		}
 		d.dumpChain = head
 	}
-	return d.dumpChain.SystemEncode(d.dumpChain, d)
+	if d.dumpChain != nil {
+		return d.dumpChain.SystemEncode(d.dumpChain, d)
+	}
+	return d.data, nil
 }
