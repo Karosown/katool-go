@@ -5,7 +5,7 @@ import (
 )
 
 func Panic(err any) {
-	xlog.KaToolLoggerWrapper.ApplicationDesc(err)
+	xlog.KaToolLoggerWrapper.ApplicationDesc(err).Panic()
 }
 
 func Warn(err any) {

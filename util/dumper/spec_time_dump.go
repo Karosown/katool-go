@@ -47,6 +47,7 @@ func (d *SpecTimeUtil[T]) Exec(exec func(start, end time.Time) []T, dumpNode ...
 			t, ok := dump.([]T)
 			if !ok {
 				sys.Panic("The Exec Handler Back Type Need Consistent Of SpecTimeUtil[T]，also []T")
+				return nil
 			}
 			return t
 		}).ToList()).ToList(),
@@ -62,11 +63,8 @@ func (d *SpecTimeUtil[T]) Sync() *SpecTimeUtil[T] {
 }
 
 func (d *TimeDumpTask[T]) Dump(dumpNode ...format.EnDeCodeFormat) (any, error) {
-	if d.ExcludeEmpty && d.data == nil {
-		return nil, nil
-	}
-	if cutil.IsEmpty(dumpNode) && nil == d.dumpChain {
-		sys.Panic("Must Not Nil of Dump Node Chain.")
+	if (d.ExcludeEmpty && d.data == nil) || cutil.IsEmpty(dumpNode) && nil == d.dumpChain {
+		return d.data, nil
 	}
 	if !cutil.IsEmpty(dumpNode) {
 		head := &format.EmptyEnDecodeFormatNode{}
