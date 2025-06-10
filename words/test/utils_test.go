@@ -23,3 +23,7 @@ func TestLanguate(t *testing.T) {
 		"{测试}\n"+
 		"```", "```json", "```"))
 }
+
+func TestCaseShift(t *testing.T) {
+	println(words.CaseShift("aBc"))
+}

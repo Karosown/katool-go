@@ -19,3 +19,13 @@ func Int(min, max int) int {
 	}
 	return rand.IntN(max-min) + min
 }
+
+func String(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	// 设置随机种子
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.IntN(len(charset))]
+	}
+	return string(b)
+}

@@ -40,3 +40,12 @@ func OnlyLanguage(s string, languages ...*unicode.RangeTable) bool {
 	}
 	return true
 }
+
+// CaseShift 对已有字母进行大小写互转，大写转换为小写，小写转换为大写
+func CaseShift(str string) string {
+	res := ""
+	for _, item := range str {
+		res += string(item ^ 32)
+	}
+	return res
+}

@@ -284,6 +284,6 @@ func TestTransaction(t *testing.T) {
 	fmt.Println("示例完成")
 }
 func TestWrapper(t *testing.T) {
-	build := wrapper.NewQuery().Ne("www", "123").Ne("www", "eee").Ne("www", "ewqewq").Ne("eee", "123213").Nin("qwe", "13213").Build()
+	build := wrapper.NewQuery().Ne("www", "123").Ne("www", "eee").Ne("www", "ewqewq").Ne("eee", "123213").Nin("qwe", "13213").Eq("file.file_type", "text/html").Build()
 	t.Log(build.ToJSON())
 }

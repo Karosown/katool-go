@@ -39,7 +39,7 @@ func TestWebReader(t *testing.T) {
 	fmt.Printf("Author  : %s\n", article.Byline)
 	fmt.Printf("Length  : %d\n", article.Length)
 	fmt.Printf("Excerpt : %s\n", article.Excerpt)
-	fmt.Printf("S  : %s\n", article.Image)
+	fmt.Printf("Image  : %s\n", article.Image)
 	fmt.Printf("Favicon : %s\n", article.Favicon)
 	fmt.Printf("Data : %s\n", article.Content)
 	fmt.Printf("TextContent : %s\n", article.SiteName)
