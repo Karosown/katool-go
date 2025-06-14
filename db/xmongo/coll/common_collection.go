@@ -3,6 +3,7 @@ package coll
 //本文件的意义在于，灵活的自定义，可以在对 mongo 进行 curd 添加打印日志、计时等功能
 import (
 	"context"
+	"reflect"
 	"slices"
 
 	"github.com/karosown/katool-go/container/cutil"
@@ -52,7 +53,9 @@ func (c *CollectionFactory[T]) Identity() *Collection[T] {
 // Partition sizes[0]虚拟节点数量 sizes[1]每个虚拟节点包含的数据量大小
 func (c *CollectionFactory[T]) Partition(key string, sizes ...int) *Collection[T] {
 	partitionCollName := mongoutil.NewDefPartitionHelper(c.coll.Name(), sizes...).GetCollName(key)
-	return ioc.GetDefFunc(partitionCollName, func() *Collection[T] {
+	var zero T
+	typeName := reflect.TypeOf(zero).String()
+	return ioc.GetDefFunc("mongodb"+":"+c.coll.Database().Name()+":"+partitionCollName+":"+typeName, func() *Collection[T] {
 		db := c.coll.Database()
 		names, err := db.ListCollectionNames(context.Background(), bson.D{})
 		if err != nil {

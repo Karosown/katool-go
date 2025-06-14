@@ -30,7 +30,7 @@ type CollectionFactoryBuilder[T any] struct {
 func (m *CollectionFactoryBuilder[T]) CollName(name string) *coll.CollectionFactory[T] {
 	var zero T
 	typeName := reflect.TypeOf(zero).String()
-	return ioc.GetDefFunc("mongodb:"+":"+m.DBName+":"+name+":"+typeName, func() *coll.CollectionFactory[T] {
+	return ioc.GetDefFunc("mongodb"+":"+m.DBName+":"+name+":"+typeName, func() *coll.CollectionFactory[T] {
 		db := m.DB.Database(m.DBName)
 		background := context.Background()
 		names, err := db.ListCollectionNames(background, bson.D{})
