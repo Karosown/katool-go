@@ -57,9 +57,10 @@ func (c *Collection[T]) FindOne(ctx context.Context, result *T, opts ...*options
 	return singleResult.Decode(result)
 }
 
-func (c *Collection[T]) List(ctx context.Context, result *[]T, opts ...*options.FindOptions) error {
+func (c *Collection[T]) List(ctx context.Context, opts ...*options.FindOptions) (*[]T, error) {
+	result := &[]T{}
 	if c.before != nil {
-		return c.TransactionErr(ctx, func(stx mongo.SessionContext) error {
+		return nil, c.TransactionErr(ctx, func(stx mongo.SessionContext) error {
 			ctx, err := c.before(stx, "List", c.coll.Database().Name(), c.coll.Name(), &c.qw, nil)
 			if err != nil {
 				return err
@@ -73,10 +74,10 @@ func (c *Collection[T]) List(ctx context.Context, result *[]T, opts ...*options.
 	}
 	cur, err := c.coll.Find(ctx, c.filter(), opts...)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = cur.All(ctx, result)
-	return err
+	return result, err
 }
 func (c *Collection[T]) Count(ctx context.Context, opts ...*options.CountOptions) (int64, error) {
 	if c.before != nil {
@@ -92,10 +93,10 @@ func (c *Collection[T]) Count(ctx context.Context, opts ...*options.CountOptions
 	return c.coll.CountDocuments(ctx, c.filter(), opts...)
 }
 
-func (c *Collection[T]) Page(ctx context.Context, result *[]T, page *pager.Pager) error {
+func (c *Collection[T]) Page(ctx context.Context, page *pager.Pager) (*[]T, error) {
 	documents, err := c.Count(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	page.Total = int(documents)
 	var findoptions = &options.FindOptions{}
@@ -104,8 +105,7 @@ func (c *Collection[T]) Page(ctx context.Context, result *[]T, page *pager.Pager
 		findoptions.SetSkip(int64((page.Page - 1) * page.PageSize))
 		findoptions.SetSort(bson.D{{"created_at", -1}})
 	}
-	err = c.List(ctx, result, findoptions)
-	return err
+	return c.List(ctx, findoptions)
 }
 
 func (c *Collection[T]) UpdateOne(ctx context.Context, update *T, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
