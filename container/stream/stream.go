@@ -62,6 +62,11 @@ func FromAnySlice[T any, Slice ~[]T](source []any) *Stream[T, Slice] {
 	return ToStream(&slice)
 }
 
+func Cast[T any, Slice []T](source *Stream[any, []any]) *Stream[T, Slice] {
+	slice := fromAnySlice[T, Slice](source.ToList())
+	return ToStream(&slice)
+}
+
 // Of creates a stream from the given slice.
 func Of[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	return ToStream(source)

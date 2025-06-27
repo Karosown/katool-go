@@ -171,7 +171,13 @@ func Test_Distinct(t *testing.T) {
 
 func Test_FromAnySlice(t *testing.T) {
 	slice := convert.ToAnySlice(userList)
+	// 使用FromAnySlice方法
 	stream.FromAnySlice[user, []user](slice).ForEach(func(item user) {
+		fmt.Println(item)
+	})
+	// 使用Cast方法，对于Map可以配套使用
+	anyStream := stream.ToStream(&slice)
+	stream.Cast[user](anyStream).ForEach(func(item user) {
 		fmt.Println(item)
 	})
 }
