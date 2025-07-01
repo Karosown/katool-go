@@ -2,6 +2,7 @@ package optional
 
 import (
 	"cmp"
+	"errors"
 	"slices"
 )
 
@@ -36,6 +37,18 @@ func EmptyStringFunc() string {
 func Identity[T any](obj T) func() T {
 	return func() T {
 		return obj
+	}
+}
+func IdentityErr[T any](obj T, errs ...error) func() (T, error) {
+	return func() (T, error) {
+		return obj, errors.Join(errs...)
+	}
+}
+
+func IdentityOnlyErr[T any](errs ...error) func() (T, error) {
+	return func() (T, error) {
+		t := new(T)
+		return *t, errors.Join(errs...)
 	}
 }
 func In[T cmp.Ordered](item T, arr ...T) bool {

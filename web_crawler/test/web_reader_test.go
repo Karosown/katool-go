@@ -15,7 +15,7 @@ import (
 	"github.com/karosown/katool-go/web_crawler/rss"
 )
 
-func TestChorme(t *testing.T) {
+func TestChrome(t *testing.T) {
 	container := launcher.MustResolveURL(web_crawler.ChromeRemoteURL)
 	browser := rod.New().ControlURL(container).MustConnect().MustPage("https://openai.com/news/rss.xml")
 	fmt.Println(
