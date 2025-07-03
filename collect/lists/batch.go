@@ -11,10 +11,14 @@ type Batch[T any, RT ~[]T] struct {
 	SplitData []RT
 }
 
-func Partition[T any](datas []T, size int) Batch[T, []T] {
+func AvgPartition[T any](datas []T, totalPage int) Batch[T, []T] {
+	total := len(datas)
+	return Partition(datas, total/totalPage)
+}
+func Partition[T any](datas []T, pageSize int) Batch[T, []T] {
 	splitData := make([][]T, 0)
-	for i := 0; i < len(datas); i += size {
-		splitData = append(splitData, datas[i:min(i+size, len(datas))])
+	for i := 0; i < len(datas); i += pageSize {
+		splitData = append(splitData, datas[i:min(i+pageSize, len(datas))])
 	}
 
 	return Batch[T, []T]{
