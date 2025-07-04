@@ -181,3 +181,52 @@ func Test_FromAnySlice(t *testing.T) {
 		fmt.Println(item)
 	})
 }
+
+func Test_Merge(t *testing.T) {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	arr1 := []int{11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+	stream.ToStream(&arr).Parallel().Merge(arr1).ForEach(func(item int) {
+		fmt.Println(item)
+	})
+}
+
+func Test_Intersect(t *testing.T) {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	arr1 := []int{11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 5, 6, 7}
+	stream.ToStream(&arr).Parallel().Intersect(arr1).ForEach(func(item int) {
+		fmt.Println(item)
+	})
+}
+
+func Test_Difference(t *testing.T) {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	arr1 := []int{11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 5, 6, 7}
+	stream.ToStream(&arr).Parallel().Difference(arr1).ForEach(func(item int) {
+		fmt.Println(item)
+	})
+}
+
+// 其他玩儿法
+func Test_Intersect_filter(t *testing.T) {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	arr1 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	stream.ToStream(&arr).Parallel().Intersect(arr1, func(a, b int) bool {
+		return a < b
+	}).ForEach(func(item int) {
+		fmt.Println(item)
+	})
+}
+
+func Test_Sub(t *testing.T) {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	stream.ToStream(&arr).Sub(-2, -1).ForEach(func(item int) {
+		fmt.Println(item)
+	})
+}
+
+func Test_Skip(t *testing.T) {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	stream.ToStream(&arr).Skip(3).ForEach(func(item int) {
+		fmt.Println(item)
+	})
+}

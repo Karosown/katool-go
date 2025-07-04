@@ -8,12 +8,14 @@ package stream
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"sort"
 	"sync"
 
 	lynx "github.com/Tangerg/lynx/pkg/sync"
 	"github.com/karosown/katool-go/algorithm"
 	"github.com/karosown/katool-go/collect/lists"
+	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/container/optional"
 	"github.com/karosown/katool-go/convert"
 	"github.com/karosown/katool-go/sys"
@@ -39,7 +41,6 @@ func NewStream(source *[]any) *Stream[any, []any] {
 		source:  source,
 	}
 }
-
 func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	resOptions := make(Options[T], 0)
 	for i := 0; i < len(*source); i++ {
@@ -49,6 +50,49 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 		options: &resOptions,
 		source:  source,
 	}
+}
+func (s *Stream[T, Slice]) Sub(begin, end int) *Stream[T, Slice] {
+	if s.source == nil {
+		return &Stream[T, Slice]{
+			options: &Options[T]{},
+			source:  s.source,
+		}
+	}
+	length := len(*s.source)
+	if length == 0 {
+		return &Stream[T, Slice]{
+			options: &Options[T]{},
+			source:  s.source,
+		}
+	}
+	// 处理负数索引
+	if begin < 0 {
+		begin = length + begin
+	}
+	if end < 0 {
+		end = length + end
+	}
+	// 边界检查和修正
+	if begin < 0 {
+		begin = 0
+	}
+	if end > length {
+		end = length
+	}
+	if begin > end {
+		begin = end
+	}
+	resOptions := make(Options[T], 0, end-begin)
+	for i := begin; i < end; i++ {
+		resOptions = append(resOptions, Option[T]{opt: (*s.source)[i]})
+	}
+	return &Stream[T, Slice]{
+		options: &resOptions,
+		source:  s.source,
+	}
+}
+func (s *Stream[T, Slice]) Skip(n int) *Stream[T, Slice] {
+	return s.Sub(n, -1)
 }
 func fromAnySlice[T any, Slice ~[]T](source []any) Slice {
 	res := make([]T, len(source))
@@ -71,7 +115,6 @@ func Cast[T any, Slice []T](source *Stream[any, []any]) *Stream[T, Slice] {
 func Of[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	return ToStream(source)
 }
-
 func newOptionsStream[Opt any, Opts Options[Opt]](source *[]Opts) *Stream[Options[any], []Options[any]] {
 	resOptions := make([]Option[Options[any]], 0)
 	sourceList := make([]Options[any], 0)
@@ -93,7 +136,6 @@ func newOptionsStream[Opt any, Opts Options[Opt]](source *[]Opts) *Stream[Option
 		source:  &sourceList,
 	}
 }
-
 func newOptionStream[Opt any, T Options[Opt]](source *T) *Stream[Option[any], []Option[any]] {
 	resOptions := make(Options[Option[any]], 0)
 	resSource := make([]Option[any], 0)
@@ -194,8 +236,6 @@ func (s *Stream[T, Slice]) DistinctBy(hash algorithm.HashComputeFunction) *Strea
 		}
 	}
 	return ToStream(&res)
-	//}
-	//return nil
 }
 
 // Reduce 求和计算
@@ -230,7 +270,6 @@ func (s *Stream[T, Slice]) Reduce(begin any, atomicSolveFunction func(cntValue a
 	})
 	return begin
 }
-
 func (s *Stream[T, Slice]) Filter(fn func(i T) bool) *Stream[T, Slice] {
 	res := make(Slice, 0)
 	size := len(*s.options)
@@ -302,7 +341,6 @@ func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 					optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)), 1) + i
 				res.Store(key, append(value.(Slice), (*s.source)[index]))
 			}
-
 		}
 		return nil
 	})
@@ -313,7 +351,6 @@ func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 	})
 	return result
 }
-
 func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunction) *Stream[T, Slice] {
 	if !s.parallel {
 		sort.SliceStable(*s.options, func(i, j int) bool {
@@ -327,7 +364,6 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 		})
 		return s
 	}
-
 	size := len(*s.options)
 	data := make([]Options[T], 0, optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)))
 	// opt opt opt opt -> opts opts
@@ -336,9 +372,7 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 		data = append(data, options)
 		return nil
 	})
-
 	optionsStream := newOptionsStream[T, Options[T]](&data)
-
 	optionsStream.parallel = s.parallel
 	sortedMap := optionsStream.Map(func(options Options[any]) any {
 		sort.SliceStable(options, func(i, j int) bool {
@@ -373,7 +407,6 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 	stream := ToStream(&result)
 	return stream
 }
-
 func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunction) *Stream[T, Slice] {
 	if !s.parallel {
 		sort.SliceStable(*s.options, func(i, j int) bool {
@@ -387,7 +420,6 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 		})
 		return s
 	}
-
 	size := len(*s.options)
 	data := make([]Options[T], 0, optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)))
 	// opt opt opt opt -> opts opts
@@ -431,16 +463,13 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 	stream := ToStream(&result)
 	return stream
 }
-
 func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
-
 	if !s.parallel {
 		sort.SliceStable(*s.options, func(i, j int) bool {
 			return orderBy((*s.options)[i].opt, (*s.options)[j].opt)
 		})
 		return s
 	}
-
 	size := len(*s.options)
 	data := make([]Options[T], 0, optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)))
 	// opt opt opt opt -> opts opts
@@ -476,7 +505,6 @@ func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 		itv, _ := mergeSorted[i].(T)
 		result = append(result, itv)
 	}
-	//stream := ToStream(&result)
 	stream := ToStream(&result)
 	return stream
 }
@@ -484,7 +512,55 @@ func (s *Stream[T, Slice]) Collect(call func(data Options[T], sourceData Slice) 
 	res := call(*s.options, *s.source)
 	return res
 }
+func (s *Stream[T, Slice]) Merge(arrOrStream any) *Stream[T, Slice] {
+	var res Slice
+	switch arrOrStream.(type) {
+	case *Stream[T, Slice]:
+		res = append(s.ToList(), arrOrStream.(*Stream[T, Slice]).ToList()...)
+	case Slice:
+		res = append(s.ToList(), arrOrStream.(Slice)...)
+	}
+	return ToStream(&res)
+}
+func (s *Stream[T, Slice]) Intersect(arrOrStream any, validEq ...func(a, b T) bool) *Stream[T, Slice] {
+	var temp Slice
+	switch arrOrStream.(type) {
+	case *Stream[T, Slice]:
+		temp = arrOrStream.(*Stream[T, Slice]).ToList()
+	case Slice:
+		temp = arrOrStream.(Slice)
+	}
+	return s.Filter(func(i T) bool {
+		if cutil.IsEmpty(validEq) {
+			return slices.ContainsFunc(temp, func(t T) bool {
+				return algorithm.HASH_WITH_JSON(i) == algorithm.HASH_WITH_JSON(t)
+			})
+		}
+		return slices.ContainsFunc(temp, func(t T) bool {
+			return validEq[0](i, t)
+		})
+	})
+}
 
+func (s *Stream[T, Slice]) Difference(arrOrStream any, validEq ...func(a, b T) bool) *Stream[T, Slice] {
+	var temp Slice
+	switch arrOrStream.(type) {
+	case *Stream[T, Slice]:
+		temp = arrOrStream.(*Stream[T, Slice]).ToList()
+	case Slice:
+		temp = arrOrStream.(Slice)
+	}
+	return s.Filter(func(i T) bool {
+		if cutil.IsEmpty(validEq) {
+			return !slices.ContainsFunc(temp, func(t T) bool {
+				return algorithm.HASH_WITH_JSON(i) == algorithm.HASH_WITH_JSON(t)
+			})
+		}
+		return !slices.ContainsFunc(temp, func(t T) bool {
+			return validEq[0](i, t)
+		})
+	})
+}
 func (s *Stream[T, Slice]) ForEach(fn func(item T)) *Stream[T, Slice] {
 	//size := len(*s.options)
 	goRun[Option[T]](*s.options, s.parallel, func(pos int, options []Option[T]) error {
@@ -495,16 +571,13 @@ func (s *Stream[T, Slice]) ForEach(fn func(item T)) *Stream[T, Slice] {
 	})
 	return s
 }
-
 func (s *Stream[T, Slice]) Count() int64 {
 	return int64(len(*s.options))
 }
-
 func (s *Stream[T, Slice]) Parallel() *Stream[T, Slice] {
 	s.parallel = true
 	return s
 }
-
 func (s *Stream[T, Slice]) UnParallel() *Stream[T, Slice] {
 	s.parallel = false
 	return s
