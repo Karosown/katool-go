@@ -1,0 +1,72 @@
+package jsonhp
+
+import (
+	"encoding/json"
+
+	"github.com/kaptinlin/jsonrepair"
+	"github.com/karosown/katool-go/container/stream"
+	"github.com/karosown/katool-go/sys"
+)
+
+/*
+*
+对于残缺的json进行修复
+*/
+func FixJson(unfixJson string) string {
+	fixedJson, err := jsonrepair.JSONRepair(unfixJson)
+	if err != nil {
+		return ""
+	}
+	return fixedJson
+}
+func JsonUnMarshal[T any](unfixJson string) *T {
+	fixedJson := FixJson(unfixJson)
+	back := new(T)
+	err := json.Unmarshal([]byte(fixedJson), back)
+	if err != nil {
+		return nil
+	}
+	return back
+}
+func ToJsonLine[T any](entities any) string {
+	switch entities.(type) {
+	case []T:
+		ts := entities.([]T)
+		reduce := stream.ToStream(&ts).Reduce("", func(cntValue any, nxt T) any {
+			marshal, err := json.Marshal(nxt)
+			if err != nil {
+				return cntValue
+			}
+			return cntValue.(string) + string(marshal) + "\n"
+		}, func(cntValue any, nxt any) any {
+			return cntValue.(string) + nxt.(string) + "\n"
+		})
+		return reduce.(string)
+	case string:
+		ts := JsonUnMarshal[[]T](entities.(string))
+		reduce := stream.ToStream(ts).Reduce("", func(cntValue any, nxt T) any {
+			marshal, err := json.Marshal(nxt)
+			if err != nil {
+				return cntValue
+			}
+			return cntValue.(string) + string(marshal) + "\n"
+		}, func(cntValue any, nxt any) any {
+			return cntValue.(string) + nxt.(string) + "\n"
+		})
+		return reduce.(string)
+	case []byte:
+		return ToJsonLine[T](string(entities.([]byte)))
+	case [][]byte:
+		entries := entities.([][]byte)
+		reduce := stream.ToStream(&entries).Reduce([]T{}, func(cntValue any, nxt []byte) any {
+			marshal := JsonUnMarshal[T](string(nxt))
+			return append(cntValue.([]T), *marshal)
+		}, func(cntValue any, nxt any) any {
+			return append(cntValue.([]T), nxt.([]T)...)
+		})
+		return ToJsonLine[T](reduce)
+	default:
+		sys.Panic("Not Support This Type")
+		return ""
+	}
+}

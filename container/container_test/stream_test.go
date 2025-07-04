@@ -1,6 +1,7 @@
 package container_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 	"github.com/karosown/katool-go/algorithm"
 	"github.com/karosown/katool-go/container/stream"
 	"github.com/karosown/katool-go/convert"
+	"github.com/karosown/katool-go/helper/jsonhp"
 	"github.com/karosown/katool-go/sys"
 )
 
@@ -229,4 +231,26 @@ func Test_Skip(t *testing.T) {
 	stream.ToStream(&arr).Skip(3).ForEach(func(item int) {
 		fmt.Println(item)
 	})
+}
+
+func Test_JSONLINE(t *testing.T) {
+	println(jsonhp.ToJsonLine[user](userList))
+
+	marshal, err := json.Marshal(userList)
+	if err != nil {
+		t.Error(err)
+	}
+	println(jsonhp.ToJsonLine[user](marshal))
+
+	println(jsonhp.ToJsonLine[user](stream.Cast[[]byte](stream.ToStream(&userList).Map(func(i user) any {
+		bytes, err2 := json.Marshal(i)
+		if err2 != nil {
+			return []byte{}
+		}
+		return bytes
+	})).ToList()))
+}
+
+func Test_JSONFIX(t *testing.T) {
+	println(jsonhp.FixJson(jsonhp.ToJsonLine[user](userList)))
 }
