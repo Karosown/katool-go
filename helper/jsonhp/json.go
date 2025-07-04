@@ -19,6 +19,18 @@ func FixJson(unfixJson string) string {
 	}
 	return fixedJson
 }
+func ToJSON(entity any) string {
+	switch entity.(type) {
+	case string:
+		return FixJson(entity.(string))
+	default:
+		marshal, err := json.Marshal(entity)
+		if err != nil {
+			return ""
+		}
+		return string(marshal)
+	}
+}
 func JsonUnMarshal[T any](unfixJson string) *T {
 	fixedJson := FixJson(unfixJson)
 	back := new(T)
@@ -33,8 +45,8 @@ func ToJsonLine[T any](entities any) string {
 	case []T:
 		ts := entities.([]T)
 		reduce := stream.ToStream(&ts).Reduce("", func(cntValue any, nxt T) any {
-			marshal, err := json.Marshal(nxt)
-			if err != nil {
+			marshal := ToJSON(nxt)
+			if marshal == "" {
 				return cntValue
 			}
 			return cntValue.(string) + string(marshal) + "\n"
@@ -45,11 +57,11 @@ func ToJsonLine[T any](entities any) string {
 	case string:
 		ts := JsonUnMarshal[[]T](entities.(string))
 		reduce := stream.ToStream(ts).Reduce("", func(cntValue any, nxt T) any {
-			marshal, err := json.Marshal(nxt)
-			if err != nil {
+			marshal := ToJSON(nxt)
+			if marshal == "" {
 				return cntValue
 			}
-			return cntValue.(string) + string(marshal) + "\n"
+			return cntValue.(string) + marshal + "\n"
 		}, func(cntValue any, nxt any) any {
 			return cntValue.(string) + nxt.(string) + "\n"
 		})

@@ -251,6 +251,17 @@ func Test_JSONLINE(t *testing.T) {
 	})).ToList()))
 }
 
-func Test_JSONFIX(t *testing.T) {
-	println(jsonhp.FixJson(jsonhp.ToJsonLine[user](userList)))
+func Test_ToJSON(t *testing.T) {
+	println(jsonhp.ToJSON(jsonhp.ToJsonLine[user](userList)))
+}
+
+func Test_FixJson(t *testing.T) {
+	strs := []string{
+		"{a:1,C:'1',b:[2,3,5,",
+		"{\"name\":\"JDPkICWlXc\",\"age\":50,\"sex\":1,\"money\":0,\"class\":\"四班\",\"id\":0}\n{\"name\":\"BhdimrYUah\",\"age\":98,\"sex\":0,\"money\":0,\"class\":\"二班\",\"id\":0}\n{\"name\":\"OvLDmnxIeI\",\"age\":8,\"sex\":1,\"money\":0,\"class\":\"三班\",\"id\":0}\n{\"name\":\"oItFsEiAAm\",\"age\":49,\"sex\":0,\"money\":0,\"class\":\"一班\",\"id\":0}\n{\"name\":\"LOROEAFcUT\",\"age\":89,\"sex\":0,\"money\":0,\"class\":\"五班\",\"id\":0}",
+	}
+
+	stream.ToStream(&strs).ForEach(func(item string) {
+		fmt.Println(jsonhp.FixJson(item))
+	})
 }
