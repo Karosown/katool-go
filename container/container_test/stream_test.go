@@ -258,9 +258,9 @@ func Test_ToJSON(t *testing.T) {
 func Test_FixJson(t *testing.T) {
 	strs := []string{
 		"{a:1,C:'1',b:[2,3,5,",
-		`{"name":"SINpUGSroN""age":37,"sex":0,"money":0,"class":"一班","id":0}
-{"name""RqPaNmmEcJ""age"31,"sex":1,"money":0,"class":"四班","id":0}
-{"name":"jzHCCSepro""age":17,"sex":1,"money":0,"class":"五班","id":0}
+		`{"name""SINpUGSroN""age"37"sex"0"money"0"class""一班""id"0}
+{"name""RqPaNmmEcJ""age"31"sex"1"money"0"class""四班""id"0}
+{"name""jzHCCSepro""age"17"sex":1,"money":0,"class":"五班","id":0}
 {"name":"uHZBCFNrGE","age":6,"sex":0"money":0,"class":"三班","id":0}
 {"name":"SGwKKLCfPL","age":19,"sex":0,"money":0,"class":"一班","id":0}
 {"name":"zENFnzjImU","age":98,"sex":1,"money":0,"class":"二班","id":0}`,
