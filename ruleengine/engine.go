@@ -10,7 +10,8 @@ import (
 type RuleErr error
 
 var (
-	EOF RuleErr = errors.New("RULETREE EOF")
+	EOF         RuleErr = errors.New("RULETREE EOF")
+	FALLTHROUGH RuleErr = errors.New("RULETREE FALL THROUGH")
 )
 
 // RuleNodeMeta 如果需要做类型转换，可以使用SourceType
@@ -119,8 +120,14 @@ func (r *RuleTree[T]) Run(data T) (T, any, error) {
 			if err != nil {
 				if errors.Is(err, EOF) {
 					close(r.waitQueue)
+					err = nil
 					r.waitQueue = make(chan *RuleNode[T], r.Root.NxtLayer.Len()+0x11)
-					return orginData, cvtDara, nil
+					return orginData, cvtDara, err
+				}
+				if errors.Is(err, FALLTHROUGH) {
+					err = nil
+					r.Root.SourceTypeData = orginData
+					r.Root.ConvertData = cvtDara
 				}
 				break
 			}
