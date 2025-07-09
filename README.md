@@ -28,6 +28,7 @@
 - [🚀 快速开始](#快速开始)
 - [🔧 核心模块](#核心模块)
   - [📚 容器与集合](#容器与集合)
+    - [Optional 可选值容器](#optional-可选值容器)
   - [🌊 流式处理](#流式处理)
   - [🔄 数据转换](#数据转换)
   - [💉 依赖注入](#依赖注入)
@@ -464,875 +465,1179 @@ func main() {
 ```
 </details>
 
+<details>
+<summary><b>📚 Optional 容器 - 安全处理空值</b></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"github.com/karosown/katool-go/container/optional"
+)
+
+func main() {
+	// 1. 基础用法：安全处理可能为空的值
+	fmt.Println("=== Optional 基础用法 ===")
+	
+	// 创建包含值的Optional
+	nameOpt := optional.Of("张三")
+	nameOpt.IfPresent(func(name string) {
+		fmt.Printf("用户名: %s\n", name)
+	})
+	
+	// 处理空值情况
+	emptyOpt := optional.Empty[string]()
+	username := emptyOpt.OrElse("匿名用户")
+	fmt.Printf("用户名（带默认值）: %s\n", username)
+	
+	// 2. 函数式链式操作
+	fmt.Println("\n=== 链式操作 ===")
+	
+	// 用户输入处理链
+	userInput := "  HELLO WORLD  "
+	processedInput := optional.MapTyped(optional.Of(userInput), strings.TrimSpace).
+		Filter(func(s string) bool { return len(s) > 0 }).         // 过滤空字符串
+		Map(func(s any) any { return strings.ToLower(s.(string)) }). // 转小写
+		OrElse("无效输入")
+	
+	fmt.Printf("处理后的输入: %s\n", processedInput)
+	
+	// 3. 字符串专用处理
+	fmt.Println("\n=== 字符串专用处理 ===")
+	
+	// StringOptional 链式处理
+	result := optional.NewStringOptional("  hello world  ").
+		TrimSpace().                    // 去除空格
+		FilterNonEmpty().              // 过滤空字符串
+		OrElse("空字符串")
+	
+	fmt.Printf("字符串处理结果: %s\n", result)
+	
+	// 4. 配置值处理
+	fmt.Println("\n=== 配置值处理 ===")
+	
+	// 模拟从环境变量获取配置
+	getConfig := func(key string) optional.Optional[string] {
+		configs := map[string]string{
+			"database_url": "postgres://localhost:5432/mydb",
+			"redis_url":    "",  // 空值
+		}
+		return optional.OfNullable(configs[key])
+	}
+	
+	// 获取数据库配置，带默认值
+	dbUrl := getConfig("database_url").OrElse("sqlite://memory")
+	fmt.Printf("数据库URL: %s\n", dbUrl)
+	
+	// 获取Redis配置，空值处理
+	redisUrl := getConfig("redis_url").OrElse("redis://localhost:6379")
+	fmt.Printf("Redis URL: %s\n", redisUrl)
+	
+	// 5. 用户验证链
+	fmt.Println("\n=== 用户验证链 ===")
+	
+	type User struct {
+		Name  string
+		Age   int
+		Email string
+	}
+	
+	validateUser := func(user User) optional.Optional[User] {
+		return optional.Of(user).
+			Filter(func(u User) bool { return u.Name != "" }).        // 验证姓名
+			Filter(func(u User) bool { return u.Age >= 18 }).         // 验证年龄
+			Filter(func(u User) bool { return strings.Contains(u.Email, "@") }) // 验证邮箱
+	}
+	
+	// 测试有效用户
+	validUser := User{Name: "张三", Age: 25, Email: "zhangsan@example.com"}
+	result1 := validateUser(validUser)
+	result1.IfPresentOrElse(
+		func(u User) { fmt.Printf("验证通过: %+v\n", u) },
+		func() { fmt.Println("验证失败") },
+	)
+	
+	// 测试无效用户
+	invalidUser := User{Name: "", Age: 16, Email: "invalid-email"}
+	result2 := validateUser(invalidUser)
+	result2.IfPresentOrElse(
+		func(u User) { fmt.Printf("验证通过: %+v\n", u) },
+		func() { fmt.Println("验证失败") },
+	)
+	
+	// 6. 条件工具函数
+	fmt.Println("\n=== 条件工具函数 ===")
+	
+	isVIP := true
+	userType := optional.IsTrue(isVIP, "VIP用户", "普通用户")
+	fmt.Printf("用户类型: %s\n", userType)
+	
+	// 根据条件执行不同函数
+	message := optional.IsTrueByFunc(isVIP,
+		func() string { return "欢迎VIP用户，享受专属服务！" },
+		func() string { return "欢迎使用我们的服务！" },
+	)
+	fmt.Printf("欢迎消息: %s\n", message)
+}
+```
+</details>
+
+<details>
+<summary><b>⚡ 规则引擎 - 灵活的业务逻辑</b></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+	"github.com/karosown/katool-go/ruleengine"
+)
+
+type User struct {
+	ID       int       `json:"id"`
+	Name     string    `json:"name"`
+	Age      int       `json:"age"`
+	Email    string    `json:"email"`
+	VIPLevel int       `json:"vip_level"`
+	Balance  float64   `json:"balance"`
+	IDCard   string    `json:"id_card"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func main() {
+	// 1. 创建规则引擎
+	fmt.Println("=== 规则引擎基础用法 ===")
+	
+	engine := ruleengine.NewRuleEngine[User]()
+	
+	// 2. 注册验证规则
+	engine.RegisterRule("validate_basic_info",
+		func(user User, _ any) bool { return true },
+		func(user User, _ any) (User, any, error) {
+			if user.Name == "" {
+				return user, "用户名不能为空", ruleengine.EOF
+			}
+			if len(user.Name) < 2 {
+				return user, "用户名太短", ruleengine.EOF
+			}
+			return user, "基础信息验证通过", nil
+		},
+	)
+	
+	// 3. 年龄检查规则（含流程控制）
+	engine.RegisterRule("check_age",
+		func(user User, _ any) bool { return true },
+		func(user User, _ any) (User, any, error) {
+			if user.Age < 13 {
+				return user, "用户年龄过小", ruleengine.EOF // 立即终止
+			} else if user.Age < 18 {
+				return user, "未成年用户", ruleengine.FALLTHROUGH // 跳过成年用户逻辑
+			}
+			return user, "成年用户", nil
+		},
+	)
+	
+	// 4. 成年用户身份验证（未成年用户会跳过）
+	engine.RegisterRule("adult_identity_check",
+		func(user User, _ any) bool { return user.Age >= 18 },
+		func(user User, _ any) (User, any, error) {
+			if user.IDCard == "" {
+				return user, "成年用户需要身份证", ruleengine.EOF
+			}
+			return user, "身份验证完成", nil
+		},
+	)
+	
+	// 5. VIP特权检查
+	engine.RegisterRule("vip_privilege_check",
+		func(user User, _ any) bool { return user.VIPLevel > 0 },
+		func(user User, _ any) (User, any, error) {
+			if user.VIPLevel >= 3 {
+				user.Balance += 100.0  // VIP3以上赠送余额
+				return user, "VIP特权已激活", nil
+			} else if user.VIPLevel >= 1 {
+				user.Balance += 50.0   // VIP1-2赠送部分余额
+				return user, "VIP福利已发放", nil
+			}
+			return user, "普通用户", nil
+		},
+	)
+	
+	// 6. 最终注册
+	engine.RegisterRule("complete_registration",
+		func(user User, _ any) bool { return true },
+		func(user User, _ any) (User, any, error) {
+			if user.ID == 0 {
+				user.ID = int(time.Now().Unix()) // 生成ID
+			}
+			user.CreatedAt = time.Now()
+			return user, "注册完成", nil
+		},
+	)
+	
+	// 7. 添加日志中间件
+	engine.AddMiddleware(func(data User, next func(User) (User, any, error)) (User, any, error) {
+		fmt.Printf("  → 处理用户: %s (年龄: %d)\n", data.Name, data.Age)
+		result, info, err := next(data)
+		if err == ruleengine.EOF {
+			fmt.Printf("  ✖ 流程终止: %v\n", info)
+		} else if err == ruleengine.FALLTHROUGH {
+			fmt.Printf("  ⚡ 规则跳过: %v\n", info)
+		} else if err == nil {
+			fmt.Printf("  ✓ 执行成功: %v\n", info)
+		} else {
+			fmt.Printf("  ✗ 执行失败: %v\n", err)
+		}
+		return result, info, err
+	})
+	
+	// 8. 构建注册流程链
+	_, err := engine.NewBuilder("user_registration").
+		AddRule("validate_basic_info").
+		AddRule("check_age").
+		AddRule("adult_identity_check").
+		AddRule("vip_privilege_check").
+		AddRule("complete_registration").
+		Build()
+	
+	if err != nil {
+		fmt.Printf("构建规则链失败: %v\n", err)
+		return
+	}
+	
+	// 9. 测试不同场景
+	fmt.Println("\n=== 测试场景 1: 正常成年VIP用户 ===")
+	adultVIP := User{
+		Name:     "张三",
+		Age:      25,
+		Email:    "zhangsan@example.com",
+		VIPLevel: 3,
+		IDCard:   "123456789012345678",
+		Balance:  0,
+	}
+	result1 := engine.Execute("user_registration", adultVIP)
+	fmt.Printf("最终结果: ID=%d, 余额=%.2f\n", result1.Data.ID, result1.Data.Balance)
+	
+	fmt.Println("\n=== 测试场景 2: 未成年用户（跳过身份验证）===")
+	minor := User{
+		Name:     "李四",
+		Age:      16,
+		Email:    "lisi@example.com",
+		VIPLevel: 1,
+		Balance:  0,
+	}
+	result2 := engine.Execute("user_registration", minor)
+	fmt.Printf("最终结果: ID=%d, 余额=%.2f\n", result2.Data.ID, result2.Data.Balance)
+	
+	fmt.Println("\n=== 测试场景 3: 年龄过小（立即终止）===")
+	child := User{
+		Name:     "王五",
+		Age:      10,
+		Email:    "wangwu@example.com",
+		VIPLevel: 0,
+		Balance:  0,
+	}
+	result3 := engine.Execute("user_registration", child)
+	if result3.Error != nil {
+		fmt.Printf("注册失败: %v\n", result3.Error)
+	}
+	
+	fmt.Println("\n=== 测试场景 4: 批量处理多个用户 ===")
+	users := []User{
+		{Name: "用户A", Age: 25, VIPLevel: 2, IDCard: "111111111111111111"},
+		{Name: "用户B", Age: 17, VIPLevel: 1},
+		{Name: "", Age: 30, VIPLevel: 0},  // 无效用户名
+	}
+	
+	for i, user := range users {
+		fmt.Printf("\n--- 处理用户 %d ---\n", i+1)
+		result := engine.Execute("user_registration", user)
+		if result.Error != nil && result.Error != ruleengine.EOF && result.Error != ruleengine.FALLTHROUGH {
+			fmt.Printf("处理失败: %v\n", result.Error)
+		} else {
+			fmt.Printf("处理完成: ID=%d\n", result.Data.ID)
+		}
+	}
+}
+```
+</details>
+
 <hr>
 
 ## 🔧 核心模块
 
 ### 📚 容器与集合
 
-<details>
-<summary><b>🗂️ XMap - 增强的映射类型</b></summary>
+Katool-Go 提供了丰富的容器和集合类型，全部支持泛型，提供类型安全的操作。
 
-XMap 提供了比标准 map 更丰富的功能和类型安全保证：
+#### Optional 可选值容器
 
-```go
-import "github.com/karosown/katool-go/container/xmap"
+Optional 是一个用于安全处理可能为空值的容器类型，灵感来自 Java 的 Optional 类，提供类型安全的空值处理机制。
 
-// 1. 基础Map - 泛型支持
-regularMap := xmap.NewMap[string, int]()
-regularMap.Set("one", 1)
-regularMap.Set("two", 2)
-
-// 2. 线程安全Map - 并发安全
-safeMap := xmap.NewSafeMap[string, int]()
-safeMap.Set("counter", 1)
-
-// 原子操作
-value, loaded := safeMap.LoadOrStore("new_key", 100)  // 不存在则存储
-value, exists := safeMap.LoadAndDelete("counter")     // 获取并删除
-
-// 3. 有序Map - 按键排序
-sortedMap := xmap.NewSortedMap[string, string]()
-sortedMap.Set("c", "third")
-sortedMap.Set("a", "first")
-sortedMap.Set("b", "second")
-
-// JSON序列化自动按键排序
-jsonBytes, _ := json.Marshal(sortedMap)  // {"a":"first","b":"second","c":"third"}
-
-// 4. 双层键映射
-hashMap := xmap.NewHashBasedMap[string, int, User]()
-hashMap.Set("users", 1, User{Name: "Alice"})
-hashMap.Set("users", 2, User{Name: "Bob"})
-hashMap.Set("admins", 1, User{Name: "Admin"})
-
-user, exists := hashMap.Get("users", 1)  // 通过两个键定位
-```
-</details>
-
-<details>
-<summary><b>📦 Optional - 空值安全处理</b></summary>
-
-Optional 提供了处理可能为空值的安全方式，避免空指针异常：
+##### 🚀 基础用法
 
 ```go
 import "github.com/karosown/katool-go/container/optional"
 
-// 创建Optional
+// 创建包含值的Optional
 opt := optional.Of("Hello World")
+
+// 创建空的Optional
 emptyOpt := optional.Empty[string]()
 
+// 根据值是否为零值创建Optional
+nullableOpt := optional.OfNullable("")  // 空字符串会创建空Optional
+```
+
+##### 🔍 安全检查和获取
+
+```go
 // 安全检查和获取
 if opt.IsPresent() {
     value := opt.Get()
     fmt.Println("值存在:", value)
 }
 
-// 提供默认值
-defaultValue := emptyOpt.OrElse("默认值")
+// 检查是否为空
+if emptyOpt.IsEmpty() {
+    fmt.Println("Optional为空")
+}
 
-// 条件执行
+// 提供默认值的几种方式
+defaultValue := emptyOpt.OrElse("默认值")
+lazyDefault := emptyOpt.OrElseGet(func() string {
+    return "延迟计算的默认值"
+})
+safeValue := opt.OrElsePanic("Optional不能为空!")
+```
+
+##### ⚡ 函数式操作
+
+```go
+// 条件执行 - 有值时执行
 opt.IfPresent(func(v string) {
     fmt.Println("处理值:", v)
 })
 
-// 链式操作
-result := optional.Of("  hello  ").
-    Map(strings.TrimSpace).
+// 双分支执行 - 有值执行第一个函数，无值执行第二个
+opt.IfPresentOrElse(
+    func(v string) { fmt.Println("有值:", v) },
+    func() { fmt.Println("无值") },
+)
+
+// 过滤操作
+filtered := opt.Filter(func(s string) bool {
+    return len(s) > 5
+})
+
+// 类型安全的映射（推荐）
+result := optional.MapTyped(optional.Of("  hello  "), strings.TrimSpace).
     Filter(func(s string) bool { return len(s) > 0 }).
     OrElse("空字符串")
-
-// 工具函数
-enabled := optional.IsTrue(condition, "启用", "禁用")
-result := optional.IsTrueByFunc(condition, enabledFunc, disabledFunc)
 ```
-</details>
+
+##### 🔤 字符串处理专用
+
+为了更好地支持字符串处理，提供了专用的 StringOptional：
+
+```go
+// 专用的StringOptional进行链式字符串处理
+result := optional.NewStringOptional("  hello  ").
+    TrimSpace().                    // 去除空格
+    FilterNonEmpty().              // 过滤空字符串
+    OrElse("空字符串")             // 提供默认值
+
+fmt.Println("处理结果:", result) // 输出: 处理结果: hello
+```
+
+##### 🛠️ 实用工具函数
+
+```go
+// 根据条件返回不同的值
+enabled := optional.IsTrue(condition, "启用", "禁用")
+
+// 根据条件调用不同的函数
+result := optional.IsTrueByFunc(condition, 
+    func() string { return "功能已启用" },
+    func() string { return "功能已禁用" },
+)
+
+// 根据函数条件调用不同的函数
+result := optional.FuncIsTrueByFunc(
+    func() bool { return someComplexCondition() },
+    enabledFunc,
+    disabledFunc,
+)
+```
+
+##### 📝 实用示例
+
+**用户输入处理**
+```go
+func processUserInput(input string) string {
+    return optional.MapTyped(optional.Of(input), strings.TrimSpace).
+        Filter(func(s string) bool { return len(s) > 0 }).
+        Map(func(s any) any { return strings.ToLower(s.(string)) }).
+        OrElse("无效输入").(string)
+}
+```
+
+**配置值处理**
+```go
+func getConfig(key string) optional.Optional[string] {
+    if value := os.Getenv(key); value != "" {
+        return optional.Of(value)
+    }
+    return optional.Empty[string]()
+}
+
+// 使用
+dbUrl := getConfig("DATABASE_URL").OrElse("sqlite://default.db")
+```
+
+**用户验证链式处理**
+```go
+func validateUser(user User) optional.Optional[User] {
+    return optional.Of(user).
+        Filter(func(u User) bool { return u.Name != "" }).
+        Filter(func(u User) bool { return u.Age >= 18 }).
+        Filter(func(u User) bool { return u.Email != "" })
+}
+
+// 使用
+validUser := validateUser(user).OrElsePanic("用户验证失败")
+```
+
+##### 📋 API 参考
+
+**核心方法：**
+- `Of[T](value T)` - 创建包含值的Optional
+- `Empty[T]()` - 创建空Optional
+- `OfNullable[T](value T)` - 根据零值创建Optional
+
+**检查方法：**
+- `IsPresent()` - 检查是否有值
+- `IsEmpty()` - 检查是否为空
+
+**获取方法：**
+- `Get()` - 获取值（空时panic）
+- `OrElse(T)` - 提供默认值
+- `OrElseGet(func() T)` - 延迟计算默认值
+- `OrElsePanic(string)` - 空时panic并显示消息
+
+**函数式方法：**
+- `IfPresent(func(T))` - 条件执行
+- `IfPresentOrElse(func(T), func())` - 双分支执行
+- `Filter(func(T) bool)` - 过滤
+- `Map(func(T) any)` - 映射（实例方法）
+- `MapTyped[T,R](Optional[T], func(T) R)` - 类型安全映射
+
+##### ⚠️ 注意事项
+
+1. **类型安全**: 使用 `MapTyped` 进行类型安全的映射操作
+2. **链式调用**: 实例方法支持链式调用，但要注意类型转换
+3. **性能**: Optional 会带来轻微的性能开销，在性能敏感的场景中谨慎使用
+4. **空指针**: Optional 本身不会为 nil，但内部值可能是零值
 
 ### 🌊 流式处理
 
-<details>
-<summary><b>🔄 Stream API - Java风格的链式操作</b></summary>
+提供类似 Java 8 Stream API 的强大流式处理能力，支持并行计算和链式操作。
 
 ```go
 import "github.com/karosown/katool-go/container/stream"
 
-users := []User{
-    {Name: "Alice", Age: 25, Salary: 5000},
-    {Name: "Bob", Age: 30, Salary: 6000},
-    {Name: "Charlie", Age: 35, Salary: 7000},
-}
-
-// 1. 基本操作链
-result := stream.ToStream(&users).
-    Parallel().                           // 启用并行处理
-    Filter(func(u User) bool {           // 过滤
-        return u.Age >= 30
-    }).
-    Map(func(u User) any {               // 转换
-        return u.Name
-    }).
-    Sort(func(a, b any) bool {           // 排序
-        return a.(string) < b.(string)
-    }).
+// 并行流处理
+results := stream.ToStream(&data).
+    Parallel().                               // 启用并行处理
+    Filter(func(item Item) bool { return item.IsValid() }).
+    Map(func(item Item) ProcessedItem { return item.Process() }).
+    Sort(func(a, b ProcessedItem) bool { return a.Priority > b.Priority }).
     ToList()
-
-// 2. 聚合操作
-totalSalary := stream.ToStream(&users).
-    Reduce(0, func(sum any, u User) any {
-        return sum.(int) + u.Salary
-    }, func(sum1, sum2 any) any {
-        return sum1.(int) + sum2.(int)
-    })
-
-// 3. 分组操作
-ageGroups := stream.ToStream(&users).GroupBy(func(u User) any {
-    if u.Age < 30 {
-        return "young"
-    }
-    return "senior"
-})
-
-// 4. 去重操作
-uniqueUsers := stream.ToStream(&users).
-    DistinctBy(algorithm.HASH_WITH_JSON_MD5).
-    ToList()
-
-// 5. 扁平化处理
-departments := []Department{
-    {Name: "IT", Users: []User{{Name: "Alice"}, {Name: "Bob"}}},
-    {Name: "HR", Users: []User{{Name: "Charlie"}}},
-}
-
-allUsers := stream.ToStream(&departments).
-    FlatMap(func(dept Department) *stream.Stream[any, []any] {
-        userAnySlice := convert.ToAnySlice(dept.Users)
-        return stream.ToStream(&userAnySlice)
-    }).
-    ToList()
-
-// 6. 转换为Map
-userMap := stream.ToStream(&users).ToMap(
-    func(index int, u User) any { return u.ID },
-    func(index int, u User) any { return u.Name },
-)
-
-// 7. 统计操作
-count := stream.ToStream(&users).Count()
-seniorCount := stream.ToStream(&users).
-    Filter(func(u User) bool { return u.Age >= 35 }).
-    Count()
-
-// 8. 集合操作
-newUsers := []User{{Name: "David", Age: 28}}
-mergedStream := stream.ToStream(&users).Merge(newUsers)
-
-intersection := stream.ToStream(&users).
-    Intersect(newUsers, func(a, b User) bool {
-        return a.Name == b.Name
-    })
 ```
-</details>
+
+### 🔄 数据转换
+
+强大的数据转换和结构体处理能力。
+
+```go
+import "github.com/karosown/katool-go/convert"
+
+// 结构体复制
+var dest DestStruct
+convert.CopyStruct(&dest, &source)
+
+// 数据导出
+convert.ExportToCSV(data, "output.csv")
+convert.ExportToJSON(data, "output.json")
+```
 
 ### 💉 依赖注入
 
-<details>
-<summary><b>🏭 IOC容器 - 轻量级依赖管理</b></summary>
+轻量级IOC容器，简化依赖管理。
 
 ```go
 import "github.com/karosown/katool-go/container/ioc"
 
-// 定义接口和实现
-type UserRepository interface {
-    FindByID(id int) (*User, error)
-    Save(user *User) error
-}
+// 注册服务
+container := ioc.NewContainer()
+container.Register("userService", &UserService{})
 
-type DatabaseUserRepository struct {
-    connectionString string
-}
-
-func (r *DatabaseUserRepository) FindByID(id int) (*User, error) {
-    // 数据库查询逻辑
-    return &User{ID: id, Name: "User" + strconv.Itoa(id)}, nil
-}
-
-func (r *DatabaseUserRepository) Save(user *User) error {
-    // 保存逻辑
-    return nil
-}
-
-type UserService struct {
-    repo UserRepository
-}
-
-func (s *UserService) GetUser(id int) (*User, error) {
-    return s.repo.FindByID(id)
-}
-
-func main() {
-    // 1. 注册值对象
-    ioc.RegisterValue("dbConnection", "localhost:5432/mydb")
-    
-    // 2. 注册工厂函数
-    ioc.Register("userRepo", func() any {
-        connStr := ioc.Get("dbConnection").(string)
-        return &DatabaseUserRepository{connectionString: connStr}
-    })
-    
-    // 3. 注册依赖其他组件的服务
-    ioc.Register("userService", func() any {
-        repo := ioc.Get("userRepo").(UserRepository)
-        return &UserService{repo: repo}
-    })
-    
-    // 4. 获取服务使用
-    service := ioc.Get("userService").(*UserService)
-    user, err := service.GetUser(1)
-    if err == nil {
-        fmt.Printf("获取到用户: %+v\n", user)
-    }
-    
-    // 5. 获取带默认值的组件
-    cache := ioc.GetDef("cache", &MemoryCache{})
-    
-    // 6. 强制注册（覆盖已存在的）
-    ioc.ForceRegister("userRepo", func() UserRepository {
-        return &MockUserRepository{}  // 测试时替换为Mock
-    })
-    
-    // 7. 延迟注册（通过函数）
-    config := ioc.GetDefFunc("config", func() *Config {
-        return &Config{Debug: true, Port: 8080}
-    })
-}
+// 获取服务
+userSvc := container.Get("userService").(*UserService)
 ```
-</details>
+
+### 🔒 并发控制
+
+提供类似Java的并发控制工具。
+
+```go
+import "github.com/karosown/katool-go/lock"
+
+// LockSupport 类似Java的park/unpark
+lock.LockSupport.Park()        // 阻塞当前协程
+lock.LockSupport.Unpark(goroutineId) // 唤醒指定协程
+```
 
 ### 🕸️ Web爬虫
 
-<details>
-<summary><b>📄 智能内容提取</b></summary>
+智能内容提取和网页爬取工具。
 
 ```go
 import "github.com/karosown/katool-go/web_crawler"
 
-// 1. 基础内容提取
-article := web_crawler.GetArticleWithURL("https://example.com/article")
-if !article.IsErr() {
-    fmt.Println("标题:", article.Title)
-    fmt.Println("内容:", article.Content)
-    fmt.Println("摘要:", article.Excerpt)
-    fmt.Println("作者:", article.Byline)
-    fmt.Println("发布时间:", article.PublishedTime)
-}
+// 内容提取
+extractor := web_crawler.NewContentExtractor()
+content := extractor.ExtractFromURL("https://example.com")
 
-// 2. 自定义请求头
-article = web_crawler.GetArticleWithURL("https://example.com/article",
-    func(r *http.Request) {
-        r.Header.Set("User-Agent", "Mozilla/5.0 (compatible; MyBot/1.0)")
-        r.Header.Set("Accept-Language", "zh-CN,zh;q=0.9")
-    })
-
-// 3. Chrome渲染支持（处理JavaScript渲染的页面）
-article = web_crawler.GetArticleWithChrome(
-    "https://spa-example.com/article",
-    func(page *rod.Page) {
-        // 等待页面加载完成
-        page.WaitLoad()
-        // 等待特定元素出现
-        page.MustElement(".article-content").WaitVisible()
-        // 模拟用户交互
-        page.MustElement("#load-more").Click()
-        time.Sleep(2 * time.Second)
-    },
-    func(article web_crawler.Article) bool {
-        // 重试条件：内容为空时重启Chrome
-        return len(article.Content) == 0
-    },
-)
-
-// 4. 源码提取
-sourceCode := web_crawler.ReadSourceCode(
-    "https://example.com",
-    "",  // CSS选择器，空表示全页面
-    func(page *rod.Page) {
-        page.WaitLoad()
-    },
-)
-
-if !sourceCode.IsErr() {
-    fmt.Println("页面源码长度:", len(sourceCode.String()))
-}
-
-// 5. 路径解析工具
-absoluteURL := web_crawler.ParsePath("https://example.com/page", "./image.jpg")
-// 结果: "https://example.com/page/image.jpg"
-
-relativeURL := web_crawler.ParsePath("https://example.com/page", "/api/data")
-// 结果: "https://example.com/api/data"
+// Chrome渲染支持
+renderer := web_crawler.NewChromeRenderer()
+html := renderer.RenderPage("https://spa-app.com")
 ```
-</details>
 
-<details>
-<summary><b>📰 RSS订阅解析</b></summary>
+### 📁 文件操作
+
+完整的文件系统操作工具。
 
 ```go
-import "github.com/karosown/katool-go/web_crawler/rss"
+import "github.com/karosown/katool-go/file"
 
-// 解析RSS源
-feed, err := rss.ParseURL("https://example.com/feed.xml")
-if err == nil {
-    fmt.Println("Feed标题:", feed.Title)
-    fmt.Println("Feed描述:", feed.Description)
-    fmt.Println("更新时间:", feed.LastBuildDate)
-    
-    // 遍历文章
-    for _, item := range feed.Items {
-        fmt.Printf("文章: %s\n", item.Title)
-        fmt.Printf("链接: %s\n", item.Link)
-        fmt.Printf("描述: %s\n", item.Description)
-        fmt.Printf("发布时间: %s\n", item.PubDate)
-        fmt.Printf("作者: %s\n", item.Author)
-        fmt.Println("---")
-    }
-}
+// 文件下载
+downloader := file.NewDownloader()
+downloader.Download("https://example.com/file.zip", "./downloads/")
 
-// 使用流式处理RSS数据
-import "github.com/karosown/katool-go/container/stream"
-
-recentArticles := stream.ToStream(&feed.Items).
-    Filter(func(item rss.Item) bool {
-        // 过滤最近一周的文章
-        pubDate, _ := time.Parse(time.RFC1123, item.PubDate)
-        return time.Since(pubDate) <= 7*24*time.Hour
-    }).
-    Sort(func(a, b rss.Item) bool {
-        // 按发布时间降序排序
-        dateA, _ := time.Parse(time.RFC1123, a.PubDate)
-        dateB, _ := time.Parse(time.RFC1123, b.PubDate)
-        return dateA.After(dateB)
-    }).
-    ToList()
+// 序列化操作
+file.SerializeToFile(data, "data.json")
+data := file.DeserializeFromFile[MyStruct]("data.json")
 ```
-</details>
+
+### 💾 数据库支持
+
+MongoDB等数据库操作增强。
+
+```go
+import "github.com/karosown/katool-go/db"
+
+// MongoDB分页查询
+paginator := db.NewMongoPaginator(collection)
+result := paginator.Page(1).Size(20).Find(filter)
+```
 
 ### 🌐 网络通信
 
-<details>
-<summary><b>🔗 现代化HTTP客户端</b></summary>
+现代化HTTP客户端和网络工具。
 
 ```go
-import "github.com/karosown/katool-go/net/http"
+import "github.com/karosown/katool-go/net/http/remote"
 
-// 1. 基础HTTP请求
-client := remote.NewRemoteRequest("https://api.example.com")
-
-// GET请求
-var users []User
-resp, err := client.
-    QueryParam(map[string]string{
-        "page":     "1",
-        "pageSize": "10",
-    }).
-    Headers(map[string]string{
-        "Authorization": "Bearer your-token",
-        "Content-Type":  "application/json",
-    }).
+// 链式HTTP请求构建
+var result APIResponse
+resp, err := remote.NewRemoteRequest("https://api.example.com").
+    Headers(map[string]string{"Authorization": "Bearer " + token}).
+    QueryParam(map[string]string{"page": "1"}).
     Method("GET").
-    Url("/users").
-    Build(&users)
-
-// POST请求
-newUser := User{Name: "Alice", Age: 25}
-var createdUser User
-resp, err = client.
-    Data(newUser).
-    Method("POST").
-    Url("/users").
-    Build(&createdUser)
-
-// 2. 链式构建复杂请求
-response, err := client.
     Url("/api/data").
-    QueryParam(map[string]string{"filter": "active"}).
-    Headers(map[string]string{"X-API-Version": "v2"}).
-    FormData(map[string]string{
-        "name":  "test",
-        "value": "123",
-    }).
-    Files(map[string]string{
-        "upload": "/path/to/file.txt",
-    }).
-    Method("POST").
-    DecodeHandler(format.Json).  // 自定义解码器
-    Build(&result)
-
-// 3. 自定义HTTP客户端
-customClient := resty.New().
-    SetTimeout(30 * time.Second).
-    SetRetryCount(3)
-
-resp, err = client.
-    HttpClient(customClient).
-    Method("GET").
-    Url("/api/retry-endpoint").
     Build(&result)
 ```
-</details>
-
-<details>
-<summary><b>🔐 OAuth2 支持</b></summary>
-
-```go
-// OAuth2认证客户端
-oauth := remote.NewOAuth2Request(
-    "https://api.example.com",     // API基础URL
-    "your-client-id",              // 客户端ID
-    "your-client-secret",          // 客户端密钥
-    "https://auth.example.com/token", // Token端点
-)
-
-// 自动处理Token获取和刷新
-var protectedData ApiResponse
-resp, err := oauth.
-    Headers(map[string]string{"X-API-Version": "v1"}).
-    Method("GET").
-    Url("/protected-resource").
-    Build(&protectedData)
-
-// Token会自动管理，无需手动处理
-```
-</details>
-
-<details>
-<summary><b>📡 SSE 实时通信</b></summary>
-
-```go
-// SSE客户端
-sseClient := remote.NewSSERequest("https://api.example.com")
-
-// 连接SSE流
-err := sseClient.
-    Headers(map[string]string{"Authorization": "Bearer token"}).
-    Connect("/events", func(event remote.SSEEvent) {
-        fmt.Printf("收到事件: %s\n", event.Type)
-        fmt.Printf("数据: %s\n", event.Data)
-        fmt.Printf("ID: %s\n", event.ID)
-    })
-
-// 处理连接错误
-if err != nil {
-    fmt.Printf("SSE连接失败: %v\n", err)
-}
-```
-</details>
 
 ### 📝 日志系统
 
-<details>
-<summary><b>📊 结构化日志</b></summary>
+结构化日志和链式构建。
 
 ```go
 import "github.com/karosown/katool-go/xlog"
 
-// 1. 基础日志使用
-xlog.Info("应用启动成功")
-xlog.Errorf("处理失败: %v", err)
-xlog.Debug("调试信息: 变量值为 %d", value)
+// 结构化日志
+logger := xlog.NewLogger().
+    WithField("service", "user-api").
+    WithField("version", "1.0.0")
 
-// 2. 链式日志构建
-logger := xlog.NewLogWrapper().
-    Header("MyApplication").              // 应用标识
-    FunctionByFunc(func(layer int) string {  // 自动获取函数名
-        pc, _, _, _ := runtime.Caller(layer)
-        return runtime.FuncForPC(pc).Name()
-    }).
-    ApplicationDesc("用户服务模块")         // 模块描述
-
-// 不同级别的日志
-logger.Info().ApplicationDesc("用户登录成功").String()
-logger.Warn().ApplicationDesc("内存使用率过高").String()
-logger.Error().ApplicationDesc("数据库连接失败").Panic()  // 会触发panic
-
-// 3. 自定义格式化
-customLogger := xlog.NewLogWrapper().
-    Header("CustomApp").
-    Format(func(msg xlog.LogMessage) string {
-        return fmt.Sprintf("[%s] %s: %v", 
-            msg.Header, msg.Type, msg.ApplicationDesc)
-    }).
-    Info()
-
-// 4. 内置工具日志器
-xlog.KaToolLoggerWrapper.ApplicationDesc("工具库内部错误").Error()
-
-// 5. 自定义Logger配置
-logger := xlog.NewLogger(
-    xlog.WithLevel(xlog.InfoLevel),
-    xlog.WithFormat(xlog.JSONFormat),
-    xlog.WithOutput("app.log"),
-    xlog.WithRotation(xlog.DailyRotation),
-)
-
-logger.WithFields(xlog.Fields{
-    "userID": 12345,
-    "action": "login",
-    "ip":     "192.168.1.1",
-}).Info("用户操作记录")
+logger.Info("用户登录成功").
+    WithField("userId", userId).
+    WithField("ip", clientIP).
+    Log()
 ```
-</details>
 
 ### ⚙️ 算法工具
 
-<details>
-<summary><b>🔢 数组和哈希算法</b></summary>
+实用算法和数据结构。
 
 ```go
 import "github.com/karosown/katool-go/algorithm"
 
-// 1. 有序数组合并
-arr1 := []int{1, 3, 5, 7}
-arr2 := []int{2, 4, 6, 8}
+// 有序数组合并
+merged := algorithm.MergeSortedArrays(arr1, arr2)
 
-// 自定义比较函数的合并
-mergeFunc := algorithm.MergeSortedArrayWithEntity[int](func(a, b int) bool {
-    return a < b  // 升序
-})
-merged := mergeFunc(convert.ToAnySlice(arr1), convert.ToAnySlice(arr2))
-// 结果: [1, 2, 3, 4, 5, 6, 7, 8]
-
-// 基于哈希值的合并（用于复杂对象）
-users1 := []User{{ID: 1, Name: "Alice"}, {ID: 3, Name: "Charlie"}}
-users2 := []User{{ID: 2, Name: "Bob"}, {ID: 4, Name: "David"}}
-
-userMergeFunc := algorithm.MergeSortedArrayWithPrimaryData[User](
-    false,  // 升序
-    func(user any) algorithm.HashType {
-        u := user.(User)
-        return algorithm.HashType(fmt.Sprintf("%d", u.ID))
-    },
-)
-mergedUsers := userMergeFunc(convert.ToAnySlice(users1), convert.ToAnySlice(users2))
-
-// 基于ID的合并
-idMergeFunc := algorithm.MergeSortedArrayWithPrimaryId[User](
-    false,  // 升序
-    func(user any) algorithm.IDType {
-        return algorithm.IDType(user.(User).ID)
-    },
-)
-
-// 2. 哈希计算
-data := map[string]any{
-    "id":   123,
-    "name": "test",
-    "tags": []string{"go", "tool"},
-}
-
-// 基于JSON序列化的哈希
-jsonHash := algorithm.HASH_WITH_JSON(data)
-fmt.Printf("JSON Hash: %s\n", jsonHash)
-
-// MD5哈希
-md5Hash := algorithm.HASH_WITH_JSON_MD5(data)
-fmt.Printf("MD5 Hash: %s\n", md5Hash)
-
-// 简单累加哈希（性能更好）
-sumHash := algorithm.HASH_WITH_JSON_SUM(data)
-fmt.Printf("Sum Hash: %s\n", sumHash)
-
-// 3. 在流式处理中使用
-uniqueData := stream.ToStream(&dataList).
-    DistinctBy(algorithm.HASH_WITH_JSON_MD5).  // 使用MD5去重
-    ToList()
-
-// 4. 二进制工具
-binary := algorithm.ToBinary(42)        // 转二进制
-decimal := algorithm.FromBinary("101010") // 从二进制转回
+// 哈希计算
+hash := algorithm.ComputeHash(data)
 ```
-</details>
 
 ### 🔤 文本处理
 
-<details>
-<summary><b>📝 中文分词和文本分析</b></summary>
+中文分词和文本分析。
 
 ```go
-import "github.com/karosown/katool-go/words/split/jieba"
-
-// 1. 基础分词
-jb := jieba.New()
-defer jb.Free()  // 必须释放资源
-
-text := "我正在测试Katool-Go的中文分词功能，效果很不错！"
-
-// 精确模式分词（推荐）
-words := jb.Cut(text)
-fmt.Printf("精确分词: %v\n", words)
-// 输出: ["我", "正在", "测试", "Katool-Go", "的", "中文", "分词", "功能", "效果", "很", "不错"]
-
-// 全模式分词（包含所有可能的词）
-allWords := jb.CutAll(text)
-fmt.Printf("全模式分词: %v\n", allWords)
-
-// 搜索引擎模式（适合搜索索引）
-searchWords := jb.CutForSearch("清华大学计算机科学与技术系")
-fmt.Printf("搜索模式: %v\n", searchWords)
-// 输出: ["清华", "华大", "大学", "清华大学", "计算", "计算机", "科学", "技术", "系"]
-
-// 2. 词频统计
-document := "机器学习是人工智能的一个重要分支。机器学习算法能够从数据中学习模式。"
-words = jb.Cut(document)
-
-// 获取词频统计
-frequency := words.Frequency()
-frequency.Range(func(word string, count int64) bool {
-    fmt.Printf("词: %s, 频次: %d\n", word, count)
-    return true
-})
-
-// 3. 流式处理分词结果
-meaningfulWords := words.ToStream().
-    Filter(func(word string) bool {
-        // 过滤停用词和标点
-        return len(word) > 1 && !words.IsStopWord(word)
-    }).
-    Distinct().  // 去重
-    Sort(func(a, b string) bool {
-        return len(a) > len(b)  // 按长度排序
-    }).
-    ToList()
-
-// 4. 文本工具函数
 import "github.com/karosown/katool-go/words"
 
-// 字符串截取
-content := words.SubString("Hello [World] End", "[", "]")  // "World"
+// 中文分词
+segmenter := words.NewJiebaSegmenter()
+tokens := segmenter.Cut("这是一个中文分词测试", true)
 
-// 语言检测
-hasChinese := words.ContainsLanguage("Hello世界", unicode.Han)  // true
-onlyChinese := words.OnlyLanguage("世界", unicode.Han)         // true
-
-// 大小写转换
-shifted := words.CaseShift("Hello")  // "hELLO"
-
-// 5. 自定义分词器
-customJieba := jieba.New("/path/to/custom/dict.txt")
-defer customJieba.Free()
-
-customWords := customJieba.Cut("自定义词典测试")
+// 词频统计
+counter := words.NewWordCounter()
+frequencies := counter.Count(tokens)
 ```
-</details>
 
 ### 🧰 辅助工具
 
-<details>
-<summary><b>📅 日期工具</b></summary>
+实用的开发辅助工具。
 
 ```go
-import "github.com/karosown/katool-go/util/dateutil"
+import "github.com/karosown/katool-go/util"
 
-// 性能测试
-duration := dateutil.BeginEndTimeComputed(func() {
-    // 测试的代码
-    time.Sleep(100 * time.Millisecond)
-})
-fmt.Printf("执行耗时: %d 纳秒\n", duration)
-
-// 时间段分割
-start := time.Now()
-end := start.Add(24 * time.Hour)
-periods := dateutil.GetPeriods(start, end, time.Hour)
-
-fmt.Printf("24小时分成%d个小时段:\n", len(periods))
-for i, period := range periods {
-    fmt.Printf("段%d: %v - %v\n", i+1, period.Start.Format("15:04"), period.End.Format("15:04"))
-}
-```
-</details>
-
-<details>
-<summary><b>🎲 随机数和路径工具</b></summary>
-
-```go
-import (
-    "github.com/karosown/katool-go/util/randutil"
-    "github.com/karosown/katool-go/util/pathutil"
-)
+// 日期处理
+date := util.ParseDate("2023-12-25")
+formatted := util.FormatDate(date, "YYYY-MM-DD")
 
 // 随机数生成
-randomInt := randutil.Int(1, 100)        // 1-99之间的随机整数
-randomStr := randutil.String(16)         // 16位随机字符串
-uuid := randutil.UUID()                  // UUID生成
-
-// 路径工具
-currentDir := pathutil.CurrentDir()
-absolutePath := pathutil.Abs("config.json")
-joined := pathutil.Join("data", "files", "image.jpg")
-exists := pathutil.Exists("important.txt")
-
-if !exists {
-    pathutil.EnsureDir("data/backup")    // 确保目录存在
-}
+randomStr := util.RandomString(10)
+randomInt := util.RandomInt(1, 100)
 ```
-</details>
 
-<details>
-<summary><b>🔍 调试和系统工具</b></summary>
+### ⚡ 规则引擎
+
+灵活强大的业务规则处理引擎，支持规则链、规则树和中间件机制。支持泛型、并发安全，提供EOF和FALLTHROUGH流程控制。
+
+#### 🚀 快速开始
 
 ```go
-import (
-    "github.com/karosown/katool-go/util/dumper"
-    "github.com/karosown/katool-go/sys"
+import "github.com/karosown/katool-go/ruleengine"
+
+// 1. 创建规则引擎
+engine := ruleengine.NewRuleEngine[User]()
+
+// 2. 注册规则
+engine.RegisterRule("validate_age",
+    func(user User, _ any) bool { return user.Age > 0 },  // 验证函数
+    func(user User, _ any) (User, any, error) {           // 执行函数
+        if user.Age < 18 {
+            return user, "未成年用户", nil
+        }
+        return user, "成年用户", nil
+    },
 )
 
-// 调试输出
-complexObject := map[string]any{
-    "users": []User{{Name: "Alice", Age: 25}},
-    "config": map[string]int{"timeout": 30},
-}
-dumper.Dump(complexObject)  // 美化输出对象结构
+// 3. 构建规则链
+engine.NewBuilder("user_processing").
+    AddRule("validate_age").
+    Build()
 
-// 系统工具
-funcName := sys.GetLocalFunctionName()  // 获取当前函数名
-fmt.Printf("当前函数: %s\n", funcName)
-
-// 错误处理
-sys.Warn("这是一个警告消息")
-// sys.Panic("严重错误，程序终止")  // 会触发panic
+// 4. 执行规则
+user := User{Name: "张三", Age: 25}
+result := engine.Execute("user_processing", user)
+fmt.Printf("处理结果: %v\n", result.Result)
 ```
-</details>
+
+#### 🛠️ 高级功能
+
+##### 中间件支持
+
+```go
+// 添加日志中间件
+engine.AddMiddleware(func(data User, next func(User) (User, any, error)) (User, any, error) {
+    fmt.Printf("执行前: %+v\n", data)
+    result, info, err := next(data)
+    fmt.Printf("执行后: %+v\n", result)
+    return result, info, err
+})
+
+// 添加性能监控中间件
+engine.AddMiddleware(func(data User, next func(User) (User, any, error)) (User, any, error) {
+    start := time.Now()
+    result, info, err := next(data)
+    fmt.Printf("执行耗时: %v\n", time.Since(start))
+    return result, info, err
+})
+```
+
+##### 错误控制机制
+
+**EOF - 立即终止执行**
+```go
+// 当遇到严重问题时，立即终止整个规则链
+return user, "用户被禁用", ruleengine.EOF
+```
+
+**FALLTHROUGH - 跳过当前规则继续执行**
+```go
+// 跳过当前规则，但继续执行后续规则
+return user, "跳过此步骤", ruleengine.FALLTHROUGH
+```
+
+#### 🌳 规则树结构
+
+除了线性的规则链，还支持树形结构的规则组织：
+
+##### 基础用法
+
+```go
+type TestData struct {
+    Value int
+}
+
+// 创建规则节点
+leafNode := ruleengine.NewRuleNode[TestData](
+    func(data TestData, _ any) bool { return data.Value > 5 },
+    func(data TestData, _ any) (TestData, any, error) {
+        return TestData{Value: data.Value + 10}, "处理完成", nil
+    },
+)
+
+// 创建规则树
+tree := ruleengine.NewRuleTree[TestData](leafNode)
+
+// 执行规则树
+result, info, err := tree.Run(TestData{Value: 3})
+```
+
+##### 复杂树形结构
+
+```go
+// 构建复杂的规则树
+rootNode := ruleengine.NewRuleNode[User](
+    func(user User, _ any) bool { return user.ID > 0 },
+    func(user User, _ any) (User, any, error) {
+        return user, "用户ID验证通过", nil
+    },
+)
+
+// 添加子节点
+ageNode := ruleengine.NewRuleNode[User](
+    func(user User, _ any) bool { return user.Age > 0 },
+    func(user User, _ any) (User, any, error) {
+        return user, "年龄验证通过", nil
+    },
+)
+
+emailNode := ruleengine.NewRuleNode[User](
+    func(user User, _ any) bool { return user.Email != "" },
+    func(user User, _ any) (User, any, error) {
+        return user, "邮箱验证通过", nil
+    },
+)
+
+// 构建树形结构
+rootNode.AddChild(ageNode)
+rootNode.AddChild(emailNode)
+
+tree := ruleengine.NewRuleTree[User](rootNode)
+```
+
+#### 📝 复杂业务场景示例
+
+##### 用户注册验证流程
+
+```go
+func setupUserRegistrationEngine() *ruleengine.RuleEngine[User] {
+    engine := ruleengine.NewRuleEngine[User]()
+    
+    // 基础信息验证
+    engine.RegisterRule("validate_basic_info",
+        func(user User, _ any) bool { return true },
+        func(user User, _ any) (User, any, error) {
+            if user.Name == "" {
+                return user, "用户名不能为空", ruleengine.EOF
+            }
+            if len(user.Name) < 2 {
+                return user, "用户名太短", ruleengine.EOF
+            }
+            return user, "基础信息验证通过", nil
+        },
+    )
+    
+    // 年龄检查
+    engine.RegisterRule("check_age",
+        func(user User, _ any) bool { return true },
+        func(user User, _ any) (User, any, error) {
+            if user.Age < 13 {
+                return user, "用户年龄过小", ruleengine.EOF
+            } else if user.Age < 18 {
+                return user, "未成年用户", ruleengine.FALLTHROUGH
+            }
+            return user, "成年用户", nil
+        },
+    )
+    
+    // 成年用户身份验证（未成年用户会跳过）
+    engine.RegisterRule("adult_identity_check",
+        func(user User, _ any) bool { return user.Age >= 18 },
+        func(user User, _ any) (User, any, error) {
+            if user.IDCard == "" {
+                return user, "成年用户需要身份证", ruleengine.EOF
+            }
+            return user, "身份验证完成", nil
+        },
+    )
+    
+    // 邮箱验证
+    engine.RegisterRule("validate_email",
+        func(user User, _ any) bool { return user.Email != "" },
+        func(user User, _ any) (User, any, error) {
+            if !isValidEmail(user.Email) {
+                return user, "邮箱格式错误", ruleengine.EOF
+            }
+            return user, "邮箱验证通过", nil
+        },
+    )
+    
+    // 最终注册
+    engine.RegisterRule("complete_registration",
+        func(user User, _ any) bool { return true },
+        func(user User, _ any) (User, any, error) {
+            user.ID = generateUserID()
+            user.CreatedAt = time.Now()
+            return user, "注册完成", nil
+        },
+    )
+    
+    // 构建注册流程链
+    engine.NewBuilder("user_registration").
+        AddRule("validate_basic_info").
+        AddRule("check_age").
+        AddRule("adult_identity_check").
+        AddRule("validate_email").
+        AddRule("complete_registration").
+        Build()
+    
+    return engine
+}
+
+// 使用示例
+func registerUser(userData User) {
+    engine := setupUserRegistrationEngine()
+    
+    result := engine.Execute("user_registration", userData)
+    if result.Error != nil {
+        fmt.Printf("注册失败: %v\n", result.Error)
+        return
+    }
+    
+    fmt.Printf("注册成功: %+v\n", result.Data)
+    fmt.Printf("处理信息: %v\n", result.Result)
+}
+```
+
+##### 复杂执行场景分析
+
+```go
+// 执行结果分析：
+用户年龄 12: validate_basic_info(✅) → check_age(EOF 🛑) → 后续规则全部跳过
+用户年龄 16: validate_basic_info(✅) → check_age(FALLTHROUGH ⚡) → adult_identity_check(跳过) → validate_email(✅) → complete_registration(✅)
+用户年龄 25: validate_basic_info(✅) → check_age(✅) → adult_identity_check(✅) → validate_email(✅) → complete_registration(✅)
+```
+
+#### 🔄 批量执行
+
+```go
+// 批量执行多个规则链
+users := []User{
+    {Name: "张三", Age: 25, Email: "zhang@example.com"},
+    {Name: "李四", Age: 17, Email: "li@example.com"},
+    {Name: "王五", Age: 30, Email: "wang@example.com"},
+}
+
+chains := []string{"user_registration", "user_validation"}
+
+for _, user := range users {
+    results := engine.BatchExecute(chains, user)
+    for i, result := range results {
+        fmt.Printf("用户 %s 执行链 %s: ", user.Name, chains[i])
+        if result.Error != nil {
+            fmt.Printf("失败 - %v\n", result.Error)
+        } else {
+            fmt.Printf("成功 - %v\n", result.Result)
+        }
+    }
+}
+```
+
+#### 📚 API 参考
+
+##### 核心引擎方法
+
+**创建与配置：**
+- `NewRuleEngine[T]()` - 创建新的规则引擎
+- `RegisterRule(name, validFunc, execFunc)` - 注册规则
+- `AddMiddleware(middleware)` - 添加中间件
+
+**规则链构建：**
+- `NewBuilder(chainName)` - 创建规则链构建器
+- `AddRule(ruleName)` - 添加已注册的规则
+- `AddCustomRule(validFunc, execFunc)` - 添加临时规则
+- `Build()` - 构建规则链
+
+**执行方法：**
+- `Execute(chainName, data)` - 执行指定规则链
+- `BatchExecute(chainNames, data)` - 批量执行多个规则链
+
+##### 规则树方法
+
+**树结构构建：**
+- `NewRuleNode[T](validFunc, execFunc)` - 创建规则节点
+- `AddChild(childNode)` - 添加子节点
+- `AddChildren(childNodes...)` - 添加多个子节点
+
+**树执行：**
+- `NewRuleTree[T](rootNode)` - 创建规则树
+- `Run(data)` - 执行规则树
+- `ToQueue()` - 转换为队列形式
+
+##### 错误控制常量
+
+- `ruleengine.EOF` - 立即终止执行
+- `ruleengine.FALLTHROUGH` - 跳过当前规则继续执行
+
+##### 执行结果结构
+
+```go
+type ExecuteResult[T any] struct {
+    Data   T           // 处理后的数据
+    Result any         // 执行结果信息
+    Error  error       // 错误信息
+}
+```
+
+#### ⚠️ 注意事项
+
+1. **系统要求**: 需要 Go 1.18+ (泛型支持)
+2. **线程安全**: 引擎实例支持并发访问
+3. **规则命名**: 建议使用 `动词_名词` 格式，如 `validate_email`
+4. **错误控制**: 
+   - 使用 `EOF` 处理严重错误，立即终止
+   - 使用 `FALLTHROUGH` 跳过可选逻辑
+5. **性能优化**: 
+   - 合理设计规则粒度，避免单个规则过于复杂
+   - 善用中间件处理横切关注点
+   - 规则链顺序影响性能，将高频失败的规则前置
+
+#### 🎯 最佳实践
+
+1. **单一职责**: 每个规则只处理一种业务逻辑
+2. **合理分层**: 基础验证 → 业务逻辑 → 数据处理 → 最终确认
+3. **错误处理**: 区分业务错误（FALLTHROUGH）和系统错误（EOF）
+4. **中间件使用**: 用于日志、监控、缓存等横切关注点
+5. **测试覆盖**: 为每个规则和规则链编写单元测试
+
+```go
+// 规则测试示例
+func TestValidateAgeRule(t *testing.T) {
+    engine := ruleengine.NewRuleEngine[User]()
+    
+    engine.RegisterRule("validate_age",
+        func(user User, _ any) bool { return user.Age > 0 },
+        func(user User, _ any) (User, any, error) {
+            if user.Age < 18 {
+                return user, "未成年", ruleengine.FALLTHROUGH
+            }
+            return user, "成年", nil
+        },
+    )
+    
+    engine.NewBuilder("test_chain").AddRule("validate_age").Build()
+    
+    // 测试未成年用户
+    minorResult := engine.Execute("test_chain", User{Age: 16})
+    assert.Equal(t, ruleengine.FALLTHROUGH, minorResult.Error)
+    assert.Equal(t, "未成年", minorResult.Result)
+    
+    // 测试成年用户
+    adultResult := engine.Execute("test_chain", User{Age: 25})
+    assert.Nil(t, adultResult.Error)
+    assert.Equal(t, "成年", adultResult.Result)
+}
+```
+
+#### 📊 可视化流程图
+
+##### EOF 机制 - 立即终止执行
+
+```
+正常执行流程：
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   规则 A    │───▶│   规则 B    │───▶│   规则 C    │───▶│   规则 D    │
+│  (验证通过)  │    │  (验证通过)  │    │  (验证通过)  │    │  (验证通过)  │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+       ✅               ✅               ✅               ✅
+
+EOF 终止流程：
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   规则 A    │───▶│   规则 B    │ ╳  │   规则 C    │    │   规则 D    │
+│  (验证通过)  │    │ (返回 EOF)  │    │  (未执行)   │    │  (未执行)   │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+       ✅               🛑               ⭕               ⭕
+                   立即终止，后续规则不执行
+
+规则树中的 EOF：
+                    根节点
+                       │
+                   ┌───▼───┐
+                   │ 规则A │ ✅
+                   └───┬───┘
+                       │
+            ┌──────────┼──────────┐
+            ▼          ▼          ▼
+        ┌──────┐   ┌──────┐   ┌──────┐
+        │规则B1│   │规则B2│   │规则B3│
+        │ (EOF)│   │(未执行)│ │(未执行)│
+        └──────┘   └──────┘   └──────┘
+            🛑         ⭕         ⭕
+        
+        当B1返回EOF时，整个树立即终止
+        B2、B3 以及所有后续节点都不会执行
+```
+
+##### FALLTHROUGH 机制 - 跳过继续执行
+
+```
+正常执行流程：
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   规则 A    │───▶│   规则 B    │───▶│   规则 C    │───▶│   规则 D    │
+│  (验证通过)  │    │  (验证通过)  │    │  (验证通过)  │    │  (验证通过)  │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+       ✅               ✅               ✅               ✅
+
+FALLTHROUGH 跳过流程：
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   规则 A    │───▶│   规则 B    │~~~▶│   规则 C    │───▶│   规则 D    │
+│  (验证通过)  │    │(FALLTHROUGH)│    │  (验证通过)  │    │  (验证通过)  │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+       ✅               ⚡               ✅               ✅
+                   跳过但继续执行后续规则
+
+规则树中的 FALLTHROUGH：
+                      根节点
+                         │
+                     ┌───▼───┐
+                     │ 规则A │ ✅
+                     └───┬───┘
+                         │
+              ┌──────────┼──────────┐
+              ▼          ▼          ▼
+          ┌──────┐   ┌──────┐   ┌──────┐
+          │规则B1│   │规则B2│   │规则B3│
+          │(FALL)│   │ ✅   │   │ ✅   │
+          └──┬───┘   └──┬───┘   └──┬───┘
+             │⚡       │        │
+             ▼          ▼          ▼
+          ┌──────┐   ┌──────┐   ┌──────┐
+          │规则C1│   │规则C2│   │规则C3│
+          │(跳过) │   │ ✅   │   │ ✅   │
+          └──────┘   └──────┘   └──────┘
+             ⭕
+        
+        当B1返回FALLTHROUGH时：
+        - B1的子节点C1被跳过
+        - B2、B3 继续正常执行
+        - C2、C3 继续正常执行
+```
 
 <hr>
 
 ## 💡 最佳实践
 
-<details>
-<summary><b>🌊 流式处理最佳实践</b></summary>
+### 🚀 性能优化建议
 
-- **优先使用 `Parallel()`**：对于大数据集，启用并行处理可显著提升性能
-- **合理安排操作顺序**：先过滤再转换，减少后续处理的数据量
-- **正确使用 `Reduce`**：注意提供合适的初始值和合并函数
-- **避免嵌套过深**：复杂逻辑可拆分为多个步骤
+<details>
+<summary><b>🌊 流式处理性能优化</b></summary>
+
+- **合理使用并行流**：大数据集(>1000元素)时启用`Parallel()`
+- **避免频繁装箱**：使用具体类型而非interface{}
+- **链式操作排序**：先Filter再Map，减少处理元素数量
 
 ```go
-// ✅ 推荐写法：先过滤再转换
-result := stream.ToStream(&users).
-    Parallel().
-    Filter(func(u User) bool { 
-        return u.Age > 25  // 先过滤，减少数据量
-    }).
-    Map(func(u User) any {
-        return u.Name  // 对过滤后的数据进行转换
-    }).
+// ✅ 推荐：先过滤再处理
+stream.ToStream(&data).
+    Filter(func(item Item) bool { return item.IsValid() }).  // 先减少数据量
+    Map(func(item Item) ProcessedItem { return item.Process() }).
     ToList()
 
-// ❌ 不推荐：先转换再过滤
-result := stream.ToStream(&users).
-    Map(func(u User) any {
-        return u.Name  // 转换所有数据
-    }).
-    Filter(func(name any) bool {
-        // 过滤转换后的数据，浪费了转换资源
-        return len(name.(string)) > 3
-    }).
+// ❌ 避免：先处理再过滤
+stream.ToStream(&data).
+    Map(func(item Item) ProcessedItem { return item.Process() }).  // 处理所有数据
+    Filter(func(item ProcessedItem) bool { return item.IsValid() }). // 再过滤
     ToList()
 ```
 </details>
 
 <details>
-<summary><b>🔒 并发控制最佳实践</b></summary>
+<summary><b>📚 Optional 容器最佳实践</b></summary>
 
-- **使用 `defer` 确保资源释放**：避免协程泄漏
-- **合理使用 `LockSupport`**：确保每个 `Park()` 都有对应的 `Unpark()`
-- **批量操作用流式API**：简化多个 `LockSupport` 的管理
-- **避免死锁**：合理设计锁的获取顺序
+- **避免嵌套Optional**：不要创建`Optional[Optional[T]]`
+- **使用类型安全的MapTyped**：避免类型断言错误
+- **合理使用OrElsePanic**：仅在确定不会为空时使用
 
 ```go
-// ✅ 推荐写法：使用流式API管理多个LockSupport
-supports := make([]*lock.LockSupport, n)
-for i := 0; i < n; i++ {
-    supports[i] = lock.NewLockSupport()
-    // 启动工作协程...
-}
+// ✅ 推荐：使用MapTyped进行类型安全转换
+result := optional.MapTyped(optional.Of("  hello  "), strings.TrimSpace).
+    Filter(func(s string) bool { return len(s) > 0 }).
+    OrElse("默认值")
 
-// 批量唤醒
-stream.ToStream(&supports).ForEach(func(ls *lock.LockSupport) {
-    ls.Unpark()
-})
-
-// ✅ 推荐写法：确保资源释放
-func processWithTimeout() {
-    ls := lock.NewLockSupport()
-    done := make(chan bool, 1)
-    
-    go func() {
-        defer func() { done <- true }()
-        ls.Park()
-        // 处理逻辑...
-    }()
-    
-    select {
-    case <-done:
-        // 正常完成
-    case <-time.After(5 * time.Second):
-        ls.Unpark()  // 超时唤醒
-    }
-}
+// ❌ 避免：使用Map需要类型断言
+result := optional.Of("  hello  ").
+    Map(func(s any) any { return strings.TrimSpace(s.(string)) }). // 需要断言
+    OrElse("默认值")
 ```
 </details>
 
 <details>
-<summary><b>🔤 文本处理最佳实践</b></summary>
+<summary><b>⚡ 规则引擎最佳实践</b></summary>
 
-- **及时释放资源**：使用 `defer jb.Free()` 释放分词器资源
-- **选择合适的分词模式**：根据场景选择精确、全模式或搜索模式
-- **合理使用词频统计**：大文本处理时注意内存使用
-
-```go
-// ✅ 推荐写法：资源管理
-func processText(text string) map[string]int64 {
-    jb := jieba.New()
-    defer jb.Free()  // 确保资源释放
-    
-    words := jb.Cut(text)
-    return words.Frequency().ToMap()  // 转为普通map避免持有引用
-}
-
-// ✅ 推荐写法：流式处理分词结果
-meaningfulWords := jb.Cut(text).ToStream().
-    Filter(func(word string) bool {
-        return len(word) > 1  // 过滤单字
-    }).
-    Distinct().
-    ToList()
-```
-</details>
-
-<details>
-<summary><b>🔄 数据转换最佳实践</b></summary>
-
-- **注意类型安全**：使用泛型确保类型安全
-- **合理使用属性复制**：确保源和目标结构体字段类型匹配
-- **大批量转换使用并行流**：提升性能
+- **规则粒度控制**：单个规则只处理一种业务逻辑
+- **合理使用中间件**：用于日志、监控，避免业务逻辑
+- **错误控制策略**：EOF用于严重错误，FALLTHROUGH用于跳过逻辑
 
 ```go
-// ✅ 推荐写法：类型安全的批量转换
-dtos := convert.Convert(users, func(u User) UserDTO {
-    return UserDTO{
-        ID:     u.ID,
-        Name:   u.Name,
-        Status: "Active",
-    }
-})
+// ✅ 推荐：单一职责的规则
+engine.RegisterRule("validate_email",
+    func(user User, _ any) bool { return user.Email != "" },
+    func(user User, _ any) (User, any, error) {
+        if !isValidEmail(user.Email) {
+            return user, "邮箱格式错误", ruleengine.EOF
+        }
+        return user, "邮箱验证通过", nil
+    },
+)
 
-// ✅ 推荐写法：并行处理大批量数据
-result := stream.ToStream(&largeDataSet).
-    Parallel().
-    Map(func(item DataItem) any {
-        return convert.ToString(item.Value)
-    }).
-    ToList()
+// ❌ 避免：复杂的多职责规则
+engine.RegisterRule("validate_user",  // 太宽泛
+    func(user User, _ any) bool { return true },
+    func(user User, _ any) (User, any, error) {
+        // 验证邮箱、手机、身份证等多种逻辑混合
+        // 违反单一职责原则
+    },
+)
 ```
 </details>
 
