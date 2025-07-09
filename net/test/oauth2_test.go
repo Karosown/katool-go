@@ -1,11 +1,12 @@
 package test
 
 import (
-	rm "github.com/karosown/katool-go/net/format/base_format"
-	"github.com/karosown/katool-go/xlog"
 	"os"
 	"path"
 	"testing"
+
+	rm "github.com/karosown/katool-go/net/format/baseformat"
+	"github.com/karosown/katool-go/xlog"
 
 	remote "github.com/karosown/katool-go/net/http"
 	"go.uber.org/zap"

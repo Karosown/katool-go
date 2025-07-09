@@ -1,143 +1,307 @@
 package ruleengine
 
 import (
-	"errors"
-
-	"github.com/karosown/katool-go/container/cutil"
-	"github.com/karosown/katool-go/container/optional"
+	"fmt"
+	"sync"
 )
 
-type RuleErr error
-
-var (
-	EOF         RuleErr = errors.New("RULETREE EOF")
-	FALLTHROUGH RuleErr = errors.New("RULETREE FALL THROUGH")
-)
-
-// RuleNodeMeta 如果需要做类型转换，可以使用SourceType
-type RuleNodeMeta[T any] struct {
-	SourceTypeData T
-	ConvertData    any
-	Valid          func(T, any) bool
-	Exec           func(T, any) (T, any, error)
+// RuleEngine 规则引擎管理器
+type RuleEngine[T any] struct {
+	rules      map[string]*RuleNode[T] // 已注册的规则节点
+	chains     map[string]*RuleTree[T] // 已构建的规则链
+	mutex      sync.RWMutex            // 读写锁保护并发访问
+	middleware []MiddlewareFunc[T]     // 中间件函数
 }
-type RuleLayer[T any] []*RuleNode[T]
 
-func (r *RuleLayer[T]) Len() int {
-	// bfs计算大小
-	queue := make([]*RuleNode[T], 0)
-	visited := make(map[*RuleNode[T]]bool)
-	count := 0
+// MiddlewareFunc 中间件函数类型
+type MiddlewareFunc[T any] func(data T, next func(T) (T, any, error)) (T, any, error)
 
-	// Add all nodes of this layer to the initial queue
-	for _, node := range *r {
-		queue = append(queue, node)
-		visited[node] = true
+// RuleBuilder 规则构建器
+type RuleBuilder[T any] struct {
+	engine *RuleEngine[T]
+	nodes  []*RuleNode[T]
+	name   string
+}
+
+// ExecuteResult 执行结果
+type ExecuteResult[T any] struct {
+	Data   T
+	Result any
+	Error  error
+	Chain  string
+}
+
+// NewRuleEngine 创建新的规则引擎
+func NewRuleEngine[T any]() *RuleEngine[T] {
+	return &RuleEngine[T]{
+		rules:      make(map[string]*RuleNode[T]),
+		chains:     make(map[string]*RuleTree[T]),
+		middleware: make([]MiddlewareFunc[T], 0),
 	}
+}
 
-	// Perform BFS
-	for len(queue) > 0 {
-		node := queue[0]
-		queue = queue[1:]
-		count++
-		for _, nxt := range node.NxtLayer {
-			if !visited[nxt] {
-				queue = append(queue, nxt)
-				visited[nxt] = true
+// RegisterRule 注册单个规则节点
+func (e *RuleEngine[T]) RegisterRule(name string, valid func(T, any) bool, exec func(T, any) (T, any, error)) *RuleEngine[T] {
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
+
+	e.rules[name] = NewRuleNode(valid, exec)
+	return e
+}
+
+// GetRule 获取已注册的规则
+func (e *RuleEngine[T]) GetRule(name string) (*RuleNode[T], bool) {
+	e.mutex.RLock()
+	defer e.mutex.RUnlock()
+
+	rule, exists := e.rules[name]
+	return rule, exists
+}
+
+// NewBuilder 创建规则构建器
+func (e *RuleEngine[T]) NewBuilder(chainName string) *RuleBuilder[T] {
+	return &RuleBuilder[T]{
+		engine: e,
+		nodes:  make([]*RuleNode[T], 0),
+		name:   chainName,
+	}
+}
+
+// AddRule 向构建器添加规则（通过名称）
+func (b *RuleBuilder[T]) AddRule(ruleName string) *RuleBuilder[T] {
+	if rule, exists := b.engine.GetRule(ruleName); exists {
+		b.nodes = append(b.nodes, rule)
+	}
+	return b
+}
+
+// AddCustomRule 向构建器添加自定义规则
+func (b *RuleBuilder[T]) AddCustomRule(valid func(T, any) bool, exec func(T, any) (T, any, error)) *RuleBuilder[T] {
+	b.nodes = append(b.nodes, NewRuleNode(valid, exec))
+	return b
+}
+
+// AddConditionalChain 添加条件分支链
+func (b *RuleBuilder[T]) AddConditionalChain(condition func(T, any) bool, trueChain, falseChain []*RuleNode[T]) *RuleBuilder[T] {
+	conditionNode := NewRuleNode(
+		condition,
+		func(data T, convertData any) (T, any, error) {
+			if condition(data, convertData) {
+				// 执行 true 分支
+				for _, node := range trueChain {
+					var err error
+					data, convertData, err = node.Exec(data, convertData)
+					if err != nil {
+						return data, convertData, err
+					}
+				}
+			} else {
+				// 执行 false 分支
+				for _, node := range falseChain {
+					var err error
+					data, convertData, err = node.Exec(data, convertData)
+					if err != nil {
+						return data, convertData, err
+					}
+				}
 			}
-		}
-	}
-	return count
-}
-
-type RuleNode[T any] struct {
-	RuleNodeMeta[T]
-	NxtLayer RuleLayer[T]
-}
-
-func (r *RuleNode[T]) ToQueue(queue chan *RuleNode[T]) bool {
-	if r.Valid(r.SourceTypeData, r.ConvertData) {
-		queue <- r
-	}
-	return true
-}
-func (r *RuleNode[T]) LayerToQueue(queue chan *RuleNode[T]) bool {
-	for _, item := range r.NxtLayer {
-		if !item.ToQueue(queue) {
-			return false
-		}
-	}
-	return true
-}
-func (r *RuleNode[T]) Else(exec func(T, any) (T, any, error)) *RuleNode[T] {
-	return NewRuleNode[T](func(t T, a any) bool {
-		return !r.Valid(t, a)
-	}, exec)
-}
-func (r *RuleNode[T]) LayerData(data T, cvntData any) bool {
-	for _, item := range r.NxtLayer {
-		if nil == item {
-			return true
-		}
-		item.SourceTypeData = data
-		item.ConvertData = cvntData
-	}
-	return true
-}
-
-type RuleTree[T any] struct {
-	Root      *RuleNode[T]
-	waitQueue chan *RuleNode[T]
-}
-
-func NewRuleNode[T any](valid func(T, any) bool, exec func(T, any) (T, any, error), nxtlayer ...*RuleNode[T]) *RuleNode[T] {
-	return &RuleNode[T]{
-		RuleNodeMeta: RuleNodeMeta[T]{
-			Valid: valid,
-			Exec:  exec,
+			return data, convertData, nil
 		},
-		NxtLayer: optional.IsTrue(cutil.IsBlank[*[]*RuleNode[T]](&nxtlayer), nil, nxtlayer),
-	}
+	)
+	b.nodes = append(b.nodes, conditionNode)
+	return b
 }
-func NewRuleTree[T any](root *RuleNode[T]) *RuleTree[T] {
-	return &RuleTree[T]{
-		// 预留10个位置
-		waitQueue: make(chan *RuleNode[T], len(root.NxtLayer)+0x11),
-		Root:      root,
+
+// Build 构建规则链
+func (b *RuleBuilder[T]) Build() (*RuleTree[T], error) {
+	if len(b.nodes) == 0 {
+		return nil, fmt.Errorf("规则链 '%s' 为空", b.name)
+	}
+
+	// 构建树形结构
+	root := b.nodes[0]
+	current := root
+
+	for i := 1; i < len(b.nodes); i++ {
+		current.NxtLayer = append(current.NxtLayer, b.nodes[i])
+		current = b.nodes[i]
+	}
+
+	tree := NewRuleTree(root)
+
+	// 注册到引擎
+	b.engine.mutex.Lock()
+	b.engine.chains[b.name] = tree
+	b.engine.mutex.Unlock()
+
+	return tree, nil
+}
+
+// Execute 执行指定的规则链
+func (e *RuleEngine[T]) Execute(chainName string, data T) *ExecuteResult[T] {
+	e.mutex.RLock()
+	chain, exists := e.chains[chainName]
+	e.mutex.RUnlock()
+
+	if !exists {
+		return &ExecuteResult[T]{
+			Data:  data,
+			Error: fmt.Errorf("规则链 '%s' 不存在", chainName),
+			Chain: chainName,
+		}
+	}
+
+	// 应用中间件
+	finalData, result, err := e.applyMiddleware(data, func(d T) (T, any, error) {
+		return chain.Run(d)
+	})
+
+	return &ExecuteResult[T]{
+		Data:   finalData,
+		Result: result,
+		Error:  err,
+		Chain:  chainName,
 	}
 }
 
-func (r *RuleTree[T]) Run(data T) (T, any, error) {
-	r.Root.SourceTypeData, r.Root.ConvertData = data, data
-	r.Root.ToQueue(r.waitQueue)
-	var orginData T
-	var cvtDara any
-	var err error
-	for {
-		select {
-		case node := <-r.waitQueue:
-			orginData, cvtDara, err = node.Exec(node.SourceTypeData, r.Root.ConvertData)
-			if err != nil {
-				if errors.Is(err, EOF) {
-					close(r.waitQueue)
-					err = nil
-					r.waitQueue = make(chan *RuleNode[T], r.Root.NxtLayer.Len()+0x11)
-					return orginData, cvtDara, err
-				}
-				if errors.Is(err, FALLTHROUGH) {
-					err = nil
-					r.Root.SourceTypeData = orginData
-					r.Root.ConvertData = cvtDara
-				}
-				break
-			}
-			// 这里直接进行状态转移，把这一层的状态移交给下一层，从而避免了不同逻辑之间的影响，也不用管使用深度遍历还是广度遍历
-			node.LayerData(orginData, cvtDara)
-			node.LayerToQueue(r.waitQueue)
-		default:
-			close(r.waitQueue)
-			r.waitQueue = make(chan *RuleNode[T], r.Root.NxtLayer.Len()+0x11)
-			return orginData, cvtDara, err
+// ExecuteAll 执行所有规则链
+func (e *RuleEngine[T]) ExecuteAll(data T) map[string]*ExecuteResult[T] {
+	e.mutex.RLock()
+	chains := make(map[string]*RuleTree[T])
+	for name, chain := range e.chains {
+		chains[name] = chain
+	}
+	e.mutex.RUnlock()
+
+	results := make(map[string]*ExecuteResult[T])
+
+	for name := range chains {
+		results[name] = e.Execute(name, data)
+	}
+
+	return results
+}
+
+// BatchExecute 批量执行规则链（并发）
+func (e *RuleEngine[T]) BatchExecute(chainNames []string, data T) map[string]*ExecuteResult[T] {
+	results := make(map[string]*ExecuteResult[T])
+	var mutex sync.Mutex
+	var wg sync.WaitGroup
+
+	for _, chainName := range chainNames {
+		wg.Add(1)
+		go func(name string) {
+			defer wg.Done()
+			result := e.Execute(name, data)
+
+			mutex.Lock()
+			results[name] = result
+			mutex.Unlock()
+		}(chainName)
+	}
+
+	wg.Wait()
+	return results
+}
+
+// AddMiddleware 添加中间件
+func (e *RuleEngine[T]) AddMiddleware(middleware MiddlewareFunc[T]) *RuleEngine[T] {
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
+
+	e.middleware = append(e.middleware, middleware)
+	return e
+}
+
+// applyMiddleware 应用中间件
+func (e *RuleEngine[T]) applyMiddleware(data T, final func(T) (T, any, error)) (T, any, error) {
+	if len(e.middleware) == 0 {
+		return final(data)
+	}
+
+	// 递归应用中间件
+	var applyNext func(int, T) (T, any, error)
+	applyNext = func(index int, d T) (T, any, error) {
+		if index >= len(e.middleware) {
+			return final(d)
 		}
+
+		return e.middleware[index](d, func(nextData T) (T, any, error) {
+			return applyNext(index+1, nextData)
+		})
+	}
+
+	return applyNext(0, data)
+}
+
+// ListRules 列出所有已注册的规则
+func (e *RuleEngine[T]) ListRules() []string {
+	e.mutex.RLock()
+	defer e.mutex.RUnlock()
+
+	rules := make([]string, 0, len(e.rules))
+	for name := range e.rules {
+		rules = append(rules, name)
+	}
+	return rules
+}
+
+// ListChains 列出所有已构建的规则链
+func (e *RuleEngine[T]) ListChains() []string {
+	e.mutex.RLock()
+	defer e.mutex.RUnlock()
+
+	chains := make([]string, 0, len(e.chains))
+	for name := range e.chains {
+		chains = append(chains, name)
+	}
+	return chains
+}
+
+// RemoveRule 移除规则
+func (e *RuleEngine[T]) RemoveRule(name string) bool {
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
+
+	if _, exists := e.rules[name]; exists {
+		delete(e.rules, name)
+		return true
+	}
+	return false
+}
+
+// RemoveChain 移除规则链
+func (e *RuleEngine[T]) RemoveChain(name string) bool {
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
+
+	if _, exists := e.chains[name]; exists {
+		delete(e.chains, name)
+		return true
+	}
+	return false
+}
+
+// Clear 清空所有规则和规则链
+func (e *RuleEngine[T]) Clear() *RuleEngine[T] {
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
+
+	e.rules = make(map[string]*RuleNode[T])
+	e.chains = make(map[string]*RuleTree[T])
+	e.middleware = make([]MiddlewareFunc[T], 0)
+
+	return e
+}
+
+// Stats 获取引擎统计信息
+func (e *RuleEngine[T]) Stats() map[string]interface{} {
+	e.mutex.RLock()
+	defer e.mutex.RUnlock()
+
+	return map[string]interface{}{
+		"rules_count":      len(e.rules),
+		"chains_count":     len(e.chains),
+		"middleware_count": len(e.middleware),
 	}
 }
