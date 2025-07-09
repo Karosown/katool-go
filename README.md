@@ -16,6 +16,11 @@
 
 <b><i>一个功能丰富的 Go 工具库，借鉴 Java 生态优秀设计，为 Go 开发提供全方位支持</i></b>
 
+<p>
+  <a href="README.md">🇨🇳 中文</a> |
+  <a href="README_EN.md">🇺🇸 English</a>
+</p>
+
 </div>
 
 <hr>
@@ -265,7 +270,7 @@ func main() {
 	sortedMap.Set("1", "one")
 	sortedMap.Set("2", "two")
 	
-	jsonBytes, _ := json.Marshal(sortedMap)
+	jsonBytes, _ := json.Marshal(sortedMap) 
 	fmt.Printf("有序JSON: %s\n", string(jsonBytes))  // 按键排序输出
 	
 	// 4. 双层键映射
@@ -1581,13 +1586,13 @@ FALLTHROUGH 跳过流程：
 stream.ToStream(&data).
     Filter(func(item Item) bool { return item.IsValid() }).  // 先减少数据量
     Map(func(item Item) ProcessedItem { return item.Process() }).
-    ToList()
+	ToList()
 
 // ❌ 避免：先处理再过滤
 stream.ToStream(&data).
     Map(func(item Item) ProcessedItem { return item.Process() }).  // 处理所有数据
     Filter(func(item ProcessedItem) bool { return item.IsValid() }). // 再过滤
-    ToList()
+	ToList()
 ```
 </details>
 
