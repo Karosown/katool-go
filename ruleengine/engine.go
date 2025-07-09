@@ -42,10 +42,13 @@ func NewRuleEngine[T any]() *RuleEngine[T] {
 
 // RegisterRule 注册单个规则节点
 func (e *RuleEngine[T]) RegisterRule(name string, valid func(T, any) bool, exec func(T, any) (T, any, error)) *RuleEngine[T] {
+	return e.RegisterRuleNode(name, NewRuleNode(valid, exec))
+}
+
+func (e *RuleEngine[T]) RegisterRuleNode(name string, node *RuleNode[T]) *RuleEngine[T] {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
-
-	e.rules[name] = NewRuleNode(valid, exec)
+	e.rules[name] = node
 	return e
 }
 
@@ -77,7 +80,11 @@ func (b *RuleBuilder[T]) AddRule(ruleName string) *RuleBuilder[T] {
 
 // AddCustomRule 向构建器添加自定义规则
 func (b *RuleBuilder[T]) AddCustomRule(valid func(T, any) bool, exec func(T, any) (T, any, error)) *RuleBuilder[T] {
-	b.nodes = append(b.nodes, NewRuleNode(valid, exec))
+	return b.AddCustomRuleNode(NewRuleNode(valid, exec))
+}
+
+func (b *RuleBuilder[T]) AddCustomRuleNode(node *RuleNode[T]) *RuleBuilder[T] {
+	b.nodes = append(b.nodes, node)
 	return b
 }
 
