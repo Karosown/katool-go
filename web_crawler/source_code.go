@@ -15,13 +15,19 @@ import (
 	"golang.org/x/net/html"
 )
 
+// SourceCode 源代码结构体，包含网页源码和错误信息
+// SourceCode represents source code structure containing web page source and error information
 type SourceCode struct {
 	WebReaderString
 	WebReaderError
 }
 
+// ChromeRemoteURL Chrome远程调试URL
+// ChromeRemoteURL is the Chrome remote debugging URL
 var ChromeRemoteURL string
 
+// ReadRSS 读取RSS订阅源
+// ReadRSS reads RSS feed source
 func ReadRSS(xmlURL string) rss.RSS {
 	code := ReadSourceCode(xmlURL,
 		rss.SourceCodeGetFunc, func(page *rod.Page) {
@@ -33,6 +39,8 @@ func ReadRSS(xmlURL string) rss.RSS {
 	return *r.SetErr(err)
 }
 
+// ReadFeed 读取Atom订阅源并转换为RSS格式
+// ReadFeed reads Atom feed source and converts to RSS format
 func ReadFeed(xmlURL string) rss.RSS {
 	code := ReadSourceCode(xmlURL, rss.SourceCodeGetFunc, func(page *rod.Page) {
 		page.MustWaitLoad()
@@ -43,6 +51,9 @@ func ReadFeed(xmlURL string) rss.RSS {
 	}
 	return r.ToRSS()
 }
+
+// ReadSourceCode 读取网页源代码（带重试机制）
+// ReadSourceCode reads web page source code (with retry mechanism)
 func ReadSourceCode(url, execJsFunc string, rendorFunc func(*rod.Page)) SourceCode {
 	var gen func() SourceCode
 	tryNum := 7
@@ -70,6 +81,8 @@ func ReadSourceCode(url, execJsFunc string, rendorFunc func(*rod.Page)) SourceCo
 	return gen()
 }
 
+// readSourceCode 内部读取源代码方法
+// readSourceCode is the internal method for reading source code
 func readSourceCode(url, execJsFunc string, rendorFunc func(*rod.Page)) SourceCode {
 
 	sourceCode, err := execFun(url, optional.IsTrue(execJsFunc != "", execJsFunc, "() => {"+
@@ -87,7 +100,8 @@ func readSourceCode(url, execJsFunc string, rendorFunc func(*rod.Page)) SourceCo
 	}
 }
 
-// DiyConvertHtmlToArticle processes an HTML string to extract and clean the article content.
+// DiyConvertHtmlToArticle 处理HTML字符串以提取和清理文章内容
+// DiyConvertHtmlToArticle processes an HTML string to extract and clean the article content
 func DiyConvertHtmlToArticle(code string) string {
 	// Parse the HTML string into a node tree
 	doc, err := html.Parse(strings.NewReader(code))
@@ -159,7 +173,8 @@ func DiyConvertHtmlToArticle(code string) string {
 	return cleanedContent
 }
 
-// 方法一：使用正则表达式
+// StripHTMLTags 使用正则表达式移除HTML标签
+// StripHTMLTags removes HTML tags using regular expressions
 func StripHTMLTags(html string) string {
 	// 移除所有HTML标签
 	tagRegex := regexp.MustCompile(`<[^>]*>`)

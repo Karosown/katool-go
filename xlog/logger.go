@@ -1,5 +1,7 @@
 package xlog
 
+// Logger 日志记录器接口
+// Logger is a logging interface
 type Logger interface {
 	Infof(string, ...any)
 	Errorf(string, ...any)

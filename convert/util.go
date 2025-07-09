@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cast"
 )
 
+// Convert 将一个切片转换为另一个类型的切片
+// Convert transforms a slice of one type to a slice of another type
 func Convert[T any, R any](datas []T, vacuumMachine func(agent T) R) []R {
 	res := make([]R, 0, len(datas))
 	for _, data := range datas {
@@ -18,6 +20,8 @@ func Convert[T any, R any](datas []T, vacuumMachine func(agent T) R) []R {
 	return res
 }
 
+// CopyProperties 复制结构体属性
+// CopyProperties copies properties from source struct to destination struct
 func CopyProperties[T, R any](src T, dest R) (R, error) {
 	srcValue := reflect.ValueOf(src)
 	srcType := reflect.TypeOf(src)
@@ -55,11 +59,15 @@ func CopyProperties[T, R any](src T, dest R) (R, error) {
 	return rest.Interface().(R), nil
 }
 
+// fieldSetValue 设置字段值
+// fieldSetValue sets the value of a field
 func fieldSetValue(field *reflect.Value, fieldValue reflect.Value) error {
 	field.Set(fieldValue.Convert(field.Type()))
 	return nil
 }
 
+// ToString 将任意类型转换为字符串
+// ToString converts any type to string
 func ToString(source any) string {
 	var str string
 	if source == nil {
@@ -129,6 +137,8 @@ func ToString(source any) string {
 	return str
 }
 
+// ToAnySlice 将泛型切片转换为any切片
+// ToAnySlice converts a generic slice to a slice of any
 func ToAnySlice[T any](source []T) []any {
 	res := make([]any, 0, len(source))
 	for _, v := range source {
@@ -137,6 +147,8 @@ func ToAnySlice[T any](source []T) []any {
 	return res
 }
 
+// FromAnySlice 将any切片转换为泛型切片
+// FromAnySlice converts a slice of any to a generic slice
 func FromAnySlice[T any](source []any) []T {
 	res := make([]T, len(source))
 	for i, v := range source {
@@ -145,6 +157,8 @@ func FromAnySlice[T any](source []any) []T {
 	return res
 }
 
+// ChanToArray 将通道转换为数组（非阻塞）
+// ChanToArray converts a channel to an array (non-blocking)
 func ChanToArray[T any](source <-chan T) []T {
 	size := len(source)
 	res := make([]T, 0, size)
@@ -153,6 +167,9 @@ func ChanToArray[T any](source <-chan T) []T {
 	}
 	return res
 }
+
+// AwaitChanToArray 将通道转换为数组（阻塞直到通道关闭）
+// AwaitChanToArray converts a channel to an array (blocking until channel is closed)
 func AwaitChanToArray[T any](source <-chan T) []T {
 	res := make([]T, 0, cap(source))
 	for v := range source {
@@ -160,6 +177,9 @@ func AwaitChanToArray[T any](source <-chan T) []T {
 	}
 	return res
 }
+
+// ChanToFlatArray 将数组通道展平为一维数组（非阻塞）
+// ChanToFlatArray flattens an array channel to a one-dimensional array (non-blocking)
 func ChanToFlatArray[T any](source <-chan []T) []T {
 	size := len(source)
 	res := make([]T, 0, size)
@@ -168,6 +188,9 @@ func ChanToFlatArray[T any](source <-chan []T) []T {
 	}
 	return res
 }
+
+// AwaitChanToFlatArray 将数组通道展平为一维数组（阻塞直到通道关闭）
+// AwaitChanToFlatArray flattens an array channel to a one-dimensional array (blocking until channel is closed)
 func AwaitChanToFlatArray[T any](source <-chan []T) []T {
 	res := make([]T, 0, cap(source))
 	for v := range source {
@@ -175,6 +198,9 @@ func AwaitChanToFlatArray[T any](source <-chan []T) []T {
 	}
 	return res
 }
+
+// ToMap 将结构体转换为字符串映射
+// ToMap converts a struct to a string map
 func ToMap(dao any) (res map[string]string) {
 	if dao == nil {
 		return nil

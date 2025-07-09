@@ -16,15 +16,26 @@ import (
 	"github.com/karosown/katool-go/web_crawler/core"
 )
 
+// WebChrome Chrome浏览器实例
+// WebChrome is a Chrome browser instance
 var WebChrome *core.Contain
 
+// WebReaderError Web读取错误包装器
+// WebReaderError is a web reading error wrapper
 type WebReaderError struct {
 	error
 }
+
+// WebReaderString Web读取字符串类型
+// WebReaderString is a web reading string type
 type WebReaderString string
 
+// WebReaderValue Web读取值集合
+// WebReaderValue is a collection of web reading values
 type WebReaderValue []WebReaderString
 
+// NewWebReaderValue 创建新的Web读取值
+// NewWebReaderValue creates a new web reading value
 func NewWebReaderValue(strs ...string) WebReaderValue {
 	res := []WebReaderString{}
 	for _, str := range strs {
@@ -32,13 +43,21 @@ func NewWebReaderValue(strs ...string) WebReaderValue {
 	}
 	return res
 }
+
+// String 转换为字符串
+// String converts to string
 func (w WebReaderString) String() string {
 	return string(w)
 }
 
+// IsErr 检查是否有错误
+// IsErr checks if there is an error
 func (w WebReaderError) IsErr() bool {
 	return w.error != nil
 }
+
+// SolveErrors 处理错误
+// SolveErrors handles errors
 func (w WebReaderError) SolveErrors(errs error) error {
 	err := w
 	if w.error == nil {
@@ -50,19 +69,28 @@ func (w WebReaderError) SolveErrors(errs error) error {
 	errors.Join(errs, err)
 	return errs
 }
+
+// Stream 转换为流
+// Stream converts to stream
 func (w WebReaderValue) Stream() *stream.Stream[WebReaderString, WebReaderValue] {
 	return stream.ToStream(&w)
 }
 
+// Article 文章结构体
+// Article represents an article structure
 type Article struct {
 	readability.Article
 	WebReaderError
 }
 
+// RequestWith 请求修改函数类型
+// RequestWith is a function type for request modification
 type RequestWith func(r *http.Request)
 
-// FromURL fetch the web page from specified url then parses the response to find
+// fromURL fetch the web page from specified url then parses the response to find
 // the readable content.
+// fromURL 从指定URL获取网页并解析响应以找到可读内容
+// fromURL fetches the web page from specified URL then parses the response to find the readable content
 func fromURL(pageURL string, timeout time.Duration, requestModifiers ...RequestWith) (readability.Article, error) {
 	// Make sure URL is valid
 	parsedURL, err := nurl.ParseRequestURI(pageURL)

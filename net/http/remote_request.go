@@ -17,6 +17,8 @@ import (
 	"github.com/karosown/katool-go/sys"
 )
 
+// ReqApi HTTP请求接口定义
+// ReqApi defines the HTTP request interface
 type ReqApi interface {
 	Url(url string) ReqApi
 	QueryParam(psPair map[string]string) ReqApi
@@ -32,6 +34,8 @@ type ReqApi interface {
 	Build(backDao any) (any, error)
 }
 
+// Req HTTP请求结构体
+// Req represents HTTP request structure
 type Req struct {
 	url           string
 	queryParams   map[string]string
@@ -45,55 +49,81 @@ type Req struct {
 	Logger        xlog.Logger
 }
 
+// Url 设置请求URL
+// Url sets the request URL
 func (r *Req) Url(url string) ReqApi {
 	r.url = url
 	return r
 }
+
+// FormData 设置表单数据
+// FormData sets form data
 func (r *Req) FormData(datas map[string]string) ReqApi {
 	r.form = datas
 	return r
 }
+
+// Files 设置文件数据
+// Files sets file data
 func (r *Req) Files(datas map[string]string) ReqApi {
 	r.files = datas
 	return r
 }
+
+// QueryParam 设置查询参数
+// QueryParam sets query parameters
 func (r *Req) QueryParam(psPair map[string]string) ReqApi {
 	r.queryParams = psPair
 	return r
 }
+
+// SetLogger 设置日志记录器
+// SetLogger sets the logger
 func (r *Req) SetLogger(logger xlog.Logger) ReqApi {
 	r.Logger = logger
 	return r
 }
+
+// Headers 设置请求头
+// Headers sets request headers
 func (r *Req) Headers(headers map[string]string) ReqApi {
 	r.headers = headers
 	return r
 }
 
+// Data 设置请求数据
+// Data sets request data
 func (r *Req) Data(dataobj any) ReqApi {
 	r.data = dataobj
 	return r
 }
 
+// HTTP方法常量定义
+// HTTP method constants definition
 const (
-	GET    = "GET"
-	POST   = "POST"
-	PUT    = "PUT"
-	HEAD   = "HEAD"
-	DELETE = "DELETE"
+	GET    = "GET"    // GET请求 / GET request
+	POST   = "POST"   // POST请求 / POST request
+	PUT    = "PUT"    // PUT请求 / PUT request
+	HEAD   = "HEAD"   // HEAD请求 / HEAD request
+	DELETE = "DELETE" // DELETE请求 / DELETE request
 )
 
+// Method 设置请求方法
+// Method sets the request method
 func (r *Req) Method(method string) ReqApi {
 	r.method = method
 	return r
 }
 
+// HttpClient 设置HTTP客户端
+// HttpClient sets the HTTP client
 func (r *Req) HttpClient(client *resty.Client) ReqApi {
 	r.httpClient = client
 	return r
 }
 
-// 放置编解码工具链
+// DecodeHandler 设置编解码处理器
+// DecodeHandler sets the encode/decode handler
 func (r *Req) DecodeHandler(format format.EnDeCodeFormat) ReqApi {
 	r.decodeHandler = format
 	if nil == format.GetLogger() {
@@ -101,6 +131,9 @@ func (r *Req) DecodeHandler(format format.EnDeCodeFormat) ReqApi {
 	}
 	return r
 }
+
+// Build 构建并执行HTTP请求
+// Build builds and executes the HTTP request
 func (r *Req) Build(backDao any) (any, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -202,6 +235,9 @@ func (r *Req) Build(backDao any) (any, error) {
 	}
 	return backDao, nil
 }
+
+// ReHeader 重新设置指定的请求头键值对
+// ReHeader resets a specific request header key-value pair
 func (r *Req) ReHeader(k, v string) ReqApi {
 	r.headers[k] = v
 	return r

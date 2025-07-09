@@ -9,26 +9,31 @@ import (
 )
 
 // Contain 浏览器容器结构体
+// Contain represents a browser container structure
 type Contain struct {
-	Path     string
-	Headless bool
-	URL      string
-	*launcher.Launcher
-	*rod.Browser
+	Path               string // 浏览器可执行文件路径 / Browser executable path
+	Headless           bool   // 是否无头模式 / Whether headless mode
+	URL                string // 启动器URL / Launcher URL
+	*launcher.Launcher        // 启动器实例 / Launcher instance
+	*rod.Browser              // 浏览器实例 / Browser instance
 }
 
 // WebReaderSysLock 全局读写锁
+// WebReaderSysLock is a global read-write lock
 var WebReaderSysLock *sync.RWMutex = &sync.RWMutex{}
 
 // browserPool 全局浏览器池
+// browserPool is a global browser pool
 var browserPool rod.Pool[rod.Browser]
 
 // init 初始化浏览器池
+// init initializes the browser pool
 func init() {
 	browserPool = rod.NewBrowserPool(10) // 设置池大小为10
 }
 
 // NewCotain 创建新的Contain实例
+// NewCotain creates a new Contain instance
 func NewCotain(path string, headless bool) *Contain {
 	l := launcher.NewUserMode()
 	launch := l.NoSandbox(true).Headless(headless).Set("disable-gpu").
@@ -58,11 +63,13 @@ func NewCotain(path string, headless bool) *Contain {
 }
 
 // GetContainer 获取浏览器实例
+// GetContainer gets the browser instance
 func (c *Contain) GetContainer() *rod.Browser {
 	return c.Browser
 }
 
 // Close 关闭浏览器实例并归还到池中
+// Close closes the browser instance and returns it to the pool
 func (c *Contain) Close() {
 	lock.Synchronized(WebReaderSysLock, func() {
 		if c == nil {
@@ -99,6 +106,7 @@ func (c *Contain) Close() {
 }
 
 // ReStart 重启浏览器
+// ReStart restarts the browser
 func (c *Contain) ReStart() {
 	lock.Synchronized(WebReaderSysLock, func() {
 		// 关闭当前实例

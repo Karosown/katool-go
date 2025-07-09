@@ -8,74 +8,87 @@ import (
 	"github.com/karosown/katool-go/web_crawler/rss"
 )
 
-// AtomFeed 表示Atom格式的feed
+// AtomFeed Atom格式的订阅源结构体
+// AtomFeed represents an Atom format feed structure
 type AtomFeed struct {
 	XMLName xml.Name       `xml:"feed"`
 	XMLNS   string         `xml:"xmlns,attr"`
 	IDX     string         `xml:"xmlns:idx,attr,omitempty"`
 	ID      string         `xml:"id"`
 	Title   string         `xml:"title"`
-	Link    []rss.AtomLink `xml:"link"` // 使用切片，因为可能有多个link
+	Link    []rss.AtomLink `xml:"link"` // 使用切片，因为可能有多个link / Use slice as there may be multiple links
 	Updated string         `xml:"updated"`
 	Entries []AtomEntry    `xml:"entry"`
 	error
 }
 
-// AtomEntry 表示Atom feed中的条目
+// AtomEntry Atom订阅源中的条目结构体
+// AtomEntry represents an entry structure in Atom feed
 type AtomEntry struct {
-	ID        string         `xml:"id" json:"id,omitempty"`
-	Title     AtomText       `xml:"title" json:"title,omitempty"`
-	Link      rss.AtomLink   `xml:"link" json:"link,omitempty"`
-	Published string         `xml:"published" json:"published,omitempty"`
-	Updated   string         `xml:"updated" json:"updated,omitempty"`
-	Content   AtomText       `xml:"content" json:"content,omitempty"`
-	Author    AtomAuthor     `xml:"author" json:"author,omitempty"`
-	Category  []AtomCategory `xml:"category,omitempty" json:"categories,omitempty"`
+	ID        string         `xml:"id" json:"id,omitempty"`                         // 条目ID / Entry ID
+	Title     AtomText       `xml:"title" json:"title,omitempty"`                   // 标题 / Title
+	Link      rss.AtomLink   `xml:"link" json:"link,omitempty"`                     // 链接 / Link
+	Published string         `xml:"published" json:"published,omitempty"`           // 发布时间 / Published time
+	Updated   string         `xml:"updated" json:"updated,omitempty"`               // 更新时间 / Updated time
+	Content   AtomText       `xml:"content" json:"content,omitempty"`               // 内容 / Content
+	Author    AtomAuthor     `xml:"author" json:"author,omitempty"`                 // 作者 / Author
+	Category  []AtomCategory `xml:"category,omitempty" json:"categories,omitempty"` // 分类 / Categories
 }
 
-// AtomEntries 表示多个AtomEntry的集合
+// AtomEntries Atom条目集合
+// AtomEntries represents a collection of Atom entries
 type AtomEntries []AtomEntry
 
-// AtomText 表示可能带有类型的文本内容
+// AtomText 带有类型的文本内容结构体
+// AtomText represents text content structure with type information
 type AtomText struct {
-	Type  string `xml:"type,attr,omitempty" json:"type,omitempty"`
-	Value string `xml:",chardata" json:"value,omitempty"`
+	Type  string `xml:"type,attr,omitempty" json:"type,omitempty"` // 内容类型 / Content type
+	Value string `xml:",chardata" json:"value,omitempty"`          // 文本值 / Text value
 }
 
-// AtomAuthor 表示条目作者信息
+// AtomAuthor 条目作者信息结构体
+// AtomAuthor represents entry author information structure
 type AtomAuthor struct {
-	Name  string `xml:"name" json:"name,omitempty"`
-	Email string `xml:"email,omitempty" json:"email,omitempty"`
-	URI   string `xml:"uri,omitempty" json:"uri,omitempty"`
+	Name  string `xml:"name" json:"name,omitempty"`             // 姓名 / Name
+	Email string `xml:"email,omitempty" json:"email,omitempty"` // 邮箱 / Email
+	URI   string `xml:"uri,omitempty" json:"uri,omitempty"`     // URI地址 / URI address
 }
 
-// AtomCategory 表示条目分类
+// AtomCategory 条目分类结构体
+// AtomCategory represents entry category structure
 type AtomCategory struct {
-	Term   string `xml:"term,attr" json:"term,omitempty"`
-	Scheme string `xml:"scheme,attr,omitempty" json:"scheme,omitempty"`
-	Label  string `xml:"label,attr,omitempty" json:"label,omitempty"`
+	Term   string `xml:"term,attr" json:"term,omitempty"`               // 分类术语 / Category term
+	Scheme string `xml:"scheme,attr,omitempty" json:"scheme,omitempty"` // 分类方案 / Category scheme
+	Label  string `xml:"label,attr,omitempty" json:"label,omitempty"`   // 分类标签 / Category label
 }
 
-// 实现类似RSS的辅助方法
-
+// GetEntries 获取订阅源的所有条目
+// GetEntries gets all entries in the feed
 func (f AtomFeed) GetEntries() AtomEntries {
 	return f.Entries
 }
 
+// Stream 将条目集合转换为流
+// Stream converts the entries collection to a stream
 func (e AtomEntries) Stream() *stream.Stream[AtomEntry, AtomEntries] {
 	return stream.ToStream(&e)
 }
 
+// IsErr 检查是否有错误
+// IsErr checks if there is an error
 func (f *AtomFeed) IsErr() bool {
 	return f.error != nil
 }
 
+// SetErr 设置错误信息
+// SetErr sets error information
 func (f *AtomFeed) SetErr(err error) *AtomFeed {
 	f.error = err
 	return f
 }
 
 // GetSelfLink 获取rel="self"的链接
+// GetSelfLink gets the link with rel="self"
 func (f AtomFeed) GetSelfLink() string {
 	for _, link := range f.Link {
 		if link.Rel == "self" {
@@ -90,6 +103,7 @@ func (f AtomFeed) GetSelfLink() string {
 }
 
 // GetMainLink 获取主链接（无rel属性或rel="alternate"）
+// GetMainLink gets the main link (no rel attribute or rel="alternate")
 func (f AtomFeed) GetMainLink() string {
 	for _, link := range f.Link {
 		if link.Rel == "" || link.Rel == "alternate" {
@@ -103,41 +117,44 @@ func (f AtomFeed) GetMainLink() string {
 	return ""
 }
 
-// 辅助方法，获取不带类型属性的标题文本
+// GetTitleText 获取不带类型属性的标题文本
+// GetTitleText gets title text without type attribute
 func (e AtomEntry) GetTitleText() string {
 	return e.Title.Value
 }
 
-// 辅助方法，获取条目链接地址
+// GetLinkHref 获取条目链接地址
+// GetLinkHref gets the entry link URL
 func (e AtomEntry) GetLinkHref() string {
 	return e.Link.Href[len("https://www.google.com/url?rct=j&sa=t&url="):]
 }
 
-// 辅助方法，获取内容文本
+// GetContentText 获取内容文本
+// GetContentText gets the content text
 func (e AtomEntry) GetContentText() string {
 	return e.Content.Value
 }
 
-// 时间解析相关方法
-
-// GetUpdatedTime 将updated字段解析为time.Time
+// GetUpdatedTime 将订阅源updated字段解析为time.Time
+// GetUpdatedTime parses the feed's updated field to time.Time
 func (f AtomFeed) GetUpdatedTime() (time.Time, error) {
 	return time.Parse(time.RFC3339, f.Updated)
 }
 
-// GetPublishedTime 将published字段解析为time.Time
+// GetPublishedTime 将条目published字段解析为time.Time
+// GetPublishedTime parses the entry's published field to time.Time
 func (e AtomEntry) GetPublishedTime() (time.Time, error) {
 	return time.Parse(time.RFC3339, e.Published)
 }
 
-// GetUpdatedTime 将updated字段解析为time.Time
+// GetUpdatedTime 将条目updated字段解析为time.Time
+// GetUpdatedTime parses the entry's updated field to time.Time
 func (e AtomEntry) GetUpdatedTime() (time.Time, error) {
 	return time.Parse(time.RFC3339, e.Updated)
 }
 
-// 转换为RSS的方法
-
 // ToRSSItem 将AtomEntry转换为RSS的Item
+// ToRSSItem converts AtomEntry to RSS Item
 func (e AtomEntry) ToRSSItem() rss.Item {
 	return rss.Item{
 		Title:       e.GetTitleText(),
@@ -152,6 +169,7 @@ func (e AtomEntry) ToRSSItem() rss.Item {
 }
 
 // ToRSS 将AtomFeed转换为RSS
+// ToRSS converts AtomFeed to RSS
 func (f AtomFeed) ToRSS() rss.RSS {
 	items := make([]rss.Item, len(f.Entries))
 	for i, entry := range f.Entries {
@@ -173,7 +191,8 @@ func (f AtomFeed) ToRSS() rss.RSS {
 	}
 }
 
-// 解析Atom Feed的函数
+// ParseAtomFeed 解析Atom订阅源数据
+// ParseAtomFeed parses Atom feed data
 func ParseAtomFeed(data []byte) (*AtomFeed, error) {
 	var feed AtomFeed
 	err := xml.Unmarshal(data, &feed)
@@ -183,13 +202,15 @@ func ParseAtomFeed(data []byte) (*AtomFeed, error) {
 	return &feed, nil
 }
 
-// 统一Feed接口，便于同时处理RSS和Atom
+// FeedParser 统一订阅源接口，便于同时处理RSS和Atom
+// FeedParser is a unified feed interface for handling both RSS and Atom
 type FeedParser interface {
-	IsErr() bool
-	SetErr(error) FeedParser
+	IsErr() bool             // 检查是否有错误 / Check if there is an error
+	SetErr(error) FeedParser // 设置错误信息 / Set error information
 }
 
-// ParseFeed 根据内容自动判断并解析Feed类型
+// ParseFeed 根据内容自动判断并解析订阅源类型
+// ParseFeed automatically detects and parses feed type based on content
 func ParseFeed(data []byte) (interface{}, error) {
 	// 尝试解析为RSS
 	var rss rss.RSS

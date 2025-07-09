@@ -250,7 +250,9 @@ func Test_JSONLINE(t *testing.T) {
 		return bytes
 	})).ToList()))
 }
-
+func Test_ToJsonLine(t *testing.T) {
+	println(jsonhp.ToJsonLine[user](userList))
+}
 func Test_ToJSON(t *testing.T) {
 	println(jsonhp.ToJSON(jsonhp.ToJsonLine[user](userList)))
 }

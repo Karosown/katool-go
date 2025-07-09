@@ -6,6 +6,7 @@ import (
 )
 
 // RuleEngine 规则引擎管理器
+// RuleEngine is a rule engine manager
 type RuleEngine[T any] struct {
 	rules      map[string]*RuleNode[T] // 已注册的规则节点
 	chains     map[string]*RuleTree[T] // 已构建的规则链
@@ -14,9 +15,11 @@ type RuleEngine[T any] struct {
 }
 
 // MiddlewareFunc 中间件函数类型
+// MiddlewareFunc is the type for middleware functions
 type MiddlewareFunc[T any] func(data T, next func(T) (T, any, error)) (T, any, error)
 
 // RuleBuilder 规则构建器
+// RuleBuilder is a rule builder
 type RuleBuilder[T any] struct {
 	engine *RuleEngine[T]
 	nodes  []*RuleNode[T]
@@ -24,6 +27,7 @@ type RuleBuilder[T any] struct {
 }
 
 // ExecuteResult 执行结果
+// ExecuteResult represents the execution result
 type ExecuteResult[T any] struct {
 	Data   T
 	Result any
@@ -32,6 +36,7 @@ type ExecuteResult[T any] struct {
 }
 
 // NewRuleEngine 创建新的规则引擎
+// NewRuleEngine creates a new rule engine
 func NewRuleEngine[T any]() *RuleEngine[T] {
 	return &RuleEngine[T]{
 		rules:      make(map[string]*RuleNode[T]),
@@ -41,10 +46,13 @@ func NewRuleEngine[T any]() *RuleEngine[T] {
 }
 
 // RegisterRule 注册单个规则节点
+// RegisterRule registers a single rule node
 func (e *RuleEngine[T]) RegisterRule(name string, valid func(T, any) bool, exec func(T, any) (T, any, error)) *RuleEngine[T] {
 	return e.RegisterRuleNode(name, NewRuleNode(valid, exec))
 }
 
+// RegisterRuleNode 注册规则节点
+// RegisterRuleNode registers a rule node
 func (e *RuleEngine[T]) RegisterRuleNode(name string, node *RuleNode[T]) *RuleEngine[T] {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
@@ -53,6 +61,7 @@ func (e *RuleEngine[T]) RegisterRuleNode(name string, node *RuleNode[T]) *RuleEn
 }
 
 // GetRule 获取已注册的规则
+// GetRule gets a registered rule
 func (e *RuleEngine[T]) GetRule(name string) (*RuleNode[T], bool) {
 	e.mutex.RLock()
 	defer e.mutex.RUnlock()
@@ -62,6 +71,7 @@ func (e *RuleEngine[T]) GetRule(name string) (*RuleNode[T], bool) {
 }
 
 // NewBuilder 创建规则构建器
+// NewBuilder creates a rule builder
 func (e *RuleEngine[T]) NewBuilder(chainName string) *RuleBuilder[T] {
 	return &RuleBuilder[T]{
 		engine: e,
@@ -71,6 +81,7 @@ func (e *RuleEngine[T]) NewBuilder(chainName string) *RuleBuilder[T] {
 }
 
 // AddRule 向构建器添加规则（通过名称）
+// AddRule adds a rule to the builder (by name)
 func (b *RuleBuilder[T]) AddRule(ruleName string) *RuleBuilder[T] {
 	if rule, exists := b.engine.GetRule(ruleName); exists {
 		b.nodes = append(b.nodes, rule)
@@ -79,16 +90,20 @@ func (b *RuleBuilder[T]) AddRule(ruleName string) *RuleBuilder[T] {
 }
 
 // AddCustomRule 向构建器添加自定义规则
+// AddCustomRule adds a custom rule to the builder
 func (b *RuleBuilder[T]) AddCustomRule(valid func(T, any) bool, exec func(T, any) (T, any, error)) *RuleBuilder[T] {
 	return b.AddCustomRuleNode(NewRuleNode(valid, exec))
 }
 
+// AddCustomRuleNode 向构建器添加自定义规则节点
+// AddCustomRuleNode adds a custom rule node to the builder
 func (b *RuleBuilder[T]) AddCustomRuleNode(node *RuleNode[T]) *RuleBuilder[T] {
 	b.nodes = append(b.nodes, node)
 	return b
 }
 
 // AddConditionalChain 添加条件分支链
+// AddConditionalChain adds a conditional branch chain
 func (b *RuleBuilder[T]) AddConditionalChain(condition func(T, any) bool, trueChain, falseChain []*RuleNode[T]) *RuleBuilder[T] {
 	conditionNode := NewRuleNode(
 		condition,
@@ -120,6 +135,7 @@ func (b *RuleBuilder[T]) AddConditionalChain(condition func(T, any) bool, trueCh
 }
 
 // Build 构建规则链
+// Build builds the rule chain
 func (b *RuleBuilder[T]) Build() (*RuleTree[T], error) {
 	if len(b.nodes) == 0 {
 		return nil, fmt.Errorf("规则链 '%s' 为空", b.name)
@@ -145,6 +161,7 @@ func (b *RuleBuilder[T]) Build() (*RuleTree[T], error) {
 }
 
 // Execute 执行指定的规则链
+// Execute executes the specified rule chain
 func (e *RuleEngine[T]) Execute(chainName string, data T) *ExecuteResult[T] {
 	e.mutex.RLock()
 	chain, exists := e.chains[chainName]
@@ -172,6 +189,7 @@ func (e *RuleEngine[T]) Execute(chainName string, data T) *ExecuteResult[T] {
 }
 
 // ExecuteAll 执行所有规则链
+// ExecuteAll executes all rule chains
 func (e *RuleEngine[T]) ExecuteAll(data T) map[string]*ExecuteResult[T] {
 	e.mutex.RLock()
 	chains := make(map[string]*RuleTree[T])
@@ -190,6 +208,7 @@ func (e *RuleEngine[T]) ExecuteAll(data T) map[string]*ExecuteResult[T] {
 }
 
 // BatchExecute 批量执行规则链（并发）
+// BatchExecute executes rule chains in batch (concurrent)
 func (e *RuleEngine[T]) BatchExecute(chainNames []string, data T) map[string]*ExecuteResult[T] {
 	results := make(map[string]*ExecuteResult[T])
 	var mutex sync.Mutex
@@ -212,6 +231,7 @@ func (e *RuleEngine[T]) BatchExecute(chainNames []string, data T) map[string]*Ex
 }
 
 // AddMiddleware 添加中间件
+// AddMiddleware adds middleware
 func (e *RuleEngine[T]) AddMiddleware(middleware MiddlewareFunc[T]) *RuleEngine[T] {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
@@ -221,6 +241,7 @@ func (e *RuleEngine[T]) AddMiddleware(middleware MiddlewareFunc[T]) *RuleEngine[
 }
 
 // applyMiddleware 应用中间件
+// applyMiddleware applies middleware
 func (e *RuleEngine[T]) applyMiddleware(data T, final func(T) (T, any, error)) (T, any, error) {
 	if len(e.middleware) == 0 {
 		return final(data)
@@ -242,6 +263,7 @@ func (e *RuleEngine[T]) applyMiddleware(data T, final func(T) (T, any, error)) (
 }
 
 // ListRules 列出所有已注册的规则
+// ListRules lists all registered rules
 func (e *RuleEngine[T]) ListRules() []string {
 	e.mutex.RLock()
 	defer e.mutex.RUnlock()
@@ -254,6 +276,7 @@ func (e *RuleEngine[T]) ListRules() []string {
 }
 
 // ListChains 列出所有已构建的规则链
+// ListChains lists all built rule chains
 func (e *RuleEngine[T]) ListChains() []string {
 	e.mutex.RLock()
 	defer e.mutex.RUnlock()
@@ -266,6 +289,7 @@ func (e *RuleEngine[T]) ListChains() []string {
 }
 
 // RemoveRule 移除规则
+// RemoveRule removes a rule
 func (e *RuleEngine[T]) RemoveRule(name string) bool {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
@@ -278,6 +302,7 @@ func (e *RuleEngine[T]) RemoveRule(name string) bool {
 }
 
 // RemoveChain 移除规则链
+// RemoveChain removes a rule chain
 func (e *RuleEngine[T]) RemoveChain(name string) bool {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
@@ -290,6 +315,7 @@ func (e *RuleEngine[T]) RemoveChain(name string) bool {
 }
 
 // Clear 清空所有规则和规则链
+// Clear clears all rules and rule chains
 func (e *RuleEngine[T]) Clear() *RuleEngine[T] {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
@@ -302,6 +328,7 @@ func (e *RuleEngine[T]) Clear() *RuleEngine[T] {
 }
 
 // Stats 获取引擎统计信息
+// Stats gets engine statistics
 func (e *RuleEngine[T]) Stats() map[string]interface{} {
 	e.mutex.RLock()
 	defer e.mutex.RUnlock()

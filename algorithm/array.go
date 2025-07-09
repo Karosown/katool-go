@@ -1,5 +1,7 @@
 package algorithm
 
+// MergeSortedArrayWithEntity 使用自定义比较函数合并两个有序数组
+// MergeSortedArrayWithEntity merges two sorted arrays using a custom comparison function
 func MergeSortedArrayWithEntity[T any](orderBy func(a, b T) bool) func(any, any) any {
 	return func(cntValue any, nxt any) any {
 		ts := cntValue.([]any)
@@ -32,6 +34,9 @@ func MergeSortedArrayWithEntity[T any](orderBy func(a, b T) bool) func(any, any)
 		return rest
 	}
 }
+
+// MergeSortedArrayWithPrimaryData 使用哈希函数合并两个有序数组
+// MergeSortedArrayWithPrimaryData merges two sorted arrays using a hash function
 func MergeSortedArrayWithPrimaryData[T any](desc bool, orderBy HashComputeFunction) func(any, any) any {
 	return func(cntValue any, nxt any) any {
 		ts := cntValue.([]any)
@@ -76,6 +81,8 @@ func MergeSortedArrayWithPrimaryData[T any](desc bool, orderBy HashComputeFuncti
 	}
 }
 
+// MergeSortedArrayWithPrimaryId 使用ID函数合并两个有序数组
+// MergeSortedArrayWithPrimaryId merges two sorted arrays using an ID function
 func MergeSortedArrayWithPrimaryId[T any](desc bool, orderBy IDComputeFunction) func(any, any) any {
 	return func(cntValue any, nxt any) any {
 		ts := cntValue.([]any)

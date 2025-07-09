@@ -6,6 +6,7 @@ import (
 	"github.com/karosown/katool-go/sys"
 )
 
+// Int 返回[min, max)范围内的随机整数（包含min，不包含max）
 // Int returns a random integer in [min, max) range (inclusive).
 // Parameters:
 //   - min: the lower bound of the range
@@ -20,6 +21,8 @@ func Int(min, max int) int {
 	return rand.IntN(max-min) + min
 }
 
+// String 生成指定长度的随机字符串
+// String generates a random string of specified length
 func String(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	// 设置随机种子

@@ -10,11 +10,13 @@ import (
 )
 
 // FileDownloader 是一个文件下载工具类
+// FileDownloader is a file download utility class
 type FileDownloader struct {
 	Client *http.Client
 }
 
 // NewFileDownloader 创建一个新的 FileDownloader 实例
+// NewFileDownloader creates a new FileDownloader instance
 func NewFileDownloader() *FileDownloader {
 	return &FileDownloader{
 		Client: &http.Client{},
@@ -22,6 +24,7 @@ func NewFileDownloader() *FileDownloader {
 }
 
 // DownloadFile 下载单个文件
+// DownloadFile downloads a single file
 func (fd *FileDownloader) DownloadFile(url, destPath string) error {
 	// 创建目标文件
 	out, err := os.Create(destPath)
@@ -52,6 +55,7 @@ func (fd *FileDownloader) DownloadFile(url, destPath string) error {
 }
 
 // DownloadFiles 并发下载多个文件，请自行保证url不同，保证并发安全
+// DownloadFiles downloads multiple files concurrently, ensure URLs are different for concurrency safety
 func (fd *FileDownloader) DownloadFiles(urls []string, destDir string) []error {
 	var wg sync.WaitGroup
 	errors := make([]error, len(urls))

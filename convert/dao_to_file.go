@@ -15,6 +15,8 @@ import (
 	"github.com/karosown/katool-go/sys"
 )
 
+// StructToCSV 将结构体切片导出为CSV文件
+// StructToCSV exports a slice of structs to a CSV file
 func StructToCSV[T any](datas []T, fullPath string) error {
 	defer func() {
 		if err := recover(); err != nil {
@@ -81,6 +83,8 @@ func StructToCSV[T any](datas []T, fullPath string) error {
 	return err
 }
 
+// StructToJsonFlatLineFile 将结构体切片导出为单行JSON文件
+// StructToJsonFlatLineFile exports a slice of structs to a flat-line JSON file
 func StructToJsonFlatLineFile[T any](datas []T, fullPath string) error {
 	defer func() {
 		if err := recover(); err != nil {
@@ -115,6 +119,8 @@ func StructToJsonFlatLineFile[T any](datas []T, fullPath string) error {
 	return fileutil.WriteStringToFile(fullPath, res, false)
 }
 
+// StructToJsonFile 将结构体切片导出为标准JSON文件
+// StructToJsonFile exports a slice of structs to a standard JSON file
 func StructToJsonFile[T any](datas []T, fullPath string) error {
 	defer func() {
 		if err := recover(); err != nil {
