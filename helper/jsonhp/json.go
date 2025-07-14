@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/kaptinlin/jsonrepair"
+	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/container/stream"
 	"github.com/karosown/katool-go/sys"
 )
@@ -25,6 +26,27 @@ func ToJSON(entity any) string {
 		return FixJson(entity.(string))
 	default:
 		marshal, err := json.Marshal(entity)
+		if err != nil {
+			return ""
+		}
+		return string(marshal)
+	}
+}
+func ToJSONIndent(entity any, prefixAndIndent ...string) string {
+	if cutil.IsEmpty(prefixAndIndent) {
+		prefixAndIndent = []string{"", " "}
+	}
+	if cutil.IsBlank(prefixAndIndent[0]) {
+		prefixAndIndent[0] = ""
+	}
+	if cutil.IsBlank(prefixAndIndent[1]) {
+		prefixAndIndent[1] = " "
+	}
+	switch entity.(type) {
+	case string:
+		return FixJson(entity.(string))
+	default:
+		marshal, err := json.MarshalIndent(entity, prefixAndIndent[0], prefixAndIndent[1])
 		if err != nil {
 			return ""
 		}
