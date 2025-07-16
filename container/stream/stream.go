@@ -38,8 +38,14 @@ func getPageSize(size int) int {
 type Stream[T any, Slice ~[]T] struct {
 	options         *Options[T]
 	maxGoroutineNum int
+	getPageSize     func(size int) int
 	source          *Slice
 	parallel        bool
+}
+
+func (s *Stream[T, Slice]) SetPageSizeGetFunc(getter func(size int) int) *Stream[T, Slice] {
+	s.getPageSize = getter
+	return s
 }
 
 // NewStream 创建any类型的新流
@@ -50,8 +56,9 @@ func NewStream(source *[]any) *Stream[any, []any] {
 		resOptions = append(resOptions, Option[any]{opt: (*source)[i]})
 	}
 	return &Stream[any, []any]{
-		options: &resOptions,
-		source:  source,
+		options:     &resOptions,
+		source:      source,
+		getPageSize: getPageSize,
 	}
 }
 
@@ -63,8 +70,9 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 		resOptions = append(resOptions, Option[T]{opt: (*source)[i]})
 	}
 	return &Stream[T, Slice]{
-		options: &resOptions,
-		source:  source,
+		options:     &resOptions,
+		source:      source,
+		getPageSize: getPageSize,
 	}
 }
 
@@ -73,15 +81,17 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 func (s *Stream[T, Slice]) Sub(begin, end int) *Stream[T, Slice] {
 	if s.source == nil {
 		return &Stream[T, Slice]{
-			options: s.options,
-			source:  s.source,
+			options:     s.options,
+			source:      s.source,
+			getPageSize: s.getPageSize,
 		}
 	}
 	length := len(*s.source)
 	if length == 0 {
 		return &Stream[T, Slice]{
-			options: s.options,
-			source:  s.source,
+			options:     s.options,
+			source:      s.source,
+			getPageSize: s.getPageSize,
 		}
 	}
 	// 处理负数索引
@@ -106,8 +116,9 @@ func (s *Stream[T, Slice]) Sub(begin, end int) *Stream[T, Slice] {
 		resOptions = append(resOptions, Option[T]{opt: (*s.options)[i].opt})
 	}
 	return &Stream[T, Slice]{
-		options: &resOptions,
-		source:  s.source,
+		options:     &resOptions,
+		source:      s.source,
+		getPageSize: s.getPageSize,
 	}
 }
 
@@ -196,9 +207,10 @@ func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 		resOptions = append(resOptions, Option[T]{opt: (*source)[i]})
 	}
 	return &Stream[T, Slice]{
-		options:  &resOptions,
-		source:   source,
-		parallel: true,
+		options:     &resOptions,
+		source:      source,
+		parallel:    true,
+		getPageSize: getPageSize,
 	}
 }
 
@@ -221,7 +233,7 @@ func (s *Stream[T, Slice]) SetMaxGoroutineNum(num int) *Stream[T, Slice] {
 
 // goRun 并行执行辅助函数
 // goRun is a helper function for parallel execution
-func goRun[T any](maxGoroutineNum int, datas []T, parallel bool, solve func(pos int, automicDatas []T) error) {
+func goRun[T any](getPagesize func(int) int, maxGoroutineNum int, datas []T, parallel bool, solve func(pos int, automicDatas []T) error) {
 	size := len(datas)
 	pageSize := optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size))
 	goNum := optional.IsTrue(maxGoroutineNum == 0, algorithm.NumOfTwoMultiply(size), maxGoroutineNum)
@@ -237,7 +249,7 @@ func goRun[T any](maxGoroutineNum int, datas []T, parallel bool, solve func(pos 
 func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 	size := len(*s.options)
 	resChan := make(chan any, size)
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			runCall := fn(options[i].opt)
 			resChan <- runCall
@@ -254,7 +266,7 @@ func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 func (s *Stream[T, Slice]) FlatMap(fn func(i T) *Stream[any, []any]) *Stream[any, []any] {
 	size := len(*s.options)
 	resChan := make(chan []any, size)
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			runCall := fn(options[i].opt)
 			resChan <- runCall.ToList()
@@ -311,7 +323,7 @@ func (s *Stream[T, Slice]) Reduce(begin any, atomicSolveFunction func(cntValue a
 	//size := len(*s.options)
 	beginType := reflect.TypeOf(begin)
 	lock := &sync.Mutex{}
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		if s.parallel {
 			currentBegin := reflect.New(beginType).Elem().Interface()
 			for i := 0; i < len(options); i++ {
@@ -339,7 +351,7 @@ func (s *Stream[T, Slice]) Filter(fn func(i T) bool) *Stream[T, Slice] {
 	res := make(Slice, 0)
 	size := len(*s.options)
 	resChan := make(chan T, size)
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			if fn((options)[i].opt) {
 				resChan <- (options)[i].opt
@@ -366,7 +378,7 @@ func (s *Stream[T, Slice]) ToList() Slice {
 	res := make([]T, 0)
 	size := len(*s.options)
 	resChan := make(chan T, size)
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			resChan <- (options)[i].opt
 		}
@@ -383,10 +395,10 @@ func (s *Stream[T, Slice]) ToList() Slice {
 func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, item T) any) map[any]any {
 	ress := sync.Map{}
 	size := len(*s.options)
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			index := pos*optional.IsTrue(s.parallel,
-				optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)), 1) + i
+				optional.IsTrue((s.getPageSize(size)) == 0, 1, s.getPageSize(size)), 1) + i
 			ress.Store(k(index, (options)[i].opt), v(index, (options)[i].opt))
 		}
 		return nil
@@ -404,7 +416,7 @@ func (s *Stream[T, Slice]) ToMap(k func(index int, item T) any, v func(i int, it
 func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 	res := &sync.Map{}
 	size := len(*s.options)
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			key := groupBy((options)[i].opt)
 			if _, ok := res.Load(key); !ok {
@@ -413,7 +425,7 @@ func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 			value, ok := res.Load(key)
 			if ok {
 				index := pos*optional.IsTrue(s.parallel,
-					optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)), 1) + i
+					optional.IsTrue((s.getPageSize(size)) == 0, 1, s.getPageSize(size)), 1) + i
 				res.Store(key, append(value.(Slice), (*s.source)[index]))
 			}
 		}
@@ -443,9 +455,9 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 		return s
 	}
 	size := len(*s.options)
-	data := make([]Options[T], 0, optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)))
+	data := make([]Options[T], 0, optional.IsTrue((s.getPageSize(size)) == 0, 1, s.getPageSize(size)))
 	// opt opt opt opt -> opts opts
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		//println(pos, options)
 		data = append(data, options)
 		return nil
@@ -502,9 +514,9 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 		return s
 	}
 	size := len(*s.options)
-	data := make([]Options[T], 0, optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)))
+	data := make([]Options[T], 0, optional.IsTrue((s.getPageSize(size)) == 0, 1, s.getPageSize(size)))
 	// opt opt opt opt -> opts opts
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		//println(pos, options)
 		data = append(data, options)
 		return nil
@@ -555,9 +567,9 @@ func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 		return s
 	}
 	size := len(*s.options)
-	data := make([]Options[T], 0, optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size)))
+	data := make([]Options[T], 0, optional.IsTrue((s.getPageSize(size)) == 0, 1, s.getPageSize(size)))
 	// opt opt opt opt -> opts opts
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		//println(pos, options)
 		data = append(data, options)
 		return nil
@@ -661,7 +673,7 @@ func (s *Stream[T, Slice]) Difference(arrOrStream any, validEq ...func(a, b T) b
 // ForEach iterates over each element
 func (s *Stream[T, Slice]) ForEach(fn func(item T)) *Stream[T, Slice] {
 	//size := len(*s.options)
-	goRun[Option[T]](s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			fn((options)[i].opt)
 		}
@@ -678,12 +690,15 @@ func (s *Stream[T, Slice]) Count() int64 {
 
 // Parallel 设置为并行模式
 // Parallel sets to parallel mode
-func (s *Stream[T, Slice]) Parallel(maxGoroutineNum ...int) *Stream[T, Slice] {
+func (s *Stream[T, Slice]) Parallel() *Stream[T, Slice] {
 	s.parallel = true
-	if !cutil.IsEmpty(maxGoroutineNum) {
-		s.SetMaxGoroutineNum(maxGoroutineNum[0])
-	}
 	return s
+}
+
+// Parallel 设置为并行模式
+// Parallel sets to parallel mode
+func (s *Stream[T, Slice]) ParallelWithSetting(pageSizeGetter func(size int) int, maxGoroutineNum int) *Stream[T, Slice] {
+	return s.Parallel().SetPageSizeGetFunc(pageSizeGetter).SetMaxGoroutineNum(maxGoroutineNum)
 }
 
 // UnParallel 设置为串行模式
