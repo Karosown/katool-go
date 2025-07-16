@@ -2,6 +2,7 @@ package container_test
 
 import (
 	"math/rand"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -77,8 +78,8 @@ func Test_OrderBy(t *testing.T) {
 	var parallel []user
 	computed = dateutil.BeginEndTimeComputed(func() {
 		parallel = stream.ToStream(&users).ParallelWithSetting(func(size int) int {
-			return 100
-		}, 100).OrderBy(false, func(u any) algorithm.HashType {
+			return size / runtime.NumCPU() * 32
+		}, runtime.NumCPU()*32).OrderBy(false, func(u any) algorithm.HashType {
 			return algorithm.HashType(u.(user).Name)
 		}).ToList()
 	})
