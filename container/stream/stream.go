@@ -195,15 +195,18 @@ func newOptionsStream[Opt any, Opts Options[Opt]](source *[]Opts, getPageSize fu
 func newOptionStream[Opt any, T Options[Opt]](source *T) *Stream[Option[any], []Option[any]] {
 	resOptions := make(Options[Option[any]], 0)
 	resSource := make([]Option[any], 0)
-	for i := 0; i < len(*source); i++ {
+	size := len(*source)
+	for i := 0; i < size; i++ {
 		resOptions = append(resOptions, Option[Option[any]]{
 			Option[any]{opt: any((*source)[i].opt)},
 		})
 		resSource = append(resSource, Option[any]{opt: any((*source)[i].opt)})
 	}
 	return &Stream[Option[any], []Option[any]]{
-		options: &resOptions,
-		source:  &resSource,
+		options:         &resOptions,
+		source:          &resSource,
+		getPageSize:     getPageSize,
+		maxGoroutineNum: algorithm.NumOfTwoMultiply(size),
 	}
 }
 
@@ -241,7 +244,7 @@ func (s *Stream[T, Slice]) SetMaxGoroutineNum(num int) *Stream[T, Slice] {
 
 // goRun 并行执行辅助函数
 // goRun is a helper function for parallel execution
-func goRun[T any](getPagesize func(int) int, maxGoroutineNum int, datas []T, parallel bool, solve func(pos int, automicDatas []T) error) {
+func goRun[T any](getPageSize func(int) int, maxGoroutineNum int, datas []T, parallel bool, solve func(pos int, automicDatas []T) error) {
 	size := len(datas)
 	pageSize := optional.IsTrue((getPageSize(size)) == 0, 1, getPageSize(size))
 	goNum := optional.IsTrue(maxGoroutineNum == 0, algorithm.NumOfTwoMultiply(size), maxGoroutineNum)
