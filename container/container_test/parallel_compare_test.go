@@ -1,10 +1,11 @@
 package container_test
 
 import (
-	"github.com/karosown/katool-go/util/dateutil"
 	"math/rand"
 	"strings"
 	"testing"
+
+	"github.com/karosown/katool-go/util/dateutil"
 
 	"github.com/karosown/katool-go/algorithm"
 	"github.com/karosown/katool-go/container/stream"
@@ -75,7 +76,9 @@ func Test_OrderBy(t *testing.T) {
 	println(computed)
 	var parallel []user
 	computed = dateutil.BeginEndTimeComputed(func() {
-		parallel = stream.ToStream(&users).Parallel().OrderBy(false, func(u any) algorithm.HashType {
+		parallel = stream.ToStream(&users).ParallelWithSetting(func(size int) int {
+			return 10
+		}, 100).OrderBy(false, func(u any) algorithm.HashType {
 			return algorithm.HashType(u.(user).Name)
 		}).ToList()
 	})

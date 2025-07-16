@@ -157,9 +157,7 @@ func Test_Sorted(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		arr = append(arr, 1, 2, 3, 4, 5, 6, 7, 1, 2, 8, 9, 10)
 	}
-	stream.ToStream(&arr).ParallelWithSetting(func(size int) int {
-		return 1
-	}, 10000).Sort(func(a, b int) bool { return a < b }).ForEach(func(item int) {
+	stream.ToStream(&arr).Parallel().Sort(func(a, b int) bool { return a < b }).ForEach(func(item int) {
 		fmt.Println(item)
 	})
 }
