@@ -678,8 +678,11 @@ func (s *Stream[T, Slice]) Count() int64 {
 
 // Parallel 设置为并行模式
 // Parallel sets to parallel mode
-func (s *Stream[T, Slice]) Parallel() *Stream[T, Slice] {
+func (s *Stream[T, Slice]) Parallel(maxGoroutineNum ...int) *Stream[T, Slice] {
 	s.parallel = true
+	if !cutil.IsEmpty(maxGoroutineNum) {
+		s.SetMaxGoroutineNum(maxGoroutineNum[0])
+	}
 	return s
 }
 
