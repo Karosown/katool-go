@@ -43,11 +43,6 @@ type Stream[T any, Slice ~[]T] struct {
 	parallel        bool
 }
 
-func (s *Stream[T, Slice]) SetPageSizeGetFunc(getter func(size int) int) *Stream[T, Slice] {
-	s.getPageSize = getter
-	return s
-}
-
 // NewStream 创建any类型的新流
 // NewStream creates a new stream of any type
 func NewStream(source *[]any) *Stream[any, []any] {
@@ -230,7 +225,16 @@ func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 func (s *Stream[T, Slice]) Join(source *Slice) *Stream[T, Slice] {
 	list := s.ToList()
 	list = append(list, *source...)
-	return ToStream(&list)
+	return ToStream(&list).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
+}
+
+func (s *Stream[T, Slice]) SetPageSizeGetFunc(getter func(size int) int) *Stream[T, Slice] {
+	list := s.ToList()
+	stream := ToStream(&list)
+	stream.getPageSize = getter
+	stream.parallel = s.parallel
+	stream.maxGoroutineNum = s.maxGoroutineNum
+	return stream
 }
 
 // Join 连接两个流
@@ -239,6 +243,7 @@ func (s *Stream[T, Slice]) SetMaxGoroutineNum(num int) *Stream[T, Slice] {
 	list := s.ToList()
 	stream := ToStream(&list)
 	stream.maxGoroutineNum = num
+	stream.parallel = s.parallel
 	return stream
 }
 
@@ -454,16 +459,17 @@ func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 // OrderBy sorts by hash function
 func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunction) *Stream[T, Slice] {
 	if !s.parallel {
-		sort.SliceStable(*s.options, func(i, j int) bool {
-			a := orderBy((*s.options)[i].opt)
-			b := orderBy((*s.options)[j].opt)
+		news := ToStream(s.source).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
+		sort.SliceStable(*news.options, func(i, j int) bool {
+			a := orderBy((*news.options)[i].opt)
+			b := orderBy((*news.options)[j].opt)
 			if desc {
 				return a > b
 			} else {
 				return a < b
 			}
 		})
-		return s
+		return news
 	}
 	size := len(*s.options)
 	data := make([]Options[T], 0, optional.IsTrue((s.getPageSize(size)) == 0, 1, s.getPageSize(size)))
@@ -507,7 +513,6 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 	//	stream := ToStream(&result).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
 
 	stream := ToStream(&result).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
-
 	return stream
 }
 
@@ -515,16 +520,17 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 // OrderById sorts by ID function
 func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunction) *Stream[T, Slice] {
 	if !s.parallel {
-		sort.SliceStable(*s.options, func(i, j int) bool {
-			a := orderBy((*s.options)[i].opt)
-			b := orderBy((*s.options)[j].opt)
+		newStream := ToStream(s.source).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
+		sort.SliceStable(*newStream.options, func(i, j int) bool {
+			a := orderBy((*newStream.options)[i].opt)
+			b := orderBy((*newStream.options)[j].opt)
 			if desc {
 				return a > b
 			} else {
 				return a < b
 			}
 		})
-		return s
+		return newStream
 	}
 	size := len(*s.options)
 	data := make([]Options[T], 0, optional.IsTrue((s.getPageSize(size)) == 0, 1, s.getPageSize(size)))
@@ -574,10 +580,11 @@ func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunct
 // Sort sorts by custom comparison function
 func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 	if !s.parallel {
-		sort.SliceStable(*s.options, func(i, j int) bool {
-			return orderBy((*s.options)[i].opt, (*s.options)[j].opt)
+		newStream := ToStream(s.source).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
+		sort.SliceStable(*newStream.options, func(i, j int) bool {
+			return orderBy((*newStream.options)[i].opt, (*newStream.options)[j].opt)
 		})
-		return s
+		return newStream
 	}
 	size := len(*s.options)
 	data := make([]Options[T], 0, optional.IsTrue((s.getPageSize(size)) == 0, 1, s.getPageSize(size)))
@@ -704,8 +711,10 @@ func (s *Stream[T, Slice]) Count() int64 {
 // Parallel 设置为并行模式
 // Parallel sets to parallel mode
 func (s *Stream[T, Slice]) Parallel() *Stream[T, Slice] {
-	s.parallel = true
-	return s
+	list := s.ToList()
+	stream := ToStream(&list)
+	stream.parallel = true
+	return stream
 }
 
 // Parallel 设置为并行模式
@@ -717,6 +726,8 @@ func (s *Stream[T, Slice]) ParallelWithSetting(pageSizeGetter func(size int) int
 // UnParallel 设置为串行模式
 // UnParallel sets to serial mode
 func (s *Stream[T, Slice]) UnParallel() *Stream[T, Slice] {
-	s.parallel = false
-	return s
+	list := s.ToList()
+	stream := ToStream(&list)
+	stream.parallel = false
+	return stream
 }

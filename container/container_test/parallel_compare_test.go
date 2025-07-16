@@ -77,8 +77,8 @@ func Test_OrderBy(t *testing.T) {
 	var parallel []user
 	computed = dateutil.BeginEndTimeComputed(func() {
 		parallel = stream.ToStream(&users).ParallelWithSetting(func(size int) int {
-			return 10
-		}, 10000).OrderBy(false, func(u any) algorithm.HashType {
+			return 100
+		}, 100).OrderBy(false, func(u any) algorithm.HashType {
 			return algorithm.HashType(u.(user).Name)
 		}).ToList()
 	})
