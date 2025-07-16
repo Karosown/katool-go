@@ -1,13 +1,15 @@
 package similarity
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
+	"github.com/karosown/katool-go/container/stream"
 	"github.com/spf13/cast"
 )
 
-func CosineSimilarity[T float32 | float64 | int | int64 | int32](a []T, b []T) (cosine float64, err error) {
+func CosineSimilarity[T ~float32 | ~float64 | ~int | ~int64 | ~int32](a []T, b []T) (cosine float64, err error) {
 	const power = 2
 
 	aLen := len(a)
@@ -40,7 +42,7 @@ func CosineSimilarity[T float32 | float64 | int | int64 | int32](a []T, b []T) (
 	return sum / (math.Sqrt(sa) * math.Sqrt(sb)), nil
 }
 
-func PearsonCorrelation[T float32 | float64 | int | int64 | int32](a []T, b []T) (float64, error) {
+func PearsonCorrelation[T ~float32 | ~float64 | ~int | ~int64 | ~int32](a []T, b []T) (float64, error) {
 	aLen := len(a)
 	bLen := len(b)
 	if aLen == 0 && bLen == 0 {
@@ -79,19 +81,31 @@ func PearsonCorrelation[T float32 | float64 | int | int64 | int32](a []T, b []T)
 	return numerator / denominator, nil
 }
 
-func HammingDistance(a, b string) (int, error) {
+func HammingDistance[T ~float32 | ~float64 | ~int | ~int64 | ~int32](a, b []T) (int, error) {
 	if len(a) != len(b) {
 		return 0, fmt.Errorf("lengths are not equal")
 	}
 	dist := 0
-	for i := 0; i < len(a); i++ {
+	for i := range a {
 		if a[i] != b[i] {
 			dist++
 		}
 	}
 	return dist, nil
 }
-func ManhattanDistance[T int | int64 | float32 | float64](a, b []T) (float64, error) {
+func HammingDistanceStr(a, b string) (int, error) {
+	if len(a) != len(b) {
+		return 0, fmt.Errorf("lengths are not equal")
+	}
+	dist := 0
+	for i := range a {
+		if a[i] != b[i] {
+			dist++
+		}
+	}
+	return dist, nil
+}
+func ManhattanDistance[T ~float32 | ~float64 | ~int | ~int64 | ~int32](a, b []T) (float64, error) {
 	if len(a) != len(b) {
 		return 0, fmt.Errorf("vectors must have the same length")
 	}
@@ -104,4 +118,75 @@ func ManhattanDistance[T int | int64 | float32 | float64](a, b []T) (float64, er
 		sum += diff
 	}
 	return sum, nil
+}
+
+type SimilarityFunc[T ~float32 | ~float64 | ~int | ~int64 | ~int32] func(a, b []T) (float64, error)
+
+type Vector[T ~float32 | ~float64 | ~int | ~int64 | ~int32] interface {
+	GetVector() []T
+}
+
+func TopK[T ~float32 | ~float64 | ~int | ~int64 | ~int32, V []T](k int, a V, b []V, similarityFunc SimilarityFunc[T]) ([]V, error) {
+	if len(b) <= k {
+		return b, nil
+	}
+	type KV struct {
+		Key   V
+		Value float64
+	}
+	s := stream.ToStream(&b).Map(func(i V) any {
+		f, err := similarityFunc(a, i)
+		if err != nil {
+			return err
+		}
+		return KV{
+			Key:   i,
+			Value: f,
+		}
+	})
+	s2 := stream.Cast[error](s.Filter(func(i any) bool {
+		err, ok := i.(error)
+		return ok && err != nil
+	}))
+	if s2.Count() > 0 {
+		return nil, errors.Join(s2.ToList()...)
+	}
+	return stream.Cast[V](stream.Cast[KV](s.Filter(func(i any) bool {
+		_, ok := i.(KV)
+		return ok
+	})).Sort(func(a, b KV) bool {
+		return a.Value > b.Value
+	}).Sub(0, k).Map(func(i KV) any {
+		return i.Key
+	})).ToList(), nil
+}
+func TopKByVector[R ~float32 | ~float64 | ~int | ~int64 | ~int32, T Vector[R], V []T](k int, a T, b V, similarityFunc SimilarityFunc[R]) (V, error) {
+	if len(b) <= k {
+		return b, nil
+	}
+
+	// 1. 流式获取全部向量和index映射
+	rList := stream.Cast[[]R](stream.ToStream(&b).Map(func(t T) any { return t.GetVector() })).ToList()
+
+	// 2. Map向量到对象T的映射，防止同向量多对象丢失
+	indexMap := map[string]T{}
+	for i, v := range rList {
+		key := fmt.Sprint(v)             // 以向量内容做唯一key
+		if _, ok := indexMap[key]; !ok { // 只记录第一个
+			indexMap[key] = b[i]
+		}
+	}
+
+	// 3. 用现有TopK，得TopK个向量
+	topVecs, err := TopK[R, []R](k, a.GetVector(), rList, similarityFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	// 4. 恢复回原始对象
+	result := stream.Cast[T](stream.ToStream(&topVecs).Map(func(v []R) any {
+		return indexMap[fmt.Sprint(v)]
+	})).ToList()
+
+	return result, nil
 }

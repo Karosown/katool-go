@@ -72,14 +72,14 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 func (s *Stream[T, Slice]) Sub(begin, end int) *Stream[T, Slice] {
 	if s.source == nil {
 		return &Stream[T, Slice]{
-			options: &Options[T]{},
+			options: s.options,
 			source:  s.source,
 		}
 	}
 	length := len(*s.source)
 	if length == 0 {
 		return &Stream[T, Slice]{
-			options: &Options[T]{},
+			options: s.options,
 			source:  s.source,
 		}
 	}
@@ -102,7 +102,7 @@ func (s *Stream[T, Slice]) Sub(begin, end int) *Stream[T, Slice] {
 	}
 	resOptions := make(Options[T], 0, end-begin)
 	for i := begin; i < end; i++ {
-		resOptions = append(resOptions, Option[T]{opt: (*s.source)[i]})
+		resOptions = append(resOptions, Option[T]{opt: (*s.options)[i].opt})
 	}
 	return &Stream[T, Slice]{
 		options: &resOptions,
