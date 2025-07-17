@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	lynx "github.com/Tangerg/lynx/pkg/sync"
+	"github.com/duke-git/lancet/v2/convertor"
 	"github.com/karosown/katool-go/algorithm"
 	"github.com/karosown/katool-go/collect/lists"
 	"github.com/karosown/katool-go/container/cutil"
@@ -49,7 +50,7 @@ func NewStream(source *[]any) *Stream[any, []any] {
 	resOptions := make(Options[any], 0)
 	size := len(*source)
 	for i := 0; i < size; i++ {
-		resOptions = append(resOptions, Option[any]{opt: (*source)[i]})
+		resOptions = append(resOptions, Option[any]{opt: convertor.DeepClone((*source)[i])})
 	}
 	return &Stream[any, []any]{
 		options:         &resOptions,
@@ -65,7 +66,7 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	resOptions := make(Options[T], 0)
 	size := len(*source)
 	for i := 0; i < size; i++ {
-		resOptions = append(resOptions, Option[T]{opt: (*source)[i]})
+		resOptions = append(resOptions, Option[T]{opt: convertor.DeepClone((*source)[i])})
 	}
 	return &Stream[T, Slice]{
 		options:         &resOptions,
@@ -112,7 +113,7 @@ func (s *Stream[T, Slice]) Sub(begin, end int) *Stream[T, Slice] {
 	}
 	resOptions := make(Options[T], 0, end-begin)
 	for i := begin; i < end; i++ {
-		resOptions = append(resOptions, Option[T]{opt: (*s.options)[i].opt})
+		resOptions = append(resOptions, Option[T]{opt: convertor.DeepClone((*s.options)[i].opt)})
 	}
 	return &Stream[T, Slice]{
 		options:     &resOptions,
@@ -167,7 +168,7 @@ func newOptionsStream[Opt any, Opts Options[Opt]](source *[]Opts, getPageSize fu
 	optionsAdpter := func(opts Options[Opt]) Options[any] {
 		res := make(Options[any], 0)
 		for i := 0; i < len(opts); i++ {
-			convertOption := &Option[any]{opt: any(opts[i].opt)}
+			convertOption := &Option[any]{opt: any(convertor.DeepClone(opts[i].opt))}
 			res = append(res, *convertOption)
 		}
 		return res
@@ -193,7 +194,7 @@ func newOptionStream[Opt any, T Options[Opt]](source *T) *Stream[Option[any], []
 	size := len(*source)
 	for i := 0; i < size; i++ {
 		resOptions = append(resOptions, Option[Option[any]]{
-			Option[any]{opt: any((*source)[i].opt)},
+			Option[any]{opt: any(convertor.DeepClone((*source)[i].opt))},
 		})
 		resSource = append(resSource, Option[any]{opt: any((*source)[i].opt)})
 	}
@@ -210,7 +211,7 @@ func newOptionStream[Opt any, T Options[Opt]](source *T) *Stream[Option[any], []
 func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	resOptions := make(Options[T], 0)
 	for i := 0; i < len(*source); i++ {
-		resOptions = append(resOptions, Option[T]{opt: (*source)[i]})
+		resOptions = append(resOptions, Option[T]{opt: convertor.DeepClone((*source)[i])})
 	}
 	return &Stream[T, Slice]{
 		options:     &resOptions,
@@ -367,7 +368,9 @@ func (s *Stream[T, Slice]) Filter(fn func(i T) bool) *Stream[T, Slice] {
 	res := make(Slice, 0)
 	size := len(*s.options)
 	resChan := make(chan T, size)
-	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	ns := ToStream(s.source).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
+	ns.parallel = s.parallel
+	goRun[Option[T]](ns.getPageSize, ns.maxGoroutineNum, *ns.options, ns.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			if fn((options)[i].opt) {
 				resChan <- (options)[i].opt
@@ -688,18 +691,24 @@ func (s *Stream[T, Slice]) Difference(arrOrStream any, validEq ...func(a, b T) b
 		})
 	})
 }
+func (s *Stream[T, Slice]) Clone() *Stream[T, Slice] {
+	return s.Filter(func(i T) bool {
+		return true
+	})
+}
 
 // ForEach 遍历每个元素
 // ForEach iterates over each element
 func (s *Stream[T, Slice]) ForEach(fn func(item T)) *Stream[T, Slice] {
+	ns := s.Clone()
 	//size := len(*s.options)
-	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	goRun[Option[T]](ns.getPageSize, ns.maxGoroutineNum, *ns.options, ns.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			fn((options)[i].opt)
 		}
 		return nil
 	})
-	return s
+	return ns
 }
 
 // Count 计算元素数量

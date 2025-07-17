@@ -34,6 +34,41 @@ type userVo struct {
 
 var userList []user
 
+func TestOfFilter(t *testing.T) {
+	arr := []int{1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 4}
+	of := stream.Of(&arr).Distinct()
+	of.Filter(func(i int) bool {
+		return i >= 3
+	}).ForEach(func(item int) {
+		println(item)
+	})
+	println()
+	of.Filter(func(i int) bool {
+		return i < 3
+	}).ForEach(func(item int) {
+		println(item)
+	})
+}
+
+func TestOfForEach(t *testing.T) {
+	arr := []int{1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 4}
+	of := stream.Cast[*int](stream.Of(&arr).Distinct().Map(func(i int) any {
+		return &i
+	}))
+	of.Filter(func(i *int) bool {
+		return *i >= 3
+	}).ForEach(func(item *int) {
+		println(*item)
+		*item = 0
+	})
+	println()
+	of.Filter(func(i *int) bool {
+		return *i < 3
+	}).ForEach(func(item *int) {
+		println(*item)
+	})
+}
+
 func TestOfStream(t *testing.T) {
 
 	arr := []int{1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3, 1, 3, 2, 3, 3, 3, 3}
