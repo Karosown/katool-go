@@ -79,19 +79,25 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 // Sub gets a sub-stream (slice)
 func (s *Stream[T, Slice]) Sub(begin, end int) *Stream[T, Slice] {
 	if s.source == nil {
-		return &Stream[T, Slice]{
-			options:     s.options,
-			source:      s.source,
-			getPageSize: s.getPageSize,
+		s2 := Stream[T, Slice]{
+			options:         s.options,
+			source:          s.source,
+			getPageSize:     s.getPageSize,
+			maxGoroutineNum: s.maxGoroutineNum,
 		}
+		s2.parallel = s.parallel
+		return &s2
 	}
 	length := len(*s.source)
 	if length == 0 {
-		return &Stream[T, Slice]{
-			options:     s.options,
-			source:      s.source,
-			getPageSize: s.getPageSize,
+		s2 := Stream[T, Slice]{
+			options:         s.options,
+			source:          s.source,
+			getPageSize:     s.getPageSize,
+			maxGoroutineNum: s.maxGoroutineNum,
 		}
+		s2.parallel = s.parallel
+		return &s2
 	}
 	// 处理负数索引
 	if begin < 0 {
@@ -114,11 +120,14 @@ func (s *Stream[T, Slice]) Sub(begin, end int) *Stream[T, Slice] {
 	for i := begin; i < end; i++ {
 		resOptions = append(resOptions, Option[T]{opt: ((*s.options)[i].opt)})
 	}
-	return &Stream[T, Slice]{
-		options:     &resOptions,
-		source:      s.source,
-		getPageSize: s.getPageSize,
+	s2 := Stream[T, Slice]{
+		options:         &resOptions,
+		source:          s.source,
+		getPageSize:     s.getPageSize,
+		maxGoroutineNum: s.maxGoroutineNum,
 	}
+	s2.parallel = s.parallel
+	return &s2
 }
 
 // Skip 跳过前n个元素
@@ -368,7 +377,8 @@ func (s *Stream[T, Slice]) Filter(fn func(i T) bool) *Stream[T, Slice] {
 	res := make(Slice, 0)
 	size := len(*s.options)
 	resChan := make(chan T, size)
-	ns := ToStream(s.source).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
+	list := s.ToList()
+	ns := ToStream(&list).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
 	ns.parallel = s.parallel
 	goRun[Option[T]](ns.getPageSize, ns.maxGoroutineNum, *ns.options, ns.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
@@ -462,7 +472,8 @@ func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 // OrderBy sorts by hash function
 func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunction) *Stream[T, Slice] {
 	if !s.parallel {
-		news := ToStream(s.source).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
+		list := s.ToList()
+		news := ToStream(&list).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
 		sort.SliceStable(*news.options, func(i, j int) bool {
 			a := orderBy((*news.options)[i].opt)
 			b := orderBy((*news.options)[j].opt)
@@ -523,7 +534,8 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 // OrderById sorts by ID function
 func (s *Stream[T, Slice]) OrderById(desc bool, orderBy algorithm.IDComputeFunction) *Stream[T, Slice] {
 	if !s.parallel {
-		newStream := ToStream(s.source).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
+		list := s.ToList()
+		newStream := ToStream(&list).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
 		sort.SliceStable(*newStream.options, func(i, j int) bool {
 			a := orderBy((*newStream.options)[i].opt)
 			b := orderBy((*newStream.options)[j].opt)
