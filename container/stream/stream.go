@@ -19,7 +19,6 @@ import (
 	"sync"
 
 	lynx "github.com/Tangerg/lynx/pkg/sync"
-	"github.com/duke-git/lancet/v2/convertor"
 	"github.com/karosown/katool-go/algorithm"
 	"github.com/karosown/katool-go/collect/lists"
 	"github.com/karosown/katool-go/container/cutil"
@@ -50,7 +49,7 @@ func NewStream(source *[]any) *Stream[any, []any] {
 	resOptions := make(Options[any], 0)
 	size := len(*source)
 	for i := 0; i < size; i++ {
-		resOptions = append(resOptions, Option[any]{opt: convertor.DeepClone((*source)[i])})
+		resOptions = append(resOptions, Option[any]{opt: ((*source)[i])})
 	}
 	return &Stream[any, []any]{
 		options:         &resOptions,
@@ -66,7 +65,7 @@ func ToStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	resOptions := make(Options[T], 0)
 	size := len(*source)
 	for i := 0; i < size; i++ {
-		resOptions = append(resOptions, Option[T]{opt: convertor.DeepClone((*source)[i])})
+		resOptions = append(resOptions, Option[T]{opt: ((*source)[i])})
 	}
 	return &Stream[T, Slice]{
 		options:         &resOptions,
@@ -113,7 +112,7 @@ func (s *Stream[T, Slice]) Sub(begin, end int) *Stream[T, Slice] {
 	}
 	resOptions := make(Options[T], 0, end-begin)
 	for i := begin; i < end; i++ {
-		resOptions = append(resOptions, Option[T]{opt: convertor.DeepClone((*s.options)[i].opt)})
+		resOptions = append(resOptions, Option[T]{opt: ((*s.options)[i].opt)})
 	}
 	return &Stream[T, Slice]{
 		options:     &resOptions,
@@ -168,7 +167,7 @@ func newOptionsStream[Opt any, Opts Options[Opt]](source *[]Opts, getPageSize fu
 	optionsAdpter := func(opts Options[Opt]) Options[any] {
 		res := make(Options[any], 0)
 		for i := 0; i < len(opts); i++ {
-			convertOption := &Option[any]{opt: any(convertor.DeepClone(opts[i].opt))}
+			convertOption := &Option[any]{opt: any((opts[i].opt))}
 			res = append(res, *convertOption)
 		}
 		return res
@@ -194,7 +193,7 @@ func newOptionStream[Opt any, T Options[Opt]](source *T) *Stream[Option[any], []
 	size := len(*source)
 	for i := 0; i < size; i++ {
 		resOptions = append(resOptions, Option[Option[any]]{
-			Option[any]{opt: any(convertor.DeepClone((*source)[i].opt))},
+			Option[any]{opt: any(((*source)[i].opt))},
 		})
 		resSource = append(resSource, Option[any]{opt: any((*source)[i].opt)})
 	}
@@ -211,7 +210,7 @@ func newOptionStream[Opt any, T Options[Opt]](source *T) *Stream[Option[any], []
 func ToParallelStream[T any, Slice ~[]T](source *Slice) *Stream[T, Slice] {
 	resOptions := make(Options[T], 0)
 	for i := 0; i < len(*source); i++ {
-		resOptions = append(resOptions, Option[T]{opt: convertor.DeepClone((*source)[i])})
+		resOptions = append(resOptions, Option[T]{opt: ((*source)[i])})
 	}
 	return &Stream[T, Slice]{
 		options:     &resOptions,
@@ -266,7 +265,8 @@ func goRun[T any](getPageSize func(int) int, maxGoroutineNum int, datas []T, par
 func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 	size := len(*s.options)
 	resChan := make(chan any, size)
-	goRun[Option[T]](s.getPageSize, s.maxGoroutineNum, *s.options, s.parallel, func(pos int, options []Option[T]) error {
+	ns := s.Clone()
+	goRun[Option[T]](ns.getPageSize, ns.maxGoroutineNum, *ns.options, ns.parallel, func(pos int, options []Option[T]) error {
 		for i := 0; i < len(options); i++ {
 			runCall := fn(options[i].opt)
 			resChan <- runCall
@@ -274,7 +274,7 @@ func (s *Stream[T, Slice]) Map(fn func(i T) any) *Stream[any, []any] {
 		return nil
 	})
 	resSource := convert.ChanToArray(resChan)
-	return ToStream(&resSource)
+	return ToStream(&resSource).SetMaxGoroutineNum(s.maxGoroutineNum).SetPageSizeGetFunc(s.getPageSize)
 }
 
 // FlatMap 扁平化处理，需要放入一个返回新的Stream流的函数
@@ -607,7 +607,6 @@ func (s *Stream[T, Slice]) Sort(orderBy func(a, b T) bool) *Stream[T, Slice] {
 		})
 		return options
 	})
-	sortedMap.parallel = s.parallel
 	res := sortedMap.Map(func(v any) any {
 		i := v.(Options[any])
 		ress := newOptionStream(&i).Map(func(item Option[any]) any {
