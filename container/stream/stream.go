@@ -253,6 +253,7 @@ func (s *Stream[T, Slice]) SetMaxGoroutineNum(num int) *Stream[T, Slice] {
 	stream := ToStream(&list)
 	stream.maxGoroutineNum = num
 	stream.parallel = s.parallel
+	stream.getPageSize = s.getPageSize
 	return stream
 }
 
