@@ -2,10 +2,9 @@ module github.com/karosown/katool-go
 
 //module gitee.com/karosown/katool-go
 
-go 1.23.1
+go 1.23.0
 
 require (
-	github.com/JohannesKaufmann/html-to-markdown v1.6.0
 	github.com/Tangerg/lynx/pkg v0.0.0-20250407075544-299c15f48132
 	github.com/duke-git/lancet/v2 v2.3.3
 	github.com/go-resty/resty/v2 v2.16.2
@@ -27,7 +26,6 @@ require (
 )
 
 require (
-	github.com/PuerkitoBio/goquery v1.9.2 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -37,6 +35,7 @@ require (
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
