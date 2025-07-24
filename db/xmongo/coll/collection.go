@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/karosown/katool-go/convert"
 	"github.com/karosown/katool-go/db/pager"
 	"github.com/karosown/katool-go/db/xmongo/mongoutil"
 	options2 "github.com/karosown/katool-go/db/xmongo/options"
@@ -80,9 +79,9 @@ func (c *Collection[T]) List(ctx context.Context, opts ...*options.FindOptions) 
 	err = cur.All(ctx, result)
 	return result, err
 }
-func (c *Collection[T]) Distinct(ctx context.Context, filedName string, opts ...*options.DistinctOptions) (*[]T, error) {
-	result := &[]T{}
+func (c *Collection[T]) Distinct(ctx context.Context, filedName string, opts ...*options.DistinctOptions) (*[]any, error) {
 	if c.before != nil {
+		result := &[]any{}
 		return result, c.TransactionErr(ctx, func(stx mongo.SessionContext) error {
 			ctx, err := c.before(stx, "Distinct", c.coll.Database().Name(), c.coll.Name(), &c.qw, nil)
 			if err != nil {
@@ -92,7 +91,7 @@ func (c *Collection[T]) Distinct(ctx context.Context, filedName string, opts ...
 			if err != nil {
 				return err
 			}
-			*result = convert.FromAnySlice[T](cur)
+			*result = cur
 			return nil
 		})
 	}
@@ -100,8 +99,7 @@ func (c *Collection[T]) Distinct(ctx context.Context, filedName string, opts ...
 	if err != nil {
 		return nil, err
 	}
-	*result = convert.FromAnySlice[T](cur)
-	return result, err
+	return &cur, err
 }
 func (c *Collection[T]) Count(ctx context.Context, opts ...*options.CountOptions) (int64, error) {
 	if c.before != nil {
