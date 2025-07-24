@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/karosown/katool-go/convert"
 	"github.com/karosown/katool-go/db/pager"
 	"github.com/karosown/katool-go/db/xmongo/mongoutil"
 	options2 "github.com/karosown/katool-go/db/xmongo/options"
@@ -29,7 +30,7 @@ func (c *Collection[T]) Coll() *mongo.Collection {
 
 func (c *Collection[T]) Query(filter wrapper.QueryWrapper) *Collection[T] {
 	if c.logger != nil {
-		c.logger.Info("MongoDB/DocumentDB Query Bson is {}", filter.ToJSON())
+		c.logger.Infof("MongoDB/DocumentDB Query Bson is [%s]", filter.ToJSON())
 	}
 	return newCollection[T](c.Client, c.coll, c.logger, filter)
 }
@@ -60,7 +61,7 @@ func (c *Collection[T]) FindOne(ctx context.Context, result *T, opts ...*options
 func (c *Collection[T]) List(ctx context.Context, opts ...*options.FindOptions) (*[]T, error) {
 	result := &[]T{}
 	if c.before != nil {
-		return nil, c.TransactionErr(ctx, func(stx mongo.SessionContext) error {
+		return result, c.TransactionErr(ctx, func(stx mongo.SessionContext) error {
 			ctx, err := c.before(stx, "List", c.coll.Database().Name(), c.coll.Name(), &c.qw, nil)
 			if err != nil {
 				return err
@@ -77,6 +78,29 @@ func (c *Collection[T]) List(ctx context.Context, opts ...*options.FindOptions) 
 		return nil, err
 	}
 	err = cur.All(ctx, result)
+	return result, err
+}
+func (c *Collection[T]) Distinct(ctx context.Context, filedName string, opts ...*options.DistinctOptions) (*[]T, error) {
+	result := &[]T{}
+	if c.before != nil {
+		return result, c.TransactionErr(ctx, func(stx mongo.SessionContext) error {
+			ctx, err := c.before(stx, "Distinct", c.coll.Database().Name(), c.coll.Name(), &c.qw, nil)
+			if err != nil {
+				return err
+			}
+			cur, err := c.coll.Distinct(ctx, filedName, c.filter(), opts...)
+			if err != nil {
+				return err
+			}
+			*result = convert.FromAnySlice[T](cur)
+			return nil
+		})
+	}
+	cur, err := c.coll.Distinct(ctx, filedName, c.filter(), opts...)
+	if err != nil {
+		return nil, err
+	}
+	*result = convert.FromAnySlice[T](cur)
 	return result, err
 }
 func (c *Collection[T]) Count(ctx context.Context, opts ...*options.CountOptions) (int64, error) {
