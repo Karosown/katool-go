@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/karosown/katool-go/util/dateutil"
+	"github.com/karosown/katool-go/util/splitutil"
 
 	"github.com/karosown/katool-go/container/cutil"
 	"github.com/karosown/katool-go/container/stream"
@@ -30,10 +31,10 @@ func (d *Util[T]) Period(s, e time.Time, spec time.Duration) *SpecTimeUtil[T] {
 		d.ExcludeEmpty,
 	}
 }
-func (d *Util[T]) Split(b, e int, spec int) {
+func (d *Util[T]) Split(b, e, spec int) *SpecNumUtil[int] {
 
-	return &SpecTimeUtil[T]{
-		dateutil.GetPeriods(s, e, spec),
+	return &SpecNumUtil[T]{
+		splitutil.NumberSplit(b, e, spec),
 		d.SyncMode,
 		d.ExcludeEmpty,
 	}

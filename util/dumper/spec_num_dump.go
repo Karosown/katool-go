@@ -5,28 +5,29 @@ import (
 	"github.com/karosown/katool-go/container/stream"
 	"github.com/karosown/katool-go/net/format"
 	"github.com/karosown/katool-go/sys"
+	"github.com/karosown/katool-go/util/splitutil"
 )
 
-type SpecNumUtil[T any] struct {
-	specNums     []stream.Entry[int, int]
+type SpecNumUtil[R, T int | int8 | int16 | int32 | int64 | float32 | float64 | byte | rune] struct {
+	specNums     splitutil.Segments[T]
 	SyncMode     bool
 	ExcludeEmpty bool
 }
 
-type SplitDumpTask[T any] struct {
-	Util[T]
-	stream.Entry[int, int]
+type SplitDumpTask[R, T int | int8 | int16 | int32 | int64 | float32 | float64 | byte | rune] struct {
+	Util[R]
+	splitutil.Segment[T]
 }
 
-func (d *SpecNumUtil[T]) Exec(exec func(start, end int) []T, dumpNode ...format.EnDeCodeFormat) *Util[T] {
+func (d *SpecNumUtil[R, T]) Exec(exec func(start, end T) []R, dumpNode ...format.EnDeCodeFormat) *Util[R] {
 	toStream := stream.ToStream(&d.specNums)
 	if d.SyncMode {
 		toStream.Parallel()
 	}
-	list := stream.FromAnySlice[[]T, [][]T](toStream.Map(func(i stream.Entry[int, int]) any {
-		ts := exec(i.Key, i.Value)
-		d2 := &SplitDumpTask[T]{
-			Util[T]{
+	list := stream.Cast[[]R](toStream.Map(func(i splitutil.Segment[T]) any {
+		ts := exec(i.Begin, i.End)
+		d2 := &SplitDumpTask[R, T]{
+			Util[R]{
 				ts,
 				nil,
 				d.SyncMode,
@@ -39,18 +40,18 @@ func (d *SpecNumUtil[T]) Exec(exec func(start, end int) []T, dumpNode ...format.
 		if err != nil {
 			return err
 		}
-		t, ok := dump.([]T)
+		t, ok := dump.([]R)
 		if !ok {
 			sys.Panic("The Exec Handler Back Type Need Consistent Of SpecNumUtil[T]，also []T")
 			return nil
 		}
 		return t
-	}).ToList()).Reduce([]T{}, func(cntValue any, nxt []T) any {
-		return append(cntValue.([]T), nxt...)
+	})).Reduce([]R{}, func(cntValue any, nxt []R) any {
+		return append(cntValue.([]R), nxt...)
 	}, func(sum1, sum2 any) any {
-		return append(sum1.([]T), sum2.([]T)...)
-	}).([]T)
-	return &Util[T]{
+		return append(sum1.([]R), sum2.([]R)...)
+	}).([]R)
+	return &Util[R]{
 		list,
 		nil,
 		d.SyncMode,
@@ -58,12 +59,12 @@ func (d *SpecNumUtil[T]) Exec(exec func(start, end int) []T, dumpNode ...format.
 	}
 }
 
-func (d *SpecNumUtil[T]) Sync() *SpecNumUtil[T] {
+func (d *SpecNumUtil[R, T]) Sync() *SpecNumUtil[R, T] {
 	d.SyncMode = true
 	return d
 }
 
-func (d *SplitDumpTask[T]) Dump(dumpNode ...format.EnDeCodeFormat) (any, error) {
+func (d *SplitDumpTask[R, T]) Dump(dumpNode ...format.EnDeCodeFormat) (any, error) {
 	if (d.ExcludeEmpty && d.data == nil) || cutil.IsEmpty(dumpNode) && nil == d.dumpChain {
 		return d.data, nil
 	}
