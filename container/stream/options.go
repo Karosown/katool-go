@@ -12,7 +12,6 @@ type Options[T any] []Option[T]
 
 // ForEach you can't change the options data with you use the function,if you want to change the options data,use the Stream.ForEach
 // ForEach 遍历每个选项（不能修改数据，如需修改请使用Stream.ForEach）
-// ForEach iterates over each option (cannot modify data, use Stream.ForEach if modification needed)
 func (s Options[T]) ForEach(fn func(item T)) Options[T] {
 	for i := 0; i < len(s); i++ {
 		fn((s)[i].opt)
