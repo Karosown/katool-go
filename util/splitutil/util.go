@@ -6,7 +6,7 @@ type Segment[T any] struct {
 }
 type Segments[T any] []Segment[T]
 
-func NumberSplit[T int | int8 | int16 | int32 | int64 | float32 | float64 | byte | rune](b, e, spec T) Segments[T] {
+func NumberSplit[T int | int8 | int16 | int32 | int64 | float32 | float64 | byte](b, e, spec T) Segments[T] {
 	var res Segments[T]
 	for i := b; i < e; i += spec {
 		if i+spec < e {
