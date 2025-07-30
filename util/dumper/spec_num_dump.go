@@ -8,13 +8,13 @@ import (
 	"github.com/karosown/katool-go/util/splitutil"
 )
 
-type SpecNumUtil[R, T int | int8 | int16 | int32 | int64 | float32 | float64 | byte | rune] struct {
+type SpecNumUtil[R any, T int | int8 | int16 | int32 | int64 | float32 | float64 | byte | rune] struct {
 	specNums     splitutil.Segments[T]
 	SyncMode     bool
 	ExcludeEmpty bool
 }
 
-type SplitDumpTask[R, T int | int8 | int16 | int32 | int64 | float32 | float64 | byte | rune] struct {
+type SplitDumpTask[R any, T int | int8 | int16 | int32 | int64 | float32 | float64 | byte | rune] struct {
 	Util[R]
 	splitutil.Segment[T]
 }

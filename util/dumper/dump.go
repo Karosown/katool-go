@@ -31,9 +31,9 @@ func (d *Util[T]) Period(s, e time.Time, spec time.Duration) *SpecTimeUtil[T] {
 		d.ExcludeEmpty,
 	}
 }
-func (d *Util[T]) Split(b, e, spec int) *SpecNumUtil[int] {
+func (d *Util[T]) Split(b, e, spec int) *SpecNumUtil[T, int] {
 
-	return &SpecNumUtil[T]{
+	return &SpecNumUtil[T, int]{
 		splitutil.NumberSplit(b, e, spec),
 		d.SyncMode,
 		d.ExcludeEmpty,
