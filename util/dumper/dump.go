@@ -30,6 +30,14 @@ func (d *Util[T]) Period(s, e time.Time, spec time.Duration) *SpecTimeUtil[T] {
 		d.ExcludeEmpty,
 	}
 }
+func (d *Util[T]) Split(b, e int, spec int) {
+
+	return &SpecTimeUtil[T]{
+		dateutil.GetPeriods(s, e, spec),
+		d.SyncMode,
+		d.ExcludeEmpty,
+	}
+}
 
 // Sync 设置同步模式
 // Sync sets synchronization mode
