@@ -7,6 +7,20 @@ import (
 	"github.com/karosown/katool-go/util/markdown"
 )
 
+func TestReLine(t *testing.T) {
+	tree := markdown.ToTree(`
+# 测试
+
+
+测试
+
+
+测试
+
+# 啊？
+`)
+	println(tree.ToMarkdown())
+}
 func Test_HTML(t *testing.T) {
 	html := markdown.ToHtml(test_md)
 	fmt.Println(html)

@@ -54,9 +54,6 @@ func ToTree(md string) Tree {
 	lines := strings.Split(md, "\n")
 	reHeader := regexp.MustCompile(`^(#{1,6})\s*(.+)`)
 	for _, line := range lines {
-		if len(strings.TrimSpace(line)) == 0 {
-			continue
-		}
 		if matches := reHeader.FindStringSubmatch(line); matches != nil {
 			level := len(matches[1])
 			title := matches[2]
@@ -77,6 +74,7 @@ func ToTree(md string) Tree {
 			stack = append(stack, node)
 		} else if len(stack) > 0 {
 			curr := stack[len(stack)-1]
+			// 与空行无关，每一行都加，空行就多一个\n
 			if curr.Content != "" {
 				curr.Content += "\n"
 			}
@@ -85,7 +83,6 @@ func ToTree(md string) Tree {
 	}
 	return roots
 }
-
 func ToHtml(md string) string {
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
 	p := parser.NewWithExtensions(extensions)
