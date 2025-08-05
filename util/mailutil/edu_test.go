@@ -21,6 +21,7 @@ func TestVerifyEduEmail(t *testing.T) {
 		"student@uct.ac.za",        // 南非
 		"fake@university.com",      // 非教育邮箱
 		"fake@service.liberty.edu", // 非教育邮箱
+		"2106041117@hi.is",
 		"fuck@.vatican.va",
 	}
 

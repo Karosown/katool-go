@@ -242,6 +242,13 @@ func Test_Difference(t *testing.T) {
 		fmt.Println(item)
 	})
 }
+func Test_Filter(t *testing.T) {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	collect := stream.Of(&arr).Filter(func(i int) bool {
+		return i&1 == 0
+	}).ToList()
+	fmt.Println(collect)
+}
 
 // 其他玩儿法
 func Test_Intersect_filter(t *testing.T) {

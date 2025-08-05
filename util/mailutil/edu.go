@@ -1,6 +1,7 @@
 package mailutil
 
 import (
+	"net/mail"
 	"regexp"
 	"strings"
 )
@@ -653,4 +654,9 @@ func (v *EduEmailVerify) GetStatistics() map[string]int {
 	stats["Total Domain Patterns"] = totalDomains
 
 	return stats
+}
+
+func IsMail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }
