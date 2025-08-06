@@ -4,6 +4,8 @@ import (
 	"net/mail"
 	"regexp"
 	"strings"
+
+	"github.com/karosown/katool-go/container/cutil"
 )
 
 var MicroStrategyEducationDomains = map[string][]string{
@@ -163,7 +165,7 @@ type EduEmailVerify struct {
 	asianSmallStates    map[string][]string
 	europeanSmallStates map[string][]string
 	specialTerritories  map[string][]string
-
+	whiteLiatValid      []func(string) bool
 	// 编译后的正则表达式
 	allPatterns     []*regexp.Regexp
 	countryPatterns map[string][]*regexp.Regexp
@@ -434,7 +436,7 @@ var GlobalEducationDomains = map[string][]string{
 	"AQ": {".edu.aq", ".ac.aq"}, // 南极洲
 }
 
-func NewEduEmailVerify() *EduEmailVerify {
+func NewEduEmailVerify(whiteLiatValid ...func(string) bool) *EduEmailVerify {
 	v := &EduEmailVerify{
 		majorCountries:      GlobalEducationDomains, // 之前定义的主要国家
 		microstates:         MicroStrategyEducationDomains,
@@ -444,7 +446,9 @@ func NewEduEmailVerify() *EduEmailVerify {
 		specialTerritories:  SpecialTerritoriesEducationDomains,
 		countryPatterns:     make(map[string][]*regexp.Regexp),
 	}
-
+	if !cutil.IsEmpty(whiteLiatValid) {
+		v.whiteLiatValid = whiteLiatValid
+	}
 	v.compileAllPatterns()
 	return v
 }
@@ -483,7 +487,13 @@ func (v *EduEmailVerify) IsEducationEmail(email string) bool {
 	if !v.isValidEmailFormat(email) {
 		return false
 	}
-
+	if !cutil.IsEmpty(v.whiteLiatValid) {
+		for _, fun := range v.whiteLiatValid {
+			if fun(email) {
+				return true
+			}
+		}
+	}
 	// 检查所有模式
 	for _, pattern := range v.allPatterns {
 		if pattern.MatchString(email) {
@@ -497,10 +507,11 @@ func (v *EduEmailVerify) IsEducationEmail(email string) bool {
 // 获取完整信息
 func (v *EduEmailVerify) GetCompleteInfo(email string) CompleteEmailInfo {
 	email = strings.ToLower(strings.TrimSpace(email))
+	educationEmail := v.IsEducationEmail(email)
 
 	info := CompleteEmailInfo{
 		Email:       email,
-		IsEducation: false,
+		IsEducation: educationEmail,
 		Country:     "",
 		CountryType: "",
 		Domain:      v.extractDomain(email),
@@ -526,7 +537,7 @@ func (v *EduEmailVerify) GetCompleteInfo(email string) CompleteEmailInfo {
 		for country, suffixes := range domains {
 			for _, suffix := range suffixes {
 				if strings.HasSuffix(email, suffix) {
-					info.IsEducation = true
+					info.IsEducation = educationEmail
 					info.Country = country
 					info.CountryType = category
 					return info

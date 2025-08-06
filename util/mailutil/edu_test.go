@@ -2,13 +2,19 @@ package mailutil
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/karosown/katool-go/container/stream"
 )
 
+var qqwhite = func(s string) bool {
+	return strings.HasSuffix(s, "@qq.com")
+}
+
 func TestVerifyEduEmail(t *testing.T) {
-	validator := NewEduEmailVerify()
+
+	validator := NewEduEmailVerify(qqwhite)
 
 	testEmails := []string{
 		"student@harvard.edu",      // 美国
@@ -21,10 +27,11 @@ func TestVerifyEduEmail(t *testing.T) {
 		"student@uct.ac.za",        // 南非
 		"fake@university.com",      // 非教育邮箱
 		"fake@service.liberty.edu", // 非教育邮箱
-		"2106041117@hi.is",
 		"fuck@.vatican.va",
 	}
-
+	stream.ToStream(&testEmails).ForEach(func(item string) {
+		fmt.Println(validator.IsEducationEmail(item))
+	})
 	stream.Cast[CompleteEmailInfo](stream.ToStream(&testEmails).Map(func(i string) any {
 		return validator.GetCompleteInfo(i)
 	})).ForEach(func(info CompleteEmailInfo) {
@@ -35,4 +42,9 @@ func TestVerifyEduEmail(t *testing.T) {
 		fmt.Println()
 	})
 
+}
+
+func TestVerifyEduEmail1(t *testing.T) {
+	validator := NewEduEmailVerify(qqwhite)
+	println(validator.GetCompleteInfo("66985726@qq.com").IsEducation)
 }
