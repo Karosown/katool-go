@@ -46,5 +46,5 @@ func TestVerifyEduEmail(t *testing.T) {
 
 func TestVerifyEduEmail1(t *testing.T) {
 	validator := NewEduEmailVerify(qqwhite)
-	println(validator.GetCompleteInfo("66985726@qq.com").IsEducation)
+	println(validator.GetCompleteInfo("xxxxxx").IsEducation)
 }

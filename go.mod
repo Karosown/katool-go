@@ -11,6 +11,7 @@ require (
 	github.com/go-rod/rod v0.116.2
 	github.com/go-shiori/go-readability v0.0.0-20250217085726-9f5bf5ca7612
 	github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b
+	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/kaptinlin/jsonrepair v0.1.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cast v1.7.0
