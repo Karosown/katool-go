@@ -18,7 +18,7 @@ type IDType int64
 
 // HashComputeFunction 哈希计算函数类型
 // HashComputeFunction represents a function type for computing hash values
-type HashComputeFunction func(any2 any) HashType
+type HashComputeFunction[T any] func(any2 T) HashType
 
 // IDComputeFunction ID计算函数类型
 // IDComputeFunction represents a function type for computing ID values
@@ -26,7 +26,7 @@ type IDComputeFunction func(any2 any) IDType
 
 // HASH_WITH_JSON 使用JSON序列化计算哈希值
 // HASH_WITH_JSON computes hash value using JSON serialization
-func HASH_WITH_JSON(cnt any) HashType {
+func HASH_WITH_JSON[T any](cnt T) HashType {
 	marshal, err := json.Marshal(cnt)
 	if err != nil {
 		sys.Warn(err.Error())
@@ -36,7 +36,7 @@ func HASH_WITH_JSON(cnt any) HashType {
 
 // HASH_WITH_JSON_MD5 使用JSON序列化后MD5计算哈希值
 // HASH_WITH_JSON_MD5 computes hash value using MD5 after JSON serialization
-func HASH_WITH_JSON_MD5(cnt any) HashType {
+func HASH_WITH_JSON_MD5[T any](cnt T) HashType {
 	marshal, err := json.Marshal(cnt)
 	if err != nil {
 		sys.Warn(err.Error())

@@ -119,7 +119,7 @@ func Test_Map(t *testing.T) {
 	})
 	println(totalMoney.(int64))
 	// 过滤
-	userStream.Filter(func(item user) bool { return item.Sex != 0 }).DistinctBy(algorithm.HASH_WITH_JSON_MD5).ToOptionList().ForEach(func(item user) { println(item.Name) })
+	userStream.Filter(func(item user) bool { return item.Sex != 0 }).DistinctBy(algorithm.HASH_WITH_JSON_MD5[user]).ToOptionList().ForEach(func(item user) { println(item.Name) })
 	// 转换
 	s := userStream.Map(func(item user) any {
 		properties, err := convert.CopyProperties(&item, &userVo{})
@@ -238,7 +238,7 @@ func Test_Intersect(t *testing.T) {
 func Test_Difference(t *testing.T) {
 	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	arr1 := []int{11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 5, 6, 7}
-	stream.ToStream(&arr).Parallel().Difference(arr1).ForEach(func(item int) {
+	stream.ToStream(&arr).Parallel().Difference(arr1, nil).ForEach(func(item int) {
 		fmt.Println(item)
 	})
 }

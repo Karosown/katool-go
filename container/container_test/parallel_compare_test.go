@@ -70,8 +70,8 @@ func Test_OrderBy(t *testing.T) {
 	}
 	var unParallel []user
 	computed := dateutil.BeginEndTimeComputed(func() {
-		unParallel = stream.ToStream(&users).OrderBy(false, func(u any) algorithm.HashType {
-			return algorithm.HashType(u.(user).Name)
+		unParallel = stream.ToStream(&users).OrderBy(false, func(u user) algorithm.HashType {
+			return algorithm.HashType(u.Name)
 		}).ToList()
 	})
 	println(computed)
@@ -79,8 +79,8 @@ func Test_OrderBy(t *testing.T) {
 	computed = dateutil.BeginEndTimeComputed(func() {
 		parallel = stream.ToStream(&users).ParallelWithSetting(func(size int) int {
 			return size / runtime.NumCPU() * 32
-		}, runtime.NumCPU()*32).OrderBy(false, func(u any) algorithm.HashType {
-			return algorithm.HashType(u.(user).Name)
+		}, runtime.NumCPU()*32).OrderBy(false, func(u user) algorithm.HashType {
+			return algorithm.HashType(u.Name)
 		}).ToList()
 	})
 	println(computed)

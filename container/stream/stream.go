@@ -313,7 +313,7 @@ func (s *Stream[T, Slice]) Distinct() *Stream[T, Slice] {
 
 // DistinctBy 按照指定方法去重
 // DistinctBy removes duplicates using specified method
-func (s *Stream[T, Slice]) DistinctBy(hash algorithm.HashComputeFunction) *Stream[T, Slice] {
+func (s *Stream[T, Slice]) DistinctBy(hash algorithm.HashComputeFunction[T]) *Stream[T, Slice] {
 	res := make(Slice, 0)
 	size := len(*s.options)
 	if size < 1e10+5 {
@@ -471,7 +471,7 @@ func (s *Stream[T, Slice]) GroupBy(groupBy func(item T) any) map[any]Slice {
 
 // OrderBy 按照哈希函数排序
 // OrderBy sorts by hash function
-func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunction) *Stream[T, Slice] {
+func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunction[T]) *Stream[T, Slice] {
 	if !s.parallel {
 		list := s.ToList()
 		news := ToStream(&list).SetPageSizeGetFunc(s.getPageSize).SetMaxGoroutineNum(s.maxGoroutineNum)
@@ -498,8 +498,8 @@ func (s *Stream[T, Slice]) OrderBy(desc bool, orderBy algorithm.HashComputeFunct
 	optionsStream.parallel = s.parallel
 	sortedMap := optionsStream.Map(func(options Options[any]) any {
 		sort.SliceStable(options, func(i, j int) bool {
-			a := orderBy(options[i].opt)
-			b := orderBy(options[j].opt)
+			a := orderBy(options[i].opt.(T))
+			b := orderBy(options[j].opt.(T))
 			if desc {
 				return a > b
 			} else {
@@ -663,46 +663,129 @@ func (s *Stream[T, Slice]) Merge(arrOrStream any) *Stream[T, Slice] {
 // Intersect 求交集
 // Intersect finds intersection
 func (s *Stream[T, Slice]) Intersect(arrOrStream any, validEq ...func(a, b T) bool) *Stream[T, Slice] {
+	if len(validEq) == 0 {
+		return s.IntersectWith(arrOrStream, nil)
+	}
+	return s.IntersectWith(arrOrStream, validEq[0])
+}
+
+// IntersectWith 求交集(全配置)
+// IntersectWith finds intersection
+func (s *Stream[T, Slice]) IntersectWith(arrOrStream any, validEq func(a, b T) bool, validHash ...algorithm.HashComputeFunction[T]) *Stream[T, Slice] {
 	var temp Slice
+	var vh algorithm.HashComputeFunction[T]
+	if cutil.IsEmpty(validHash) {
+		vh = algorithm.HASH_WITH_JSON
+	} else {
+		vh = validHash[0]
+	}
 	switch arrOrStream.(type) {
 	case *Stream[T, Slice]:
 		temp = arrOrStream.(*Stream[T, Slice]).ToList()
 	case Slice:
 		temp = arrOrStream.(Slice)
 	}
-	return s.Filter(func(i T) bool {
-		if cutil.IsEmpty(validEq) {
+	if s.Count()*int64(len(temp)) < 1e5 {
+		return s.Filter(func(i T) bool {
+			if validEq == nil {
+				return slices.ContainsFunc(temp, func(t T) bool {
+					return vh(i) == vh(t)
+				})
+			}
 			return slices.ContainsFunc(temp, func(t T) bool {
-				return algorithm.HASH_WITH_JSON(i) == algorithm.HASH_WITH_JSON(t)
+				return validEq(i, t)
+			})
+		})
+	} else {
+		if validEq == nil {
+			excludeMap := make(map[algorithm.HashType]bool, len(temp))
+			// 使用哈希 Map 优化查找
+			for _, item := range temp {
+				hash := vh(item)
+				excludeMap[hash] = true
+			}
+			return s.Filter(func(i T) bool {
+				hash := vh(i)
+				return excludeMap[hash]
+			})
+		} else {
+			// 自定义比较函数时，构建比较 Map
+			return s.Filter(func(i T) bool {
+				for _, t := range temp {
+					if validEq(i, t) {
+						return true
+					}
+				}
+				return false
 			})
 		}
-		return slices.ContainsFunc(temp, func(t T) bool {
-			return validEq[0](i, t)
-		})
-	})
+	}
+
 }
 
 // Difference 求差集
 // Difference finds difference
 func (s *Stream[T, Slice]) Difference(arrOrStream any, validEq ...func(a, b T) bool) *Stream[T, Slice] {
+	if len(validEq) == 0 {
+		return s.DifferenceWith(arrOrStream, nil)
+	}
+	return s.DifferenceWith(arrOrStream, validEq[0])
+}
+
+// DifferenceWith 求差集(全配置)
+// DifferenceWith finds difference
+func (s *Stream[T, Slice]) DifferenceWith(arrOrStream any, validEq func(a, b T) bool, validHash ...algorithm.HashComputeFunction[T]) *Stream[T, Slice] {
 	var temp Slice
+	var vh algorithm.HashComputeFunction[T]
+	if cutil.IsEmpty(validHash) {
+		vh = algorithm.HASH_WITH_JSON
+	} else {
+		vh = validHash[0]
+	}
 	switch arrOrStream.(type) {
 	case *Stream[T, Slice]:
 		temp = arrOrStream.(*Stream[T, Slice]).ToList()
 	case Slice:
 		temp = arrOrStream.(Slice)
 	}
-	return s.Filter(func(i T) bool {
-		if cutil.IsEmpty(validEq) {
+	if s.Count()*int64(len(temp)) < 1e5 {
+		return s.Filter(func(i T) bool {
+			if validEq == nil {
+				return !slices.ContainsFunc(temp, func(t T) bool {
+					return vh(i) == vh(t)
+				})
+			}
 			return !slices.ContainsFunc(temp, func(t T) bool {
-				return algorithm.HASH_WITH_JSON(i) == algorithm.HASH_WITH_JSON(t)
+				return validEq(i, t)
+			})
+		})
+	} else {
+		if validEq == nil {
+			excludeMap := make(map[algorithm.HashType]bool, len(temp))
+			// 使用哈希 Map 优化查找
+			for _, item := range temp {
+				hash := vh(item)
+				excludeMap[hash] = true
+			}
+			return s.Filter(func(i T) bool {
+				hash := vh(i)
+				return !excludeMap[hash]
+			})
+		} else {
+			// 自定义比较函数时，构建比较 Map
+			return s.Filter(func(i T) bool {
+				for _, t := range temp {
+					if validEq(i, t) {
+						return false
+					}
+				}
+				return true
 			})
 		}
-		return !slices.ContainsFunc(temp, func(t T) bool {
-			return validEq[0](i, t)
-		})
-	})
+	}
+
 }
+
 func (s *Stream[T, Slice]) Clone() *Stream[T, Slice] {
 	return s.Filter(func(i T) bool {
 		return true

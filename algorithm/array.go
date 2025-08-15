@@ -37,7 +37,7 @@ func MergeSortedArrayWithEntity[T any](orderBy func(a, b T) bool) func(any, any)
 
 // MergeSortedArrayWithPrimaryData 使用哈希函数合并两个有序数组
 // MergeSortedArrayWithPrimaryData merges two sorted arrays using a hash function
-func MergeSortedArrayWithPrimaryData[T any](desc bool, orderBy HashComputeFunction) func(any, any) any {
+func MergeSortedArrayWithPrimaryData[T any](desc bool, orderBy HashComputeFunction[T]) func(any, any) any {
 	return func(cntValue any, nxt any) any {
 		ts := cntValue.([]any)
 		nxts := nxt.([]any)
