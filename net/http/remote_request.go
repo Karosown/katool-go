@@ -17,6 +17,12 @@ import (
 	"github.com/karosown/katool-go/sys"
 )
 
+type Error struct {
+	HttpErr   error
+	DecodeErr error
+	error
+}
+
 // ReqApi HTTP请求接口定义
 // ReqApi defines the HTTP request interface
 type ReqApi interface {
@@ -231,6 +237,20 @@ func (r *Req) Build(backDao any) (any, error) {
 		}
 		//fmt.Println(string(body))
 		res, err := (r.decodeHandler).SystemDecode(r.decodeHandler, body, backDao)
+		if response.StatusCode() != http.StatusOK {
+			return res, Error{
+				HttpErr:   errors.New(response.Status()),
+				DecodeErr: err,
+				error:     errors.New(string(body)),
+			}
+		}
+		if err != nil {
+			return res, Error{
+				HttpErr:   nil,
+				DecodeErr: err,
+				error:     err,
+			}
+		}
 		return res, err
 	}
 	return backDao, nil
