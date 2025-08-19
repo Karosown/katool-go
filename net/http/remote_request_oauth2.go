@@ -151,7 +151,7 @@ func (O *OAuth2Req) Build(backDao any) (any, *Error) {
 		return nil, &Error{
 			HttpErr:   nil,
 			DecodeErr: nil,
-			error:     fmt.Errorf("error ensuring access token:%s", err),
+			Err:       fmt.Errorf("error ensuring access token:%s", err),
 		}
 	}
 	return O.Req.Build(backDao)
