@@ -37,7 +37,7 @@ type ReqApi interface {
 	DecodeHandler(format format.EnDeCodeFormat) ReqApi
 	ReHeader(k, v string) ReqApi
 	SetLogger(logger xlog.Logger) ReqApi
-	Build(backDao any) (any, error)
+	Build(backDao any) (any, *Error)
 }
 
 // Req HTTP请求结构体
@@ -140,7 +140,7 @@ func (r *Req) DecodeHandler(format format.EnDeCodeFormat) ReqApi {
 
 // Build 构建并执行HTTP请求
 // Build builds and executes the HTTP request
-func (r *Req) Build(backDao any) (any, error) {
+func (r *Req) Build(backDao any) (any, *Error) {
 	defer func() {
 		if err := recover(); err != nil {
 			if r.Logger != nil {
@@ -150,7 +150,11 @@ func (r *Req) Build(backDao any) (any, error) {
 	}()
 	// 检查 response 是否为指针类型
 	if reflect.TypeOf(backDao).Kind() != reflect.Ptr {
-		return nil, errors.New("back must be a pointer")
+		return nil, &Error{
+			HttpErr:   nil,
+			DecodeErr: nil,
+			error:     errors.New("back must be a pointer"),
+		}
 	}
 	if r.httpClient == nil {
 		r.httpClient = resty.New()
@@ -170,12 +174,20 @@ func (r *Req) Build(backDao any) (any, error) {
 		if nil != data {
 			marshal, err := json.Marshal(data)
 			if nil != err {
-				return nil, err
+				return nil, &Error{
+					HttpErr:   nil,
+					DecodeErr: nil,
+					error:     err,
+				}
 			}
 			mp := make(map[string]string)
 			err = json.Unmarshal(marshal, &mp)
 			if nil != err {
-				return nil, err
+				return nil, &Error{
+					HttpErr:   nil,
+					DecodeErr: nil,
+					error:     err,
+				}
 			}
 			reqAtomic.SetPathParams(mp)
 		}
@@ -187,7 +199,11 @@ func (r *Req) Build(backDao any) (any, error) {
 			res, err = reqAtomic.Delete(url)
 		}
 		if nil != err {
-			return nil, err
+			return nil, &Error{
+				HttpErr:   nil,
+				DecodeErr: nil,
+				error:     err,
+			}
 		}
 		body := res.Body()
 		noOkErr := fmt.Errorf("url:%s,method:%s,status_code:%d,status:%s,body:%s", url, r.method, res.StatusCode(),
@@ -208,7 +224,11 @@ func (r *Req) Build(backDao any) (any, error) {
 			}
 		}
 		response, err := (r.decodeHandler).SystemDecode(r.decodeHandler, body, backDao)
-		return response, err
+		return response, &Error{
+			HttpErr:   nil,
+			DecodeErr: nil,
+			error:     err,
+		}
 	default:
 		// resty 会自动对data进行处理：resty.middleware.handleRequestBody , 通过反射判断
 		// if IsJSONType(contentType) && (kind == reflect.Struct || kind == reflect.Map || kind == reflect.Slice) {
@@ -228,7 +248,11 @@ func (r *Req) Build(backDao any) (any, error) {
 			response, err = reqAtomic.SetBody(data).Execute(r.method, url)
 		}
 		if nil != err {
-			return nil, err
+			return nil, &Error{
+				HttpErr:   nil,
+				DecodeErr: nil,
+				error:     err,
+			}
 		}
 		body := response.Body()
 		if nil != r.Logger {
@@ -238,20 +262,20 @@ func (r *Req) Build(backDao any) (any, error) {
 		//fmt.Println(string(body))
 		res, err := (r.decodeHandler).SystemDecode(r.decodeHandler, body, backDao)
 		if response.StatusCode() != http.StatusOK {
-			return res, Error{
+			return res, &Error{
 				HttpErr:   errors.New(response.Status()),
 				DecodeErr: err,
 				error:     errors.New(string(body)),
 			}
 		}
 		if err != nil {
-			return res, Error{
+			return res, &Error{
 				HttpErr:   nil,
 				DecodeErr: err,
 				error:     err,
 			}
 		}
-		return res, err
+		return res, nil
 	}
 	return backDao, nil
 }
