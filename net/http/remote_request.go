@@ -20,7 +20,7 @@ import (
 type Error struct {
 	HttpErr   error
 	DecodeErr error
-	error
+	Err       error
 }
 
 // ReqApi HTTP请求接口定义
@@ -153,7 +153,7 @@ func (r *Req) Build(backDao any) (any, *Error) {
 		return nil, &Error{
 			HttpErr:   nil,
 			DecodeErr: nil,
-			error:     errors.New("back must be a pointer"),
+			Err:       errors.New("back must be a pointer"),
 		}
 	}
 	if r.httpClient == nil {
@@ -177,7 +177,7 @@ func (r *Req) Build(backDao any) (any, *Error) {
 				return nil, &Error{
 					HttpErr:   nil,
 					DecodeErr: nil,
-					error:     err,
+					Err:       err,
 				}
 			}
 			mp := make(map[string]string)
@@ -186,7 +186,7 @@ func (r *Req) Build(backDao any) (any, *Error) {
 				return nil, &Error{
 					HttpErr:   nil,
 					DecodeErr: nil,
-					error:     err,
+					Err:       err,
 				}
 			}
 			reqAtomic.SetPathParams(mp)
@@ -202,7 +202,7 @@ func (r *Req) Build(backDao any) (any, *Error) {
 			return nil, &Error{
 				HttpErr:   nil,
 				DecodeErr: nil,
-				error:     err,
+				Err:       err,
 			}
 		}
 		body := res.Body()
@@ -227,7 +227,7 @@ func (r *Req) Build(backDao any) (any, *Error) {
 		return response, &Error{
 			HttpErr:   nil,
 			DecodeErr: nil,
-			error:     err,
+			Err:       err,
 		}
 	default:
 		// resty 会自动对data进行处理：resty.middleware.handleRequestBody , 通过反射判断
@@ -251,7 +251,7 @@ func (r *Req) Build(backDao any) (any, *Error) {
 			return nil, &Error{
 				HttpErr:   nil,
 				DecodeErr: nil,
-				error:     err,
+				Err:       err,
 			}
 		}
 		body := response.Body()
@@ -265,14 +265,14 @@ func (r *Req) Build(backDao any) (any, *Error) {
 			return res, &Error{
 				HttpErr:   errors.New(response.Status()),
 				DecodeErr: err,
-				error:     errors.New(string(body)),
+				Err:       errors.New(string(body)),
 			}
 		}
 		if err != nil {
 			return res, &Error{
 				HttpErr:   nil,
 				DecodeErr: err,
-				error:     err,
+				Err:       err,
 			}
 		}
 		return res, nil
