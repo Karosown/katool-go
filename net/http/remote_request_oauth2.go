@@ -3,11 +3,12 @@ package remote
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/karosown/katool-go/xlog"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/karosown/katool-go/xlog"
 
 	"github.com/go-resty/resty/v2"
 	remote2 "github.com/karosown/katool-go/net/format"
@@ -145,9 +146,13 @@ func (O *OAuth2Req) SetLogger(logger xlog.Logger) *OAuth2Req {
 	O.Logger = logger
 	return O
 }
-func (O *OAuth2Req) Build(backDao any) (any, error) {
+func (O *OAuth2Req) Build(backDao any) (any, *Error) {
 	if err := O.EnsureAccessToken(); err != nil {
-		return nil, fmt.Errorf("error ensuring access token:%s", err)
+		return nil, &Error{
+			HttpErr:   nil,
+			DecodeErr: nil,
+			error:     fmt.Errorf("error ensuring access token:%s", err),
+		}
 	}
 	return O.Req.Build(backDao)
 }
