@@ -23,6 +23,11 @@ type Error struct {
 	Err       error
 }
 
+func (e *Error) Error() string {
+	return fmt.Sprintf("Error from server: %v, Decode Error: %v,Error: %v", e.HttpErr,
+		e.DecodeErr, e.Err)
+}
+
 // ReqApi HTTP请求接口定义
 // ReqApi defines the HTTP request interface
 type ReqApi interface {
