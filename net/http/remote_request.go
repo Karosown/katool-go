@@ -229,11 +229,14 @@ func (r *Req) Build(backDao any) (any, *Error) {
 			}
 		}
 		response, err := (r.decodeHandler).SystemDecode(r.decodeHandler, body, backDao)
-		return response, &Error{
-			HttpErr:   nil,
-			DecodeErr: nil,
-			Err:       err,
+		if err != nil {
+			return response, &Error{
+				HttpErr:   nil,
+				DecodeErr: nil,
+				Err:       err,
+			}
 		}
+		return response, nil
 	default:
 		// resty 会自动对data进行处理：resty.middleware.handleRequestBody , 通过反射判断
 		// if IsJSONType(contentType) && (kind == reflect.Struct || kind == reflect.Map || kind == reflect.Slice) {
