@@ -60,6 +60,10 @@ type Req struct {
 	Logger        xlog.Logger
 }
 
+func NewReq() *Req {
+	return &Req{}
+}
+
 // Url 设置请求URL
 // Url sets the request URL
 func (r *Req) Url(url string) ReqApi {
