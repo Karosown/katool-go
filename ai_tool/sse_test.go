@@ -16,7 +16,6 @@ func TestStreamEventStructure(t *testing.T) {
 		ID:    "event-123",
 		Retry: 5000,
 	}
-
 	// 验证Data字段包含JSON字符串
 	if event.Data == "" {
 		t.Fatal("Data field should not be empty")

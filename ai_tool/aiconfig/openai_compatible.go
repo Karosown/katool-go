@@ -157,6 +157,14 @@ func (p *OpenAICompatibleProvider) Chat(req *ChatRequest) (*ChatResponse, error)
 		"presence_penalty":  req.PresencePenalty,
 	}
 
+	// 添加工具支持
+	if len(req.Tools) > 0 {
+		requestData["tools"] = req.Tools
+	}
+	if req.ToolChoice != nil {
+		requestData["tool_choice"] = req.ToolChoice
+	}
+
 	// 移除空值
 	cleanRequestData := make(map[string]interface{})
 	for k, v := range requestData {
@@ -224,6 +232,14 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ChatRequest) (<-chan *ChatRes
 		"frequency_penalty": req.FrequencyPenalty,
 		"presence_penalty":  req.PresencePenalty,
 		"stream":            true,
+	}
+
+	// 添加工具支持
+	if len(req.Tools) > 0 {
+		requestData["tools"] = req.Tools
+	}
+	if req.ToolChoice != nil {
+		requestData["tool_choice"] = req.ToolChoice
 	}
 
 	// 移除空值
@@ -311,6 +327,14 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ChatRequest) (<-chan *ChatRes
 	}()
 
 	return responseChan, nil
+}
+
+// ChatWithTools 发送带工具调用的聊天请求
+func (p *OpenAICompatibleProvider) ChatWithTools(req *ChatRequest, tools []Tool) (*ChatResponse, error) {
+	// 设置工具
+	req.Tools = tools
+	// 调用普通的Chat方法
+	return p.Chat(req)
 }
 
 // SetLogger 设置日志记录器
