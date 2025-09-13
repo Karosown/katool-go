@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/karosown/katool-go/web_crawler/core"
 	"log"
 	"net/http"
 	"time"
@@ -102,11 +103,14 @@ func registerTools(client aiconfig.AIProvider) *aiconfig.FunctionClient {
 	if err != nil {
 		log.Printf("注册时间工具失败: %v", err)
 	}
+	web_crawler.WebChrome = core.NewCotain("C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Bin\\Google Chrome.exe", true)
 
 	// 注册搜索工具
-	err = functionClient.RegisterFunction("web_search", "网络搜索，返回的是36kr的内容", func(KeyWords string) map[string]interface{} {
+	err = functionClient.RegisterFunction("36kr_rss", "36kr的rss，返回的是36kr的近期内容，返回的是一个页面的源代码，你需要读取里面的新闻链接来获取URL，通过访问页面获取工具", func(KeyWords string) map[string]interface{} {
 		return map[string]interface{}{
-			"source_code": web_crawler.ReadSourceCode("https://36kr.com/search/articles/"+KeyWords, "", render.Render),
+			"news-releases": web_crawler.ReadRSS("https://ir.36kr.com/rss/news-releases.xml"),
+			"events":        web_crawler.ReadRSS("https://ir.36kr.com/rss/events.xml"),
+			"sec-filings":   web_crawler.ReadRSS("https://ir.36kr.com/rss/sec-filings.xml"),
 		}
 	})
 	if err != nil {
@@ -196,11 +200,11 @@ func multiToolExample(functionClient *aiconfig.FunctionClient) {
 		Messages: []aiconfig.Message{
 			{
 				Role:    "system",
-				Content: "我是一个36kr智能体，请你输入想要查询的欣慰",
+				Content: "我是一个36kr智能体，请你输入想要查询的内容",
 			},
 			{
 				Role:    "user",
-				Content: "关于OpenAI最新的内容",
+				Content: "关于近期发生的时间和新闻，配上链接、发布时间、和主要整合过的内容，并在最后进行总结",
 			},
 		},
 		Temperature: 0.7,
@@ -225,7 +229,7 @@ func streamingExample(client aiconfig.AIProvider) {
 		Messages: []aiconfig.Message{
 			{
 				Role:    "system",
-				Content: "我是一个36kr智能体，请你输入想要查询的欣慰",
+				Content: "我是一个36kr智能体，请你输入想要查询的新闻内容",
 			},
 			{
 				Role:    "user",
