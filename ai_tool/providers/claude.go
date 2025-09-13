@@ -350,3 +350,11 @@ func (p *ClaudeProvider) GetConfig() *aiconfig.Config {
 func (p *ClaudeProvider) SetConfig(config *aiconfig.Config) {
 	p.config = config
 }
+
+// ChatWithTools 发送带工具调用的聊天请求
+func (p *ClaudeProvider) ChatWithTools(req *aiconfig.ChatRequest, tools []aiconfig.Tool) (*aiconfig.ChatResponse, error) {
+	// 设置工具
+	req.Tools = tools
+	// 调用普通的Chat方法
+	return p.Chat(req)
+}

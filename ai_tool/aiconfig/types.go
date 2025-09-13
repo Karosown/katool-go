@@ -6,20 +6,24 @@ import (
 
 // Message 表示聊天消息
 type Message struct {
-	Role    string `json:"role"`    // user, assistant, system
-	Content string `json:"content"` // 消息内容
+	Role       string     `json:"role"`                   // user, assistant, system, tool
+	Content    string     `json:"content,omitempty"`      // 消息内容
+	ToolCalls  []ToolCall `json:"tool_calls,omitempty"`   // 工具调用列表
+	ToolCallID string     `json:"tool_call_id,omitempty"` // 工具调用ID（tool角色消息使用）
 }
 
 // ChatRequest 聊天请求
 type ChatRequest struct {
-	Model            string    `json:"model"`                       // 模型名称
-	Messages         []Message `json:"messages"`                    // 消息列表
-	Temperature      float64   `json:"temperature,omitempty"`       // 温度参数
-	MaxTokens        int       `json:"max_tokens,omitempty"`        // 最大token数
-	Stream           bool      `json:"stream,omitempty"`            // 是否流式响应
-	TopP             float64   `json:"top_p,omitempty"`             // Top-p参数
-	FrequencyPenalty float64   `json:"frequency_penalty,omitempty"` // 频率惩罚
-	PresencePenalty  float64   `json:"presence_penalty,omitempty"`  // 存在惩罚
+	Model            string      `json:"model"`                       // 模型名称
+	Messages         []Message   `json:"messages"`                    // 消息列表
+	Tools            []Tool      `json:"tools,omitempty"`             // 可用工具列表
+	ToolChoice       interface{} `json:"tool_choice,omitempty"`       // 工具选择策略
+	Temperature      float64     `json:"temperature,omitempty"`       // 温度参数
+	MaxTokens        int         `json:"max_tokens,omitempty"`        // 最大token数
+	Stream           bool        `json:"stream,omitempty"`            // 是否流式响应
+	TopP             float64     `json:"top_p,omitempty"`             // Top-p参数
+	FrequencyPenalty float64     `json:"frequency_penalty,omitempty"` // 频率惩罚
+	PresencePenalty  float64     `json:"presence_penalty,omitempty"`  // 存在惩罚
 }
 
 // ChatResponse 聊天响应
@@ -47,6 +51,32 @@ type Usage struct {
 	TotalTokens      int `json:"total_tokens"`      // 总token数
 }
 
+// Tool 工具定义
+type Tool struct {
+	Type     string       `json:"type"`     // 工具类型，通常是 "function"
+	Function ToolFunction `json:"function"` // 函数定义
+}
+
+// ToolFunction 工具函数定义
+type ToolFunction struct {
+	Name        string      `json:"name"`        // 函数名称
+	Description string      `json:"description"` // 函数描述
+	Parameters  interface{} `json:"parameters"`  // 函数参数（JSON Schema）
+}
+
+// ToolCall 工具调用
+type ToolCall struct {
+	ID       string           `json:"id"`       // 工具调用ID
+	Type     string           `json:"type"`     // 工具类型，通常是 "function"
+	Function ToolCallFunction `json:"function"` // 函数调用信息
+}
+
+// ToolCallFunction 工具调用函数信息
+type ToolCallFunction struct {
+	Name      string `json:"name"`      // 函数名称
+	Arguments string `json:"arguments"` // 函数参数（JSON字符串）
+}
+
 // Config AI提供者配置
 type Config struct {
 	APIKey     string            `json:"api_key"`     // API密钥
@@ -63,6 +93,9 @@ type AIProvider interface {
 
 	// ChatStream 发送流式聊天请求
 	ChatStream(req *ChatRequest) (<-chan *ChatResponse, error)
+
+	// ChatWithTools 发送带工具调用的聊天请求
+	ChatWithTools(req *ChatRequest, tools []Tool) (*ChatResponse, error)
 
 	// GetName 获取提供者名称
 	GetName() string
