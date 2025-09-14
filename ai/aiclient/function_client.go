@@ -310,6 +310,16 @@ func (c *Function) ChatWithFunctionsConversationStream(req *aiconfig.ChatRequest
 					Content:    string(resultJSON),
 					ToolCallID: toolCall.ID,
 				}
+				resultChan <- &aiconfig.ChatResponse{
+					ID:      "",
+					Object:  "",
+					Created: 0,
+					Model:   "",
+					Choices: []aiconfig.Choice{
+						{Message: toolMessage},
+					},
+					Usage: nil,
+				}
 				newMessages = append(newMessages, toolMessage)
 			}
 

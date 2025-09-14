@@ -158,6 +158,24 @@ func (f *Framework) ChatWithFunctionsConversation(providerType aiconfig.Provider
 	return f.functionClient.ChatWithFunctionsConversation(req)
 }
 
+// ChatWithFunctionsConversation 使用指定提供者和函数进行完整对话
+func (f *Framework) ChatWithFunctionsConversationStream(providerType aiconfig.ProviderType, req *aiconfig.ChatRequest) (<-chan *aiconfig.ChatResponse, error) {
+	provider, err := f.GetProvider(providerType)
+	if err != nil {
+		return nil, err
+	}
+
+	// 使用框架的函数客户端
+	if f.functionClient == nil {
+		return nil, fmt.Errorf("no functions registered")
+	}
+
+	// 设置提供者
+	f.functionClient.SetProvider(provider)
+
+	return f.functionClient.ChatWithFunctionsConversationStream(req)
+}
+
 // RegisterFunction 注册函数
 func (f *Framework) RegisterFunction(name, description string, fn interface{}) error {
 	if f.functionClient == nil {
