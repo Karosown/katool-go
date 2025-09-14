@@ -1,23 +1,23 @@
-package ai_tool
+package aiclient
 
 import (
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/karosown/katool-go/ai_tool/aiconfig"
-	"github.com/karosown/katool-go/ai_tool/providers"
+	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/ai/providers"
 	"github.com/karosown/katool-go/xlog"
 )
 
-// AIClient AI客户端
-type AIClient struct {
+// SimpleAIClient AI客户端
+type SimpleAIClient struct {
 	provider aiconfig.AIProvider
 	logger   xlog.Logger
 }
 
 // NewAIClient 创建AI客户端
-func NewAIClient(providerType aiconfig.ProviderType, config *aiconfig.Config) (*AIClient, error) {
+func NewAIClient(providerType aiconfig.ProviderType, config *aiconfig.Config) (*SimpleAIClient, error) {
 	var provider aiconfig.AIProvider
 
 	switch providerType {
@@ -40,7 +40,7 @@ func NewAIClient(providerType aiconfig.ProviderType, config *aiconfig.Config) (*
 		return nil, fmt.Errorf("provider config validation failed: %v", err)
 	}
 
-	client := &AIClient{
+	client := &SimpleAIClient{
 		provider: provider,
 		logger:   &xlog.LogrusAdapter{},
 	}
@@ -54,7 +54,7 @@ func NewAIClient(providerType aiconfig.ProviderType, config *aiconfig.Config) (*
 }
 
 // NewAIClientFromEnv 从环境变量创建AI客户端
-func NewAIClientFromEnv(providerType aiconfig.ProviderType) (*AIClient, error) {
+func NewAIClientFromEnv(providerType aiconfig.ProviderType) (*SimpleAIClient, error) {
 	config := &aiconfig.Config{
 		Timeout:    30 * time.Second,
 		MaxRetries: 3,
@@ -85,32 +85,32 @@ func NewAIClientFromEnv(providerType aiconfig.ProviderType) (*AIClient, error) {
 }
 
 // Chat 发送聊天请求
-func (c *AIClient) Chat(req *aiconfig.ChatRequest) (*aiconfig.ChatResponse, error) {
+func (c *SimpleAIClient) Chat(req *aiconfig.ChatRequest) (*aiconfig.ChatResponse, error) {
 	return c.provider.Chat(req)
 }
 
 // ChatStream 发送流式聊天请求
-func (c *AIClient) ChatStream(req *aiconfig.ChatRequest) (<-chan *aiconfig.ChatResponse, error) {
+func (c *SimpleAIClient) ChatStream(req *aiconfig.ChatRequest) (<-chan *aiconfig.ChatResponse, error) {
 	return c.provider.ChatStream(req)
 }
 
 // GetProvider 获取提供者
-func (c *AIClient) GetProvider() aiconfig.AIProvider {
+func (c *SimpleAIClient) GetProvider() aiconfig.AIProvider {
 	return c.provider
 }
 
 // GetProviderName 获取提供者名称
-func (c *AIClient) GetProviderName() string {
+func (c *SimpleAIClient) GetProviderName() string {
 	return c.provider.GetName()
 }
 
 // GetModels 获取支持的模型列表
-func (c *AIClient) GetModels() []string {
+func (c *SimpleAIClient) GetModels() []string {
 	return c.provider.GetModels()
 }
 
 // SetLogger 设置日志记录器
-func (c *AIClient) SetLogger(logger xlog.Logger) {
+func (c *SimpleAIClient) SetLogger(logger xlog.Logger) {
 	c.logger = logger
 	if providerWithLogger, ok := c.provider.(interface{ SetLogger(xlog.Logger) }); ok {
 		providerWithLogger.SetLogger(logger)
@@ -118,20 +118,20 @@ func (c *AIClient) SetLogger(logger xlog.Logger) {
 }
 
 // GetLogger 获取日志记录器
-func (c *AIClient) GetLogger() xlog.Logger {
+func (c *SimpleAIClient) GetLogger() xlog.Logger {
 	return c.logger
 }
 
 // AIClientManager AI客户端管理器
 type AIClientManager struct {
-	clients map[aiconfig.ProviderType]*AIClient
+	clients map[aiconfig.ProviderType]*SimpleAIClient
 	logger  xlog.Logger
 }
 
 // NewAIClientManager 创建AI客户端管理器
 func NewAIClientManager() *AIClientManager {
 	return &AIClientManager{
-		clients: make(map[aiconfig.ProviderType]*AIClient),
+		clients: make(map[aiconfig.ProviderType]*SimpleAIClient),
 		logger:  &xlog.LogrusAdapter{},
 	}
 }
@@ -159,16 +159,16 @@ func (m *AIClientManager) AddClientFromEnv(providerType aiconfig.ProviderType) e
 }
 
 // GetClient 获取客户端
-func (m *AIClientManager) GetClient(providerType aiconfig.ProviderType) (*AIClient, error) {
+func (m *AIClientManager) GetClient(providerType aiconfig.ProviderType) (*SimpleAIClient, error) {
 	client, exists := m.clients[providerType]
 	if !exists {
-		return nil, fmt.Errorf("client for provider %s not found", providerType)
+		return nil, fmt.Errorf("aiclient for provider %s not found", providerType)
 	}
 	return client, nil
 }
 
 // GetDefaultClient 获取默认客户端（OpenAI）
-func (m *AIClientManager) GetDefaultClient() (*AIClient, error) {
+func (m *AIClientManager) GetDefaultClient() (*SimpleAIClient, error) {
 	return m.GetClient(aiconfig.ProviderOpenAI)
 }
 

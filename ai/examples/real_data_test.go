@@ -1,10 +1,10 @@
-package ai_tool
+package main
 
 import (
 	"encoding/json"
 	"testing"
 
-	"github.com/karosown/katool-go/ai_tool/aiconfig"
+	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 // TestRealSSEData 测试真实的SSE数据

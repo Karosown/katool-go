@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/karosown/katool-go/ai/aiclient"
 	"github.com/karosown/katool-go/web_crawler/core"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/karosown/katool-go/ai_tool/aiconfig"
-	"github.com/karosown/katool-go/ai_tool/providers"
+	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/ai/providers"
 	"github.com/karosown/katool-go/web_crawler"
 	"github.com/karosown/katool-go/web_crawler/render"
 )
@@ -33,7 +34,7 @@ func main() {
 	//toolCallExample(functionClient)
 	//
 	//5. 多工具组合使用
-	fmt.Println("\n5. 多工具组合使用:")
+	//fmt.Println("\n5. 多工具组合使用:")
 	multiToolExample(functionClient)
 
 	// 6. 流式响应
@@ -54,9 +55,9 @@ func createOllamaClient() aiconfig.AIProvider {
 }
 
 // registerTools 注册工具函数
-func registerTools(client aiconfig.AIProvider) *aiconfig.FunctionClient {
+func registerTools(client aiconfig.AIProvider) *aiclient.Function {
 	// 创建函数客户端
-	functionClient := aiconfig.NewFunctionClient(client)
+	functionClient := aiclient.NewFunctionClient(client)
 
 	// 注册计算工具
 	err := functionClient.RegisterFunction("calculate", "数学计算工具", func(expression string) map[string]interface{} {
@@ -122,7 +123,7 @@ func registerTools(client aiconfig.AIProvider) *aiconfig.FunctionClient {
 				r.Header = http.Header{
 					"User-Agent": []string{"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3\""},
 				}
-			}),
+			}).TextContent,
 			"source_code": web_crawler.ReadSourceCode(url, "", render.Render),
 		}
 	})
@@ -135,7 +136,7 @@ func registerTools(client aiconfig.AIProvider) *aiconfig.FunctionClient {
 }
 
 // basicChat 基本聊天
-func basicChat(functionClient *aiconfig.FunctionClient) {
+func basicChat(functionClient *aiclient.Function) {
 	req := &aiconfig.ChatRequest{
 		Model: "llama3.1",
 		Messages: []aiconfig.Message{
@@ -165,7 +166,7 @@ func basicChat(functionClient *aiconfig.FunctionClient) {
 }
 
 // toolCallExample 工具调用示例
-func toolCallExample(functionClient *aiconfig.FunctionClient) {
+func toolCallExample(functionClient *aiclient.Function) {
 	req := &aiconfig.ChatRequest{
 		Model: "llama3.1",
 		Messages: []aiconfig.Message{
@@ -194,7 +195,7 @@ func toolCallExample(functionClient *aiconfig.FunctionClient) {
 }
 
 // multiToolExample 多工具组合使用示例
-func multiToolExample(functionClient *aiconfig.FunctionClient) {
+func multiToolExample(functionClient *aiclient.Function) {
 	req := &aiconfig.ChatRequest{
 		Model: "llama3.1",
 		Messages: []aiconfig.Message{
@@ -210,15 +211,23 @@ func multiToolExample(functionClient *aiconfig.FunctionClient) {
 		Temperature: 0.7,
 	}
 
-	response, err := functionClient.ChatWithFunctionsConversation(req)
+	stream, err := functionClient.ChatWithFunctionsConversationStream(req)
 	if err != nil {
 		log.Printf("多工具调用失败: %v", err)
 		return
 	}
 
-	if len(response.Choices) > 0 {
-		choice := response.Choices[0]
-		fmt.Printf("AI: %s\n", choice.Message.Content)
+	//if len(response.Choices) > 0 {
+	//	choice := response.Choices[0]
+	//	fmt.Printf("AI: %s\n", choice.Message.Content)
+	//}
+	for response := range stream {
+		if len(response.Choices) > 0 {
+			choice := response.Choices[0]
+			if choice.Delta.Content != "" {
+				fmt.Printf("%s", choice.Delta.Content)
+			}
+		}
 	}
 }
 

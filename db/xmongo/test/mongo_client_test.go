@@ -38,7 +38,7 @@ func setupTestMongoClient(t *testing.T) *xmongo.CollectionFactoryBuilder[UserInf
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
 	assert.NoError(t, err)
 
-	// Create a new client with a test database name
+	// Create a new aiclient with a test database name
 	return xmongo.NewCollectionFactoryBuilder[UserInfo]("test_db", nil, true, nil, client)
 }
 
@@ -114,7 +114,7 @@ func TestNewMongoClient(t *testing.T) {
 	assert.NoError(t, err)
 	defer client.Disconnect(ctx)
 
-	// Test creating a new client
+	// Test creating a new aiclient
 	mongoClient := xmongo.NewCollectionFactoryBuilder[UserInfo]("test_db", nil, true, nil, client)
 	assert.NotNil(t, mongoClient)
 	assert.Equal(t, "katool:xmongdb:test_db", mongoClient.DBName)

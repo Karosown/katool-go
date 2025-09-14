@@ -9,13 +9,13 @@ import (
 )
 
 // Client 中文分词客户端结构体（基于jiebago库）
-// Client is a Chinese word segmentation client structure (based on jiebago library)
+// Client is a Chinese word segmentation aiclient structure (based on jiebago library)
 type Client struct {
 	jieba *jiebago.Segmenter // 分词器实例 / Segmenter instance
 }
 
 // New 创建一个新的中文分词客户端实例
-// New creates a new Chinese word segmentation client instance
+// New creates a new Chinese word segmentation aiclient instance
 func New(path ...string) *Client {
 	jieba := &jiebago.Segmenter{}
 	if cutil.IsEmpty(path) || cutil.IsBlank(path[0]) {

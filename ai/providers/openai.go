@@ -1,7 +1,7 @@
 package providers
 
 import (
-	"github.com/karosown/katool-go/ai_tool/aiconfig"
+	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 // NewOpenAIProvider 创建OpenAI提供者

@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/karosown/katool-go/ai_tool/aiconfig"
+	"github.com/karosown/katool-go/ai/aiconfig"
 	"github.com/karosown/katool-go/net/format/baseformat"
 	remote "github.com/karosown/katool-go/net/http"
 	"github.com/karosown/katool-go/xlog"

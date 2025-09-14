@@ -1,11 +1,11 @@
-package ai_tool
+package main
 
 import (
 	"encoding/json"
 	"testing"
 
-	"github.com/karosown/katool-go/ai_tool/aiconfig"
-	"github.com/karosown/katool-go/ai_tool/providers"
+	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/ai/providers"
 )
 
 // TestToolCallsBasic 测试基本Tool Calls功能

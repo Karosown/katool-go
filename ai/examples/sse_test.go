@@ -1,10 +1,10 @@
-package ai_tool
+package main
 
 import (
 	"encoding/json"
 	"testing"
 
-	"github.com/karosown/katool-go/ai_tool/aiconfig"
+	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 // TestStreamEventStructure 测试StreamEvent结构

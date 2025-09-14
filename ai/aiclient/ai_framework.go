@@ -1,30 +1,31 @@
-package aiconfig
+package aiclient
 
 import (
 	"fmt"
+	"github.com/karosown/katool-go/ai/aiconfig"
 	"sync"
 	"time"
 
 	"github.com/karosown/katool-go/xlog"
 )
 
-// AIFramework 完整的AI调用框架
-type AIFramework struct {
-	providers      map[ProviderType]AIProvider
-	functionClient *FunctionClient
-	config         *Config
+// Framework 完整的AI调用框架
+type Framework struct {
+	providers      map[aiconfig.ProviderType]aiconfig.AIProvider
+	functionClient *Function
+	config         *aiconfig.Config
 	logger         xlog.Logger
 	mu             sync.RWMutex
 }
 
 // NewAIFramework 创建新的AI框架
-func NewAIFramework(config *Config) *AIFramework {
+func NewAIFramework(config *aiconfig.Config) *Framework {
 	if config == nil {
-		config = &Config{}
+		config = &aiconfig.Config{}
 	}
 
-	framework := &AIFramework{
-		providers: make(map[ProviderType]AIProvider),
+	framework := &Framework{
+		providers: make(map[aiconfig.ProviderType]aiconfig.AIProvider),
 		config:    config,
 		logger:    &xlog.LogrusAdapter{},
 	}
@@ -36,7 +37,7 @@ func NewAIFramework(config *Config) *AIFramework {
 }
 
 // AddProvider 添加AI提供者
-func (f *AIFramework) AddProvider(providerType ProviderType, provider AIProvider) error {
+func (f *Framework) AddProvider(providerType aiconfig.ProviderType, provider aiconfig.AIProvider) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -62,7 +63,7 @@ func (f *AIFramework) AddProvider(providerType ProviderType, provider AIProvider
 }
 
 // GetProvider 获取AI提供者
-func (f *AIFramework) GetProvider(providerType ProviderType) (AIProvider, error) {
+func (f *Framework) GetProvider(providerType aiconfig.ProviderType) (aiconfig.AIProvider, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -75,11 +76,11 @@ func (f *AIFramework) GetProvider(providerType ProviderType) (AIProvider, error)
 }
 
 // ListProviders 列出所有提供者
-func (f *AIFramework) ListProviders() []ProviderType {
+func (f *Framework) ListProviders() []aiconfig.ProviderType {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
-	providers := make([]ProviderType, 0, len(f.providers))
+	providers := make([]aiconfig.ProviderType, 0, len(f.providers))
 	for providerType := range f.providers {
 		providers = append(providers, providerType)
 	}
@@ -88,7 +89,7 @@ func (f *AIFramework) ListProviders() []ProviderType {
 }
 
 // Chat 使用指定提供者进行聊天
-func (f *AIFramework) Chat(providerType ProviderType, req *ChatRequest) (*ChatResponse, error) {
+func (f *Framework) Chat(providerType aiconfig.ProviderType, req *aiconfig.ChatRequest) (*aiconfig.ChatResponse, error) {
 	provider, err := f.GetProvider(providerType)
 	if err != nil {
 		return nil, err
@@ -108,7 +109,7 @@ func (f *AIFramework) Chat(providerType ProviderType, req *ChatRequest) (*ChatRe
 }
 
 // ChatStream 使用指定提供者进行流式聊天
-func (f *AIFramework) ChatStream(providerType ProviderType, req *ChatRequest) (<-chan *ChatResponse, error) {
+func (f *Framework) ChatStream(providerType aiconfig.ProviderType, req *aiconfig.ChatRequest) (<-chan *aiconfig.ChatResponse, error) {
 	provider, err := f.GetProvider(providerType)
 	if err != nil {
 		return nil, err
@@ -119,7 +120,7 @@ func (f *AIFramework) ChatStream(providerType ProviderType, req *ChatRequest) (<
 }
 
 // ChatWithFunctions 使用指定提供者和函数进行聊天
-func (f *AIFramework) ChatWithFunctions(providerType ProviderType, req *ChatRequest) (*ChatResponse, error) {
+func (f *Framework) ChatWithFunctions(providerType aiconfig.ProviderType, req *aiconfig.ChatRequest) (*aiconfig.ChatResponse, error) {
 	provider, err := f.GetProvider(providerType)
 	if err != nil {
 		return nil, err
@@ -140,7 +141,7 @@ func (f *AIFramework) ChatWithFunctions(providerType ProviderType, req *ChatRequ
 }
 
 // ChatWithFunctionsConversation 使用指定提供者和函数进行完整对话
-func (f *AIFramework) ChatWithFunctionsConversation(providerType ProviderType, req *ChatRequest) (*ChatResponse, error) {
+func (f *Framework) ChatWithFunctionsConversation(providerType aiconfig.ProviderType, req *aiconfig.ChatRequest) (*aiconfig.ChatResponse, error) {
 	provider, err := f.GetProvider(providerType)
 	if err != nil {
 		return nil, err
@@ -158,7 +159,7 @@ func (f *AIFramework) ChatWithFunctionsConversation(providerType ProviderType, r
 }
 
 // RegisterFunction 注册函数
-func (f *AIFramework) RegisterFunction(name, description string, fn interface{}) error {
+func (f *Framework) RegisterFunction(name, description string, fn interface{}) error {
 	if f.functionClient == nil {
 		// 如果没有函数客户端，创建一个临时的
 		if len(f.providers) > 0 {
@@ -168,7 +169,7 @@ func (f *AIFramework) RegisterFunction(name, description string, fn interface{})
 				break
 			}
 		} else {
-			return fmt.Errorf("no providers available to create function client")
+			return fmt.Errorf("no providers available to create function aiclient")
 		}
 	}
 
@@ -176,7 +177,7 @@ func (f *AIFramework) RegisterFunction(name, description string, fn interface{})
 }
 
 // GetRegisteredFunctions 获取已注册的函数
-func (f *AIFramework) GetRegisteredFunctions() []string {
+func (f *Framework) GetRegisteredFunctions() []string {
 	if f.functionClient == nil {
 		return []string{}
 	}
@@ -185,7 +186,7 @@ func (f *AIFramework) GetRegisteredFunctions() []string {
 }
 
 // ChatWithFallback 使用回退机制进行聊天
-func (f *AIFramework) ChatWithFallback(primaryProvider ProviderType, fallbackProviders []ProviderType, req *ChatRequest) (*ChatResponse, error) {
+func (f *Framework) ChatWithFallback(primaryProvider aiconfig.ProviderType, fallbackProviders []aiconfig.ProviderType, req *aiconfig.ChatRequest) (*aiconfig.ChatResponse, error) {
 	// 尝试主要提供者
 	response, err := f.Chat(primaryProvider, req)
 	if err == nil {
@@ -208,7 +209,7 @@ func (f *AIFramework) ChatWithFallback(primaryProvider ProviderType, fallbackPro
 }
 
 // ChatWithRetry 使用重试机制进行聊天
-func (f *AIFramework) ChatWithRetry(providerType ProviderType, req *ChatRequest, maxRetries int) (*ChatResponse, error) {
+func (f *Framework) ChatWithRetry(providerType aiconfig.ProviderType, req *aiconfig.ChatRequest, maxRetries int) (*aiconfig.ChatResponse, error) {
 	var lastErr error
 
 	for i := 0; i <= maxRetries; i++ {
@@ -232,7 +233,7 @@ func (f *AIFramework) ChatWithRetry(providerType ProviderType, req *ChatRequest,
 }
 
 // GetProviderInfo 获取提供者信息
-func (f *AIFramework) GetProviderInfo(providerType ProviderType) map[string]interface{} {
+func (f *Framework) GetProviderInfo(providerType aiconfig.ProviderType) map[string]interface{} {
 	provider, err := f.GetProvider(providerType)
 	if err != nil {
 		return map[string]interface{}{
@@ -248,7 +249,7 @@ func (f *AIFramework) GetProviderInfo(providerType ProviderType) map[string]inte
 }
 
 // GetFrameworkInfo 获取框架信息
-func (f *AIFramework) GetFrameworkInfo() map[string]interface{} {
+func (f *Framework) GetFrameworkInfo() map[string]interface{} {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -268,14 +269,14 @@ func (f *AIFramework) GetFrameworkInfo() map[string]interface{} {
 }
 
 // SetLogger 设置日志记录器
-func (f *AIFramework) SetLogger(logger xlog.Logger) {
+func (f *Framework) SetLogger(logger xlog.Logger) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.logger = logger
 }
 
 // Close 关闭框架
-func (f *AIFramework) Close() {
+func (f *Framework) Close() {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -285,14 +286,14 @@ func (f *AIFramework) Close() {
 
 // ChatRequestBuilder 聊天请求构建器
 type ChatRequestBuilder struct {
-	request *ChatRequest
+	request *aiconfig.ChatRequest
 }
 
 // NewChatRequestBuilder 创建新的聊天请求构建器
 func NewChatRequestBuilder() *ChatRequestBuilder {
 	return &ChatRequestBuilder{
-		request: &ChatRequest{
-			Messages: make([]Message, 0),
+		request: &aiconfig.ChatRequest{
+			Messages: make([]aiconfig.Message, 0),
 		},
 	}
 }
@@ -305,7 +306,7 @@ func (b *ChatRequestBuilder) Model(model string) *ChatRequestBuilder {
 
 // AddMessage 添加消息
 func (b *ChatRequestBuilder) AddMessage(role, content string) *ChatRequestBuilder {
-	b.request.Messages = append(b.request.Messages, Message{
+	b.request.Messages = append(b.request.Messages, aiconfig.Message{
 		Role:    role,
 		Content: content,
 	})
@@ -346,20 +347,20 @@ func (b *ChatRequestBuilder) Stream(stream bool) *ChatRequestBuilder {
 }
 
 // Build 构建请求
-func (b *ChatRequestBuilder) Build() *ChatRequest {
+func (b *ChatRequestBuilder) Build() *aiconfig.ChatRequest {
 	return b.request
 }
 
 // ConversationManager 对话管理器
 type ConversationManager struct {
-	conversations map[string][]Message
+	conversations map[string][]aiconfig.Message
 	mu            sync.RWMutex
 }
 
 // NewConversationManager 创建新的对话管理器
 func NewConversationManager() *ConversationManager {
 	return &ConversationManager{
-		conversations: make(map[string][]Message),
+		conversations: make(map[string][]aiconfig.Message),
 	}
 }
 
@@ -368,9 +369,9 @@ func (cm *ConversationManager) StartConversation(conversationID string, systemMe
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
 
-	cm.conversations[conversationID] = []Message{}
+	cm.conversations[conversationID] = []aiconfig.Message{}
 	if systemMessage != "" {
-		cm.conversations[conversationID] = append(cm.conversations[conversationID], Message{
+		cm.conversations[conversationID] = append(cm.conversations[conversationID], aiconfig.Message{
 			Role:    "system",
 			Content: systemMessage,
 		})
@@ -383,17 +384,17 @@ func (cm *ConversationManager) AddMessage(conversationID string, role, content s
 	defer cm.mu.Unlock()
 
 	if cm.conversations[conversationID] == nil {
-		cm.conversations[conversationID] = []Message{}
+		cm.conversations[conversationID] = []aiconfig.Message{}
 	}
 
-	cm.conversations[conversationID] = append(cm.conversations[conversationID], Message{
+	cm.conversations[conversationID] = append(cm.conversations[conversationID], aiconfig.Message{
 		Role:    role,
 		Content: content,
 	})
 }
 
 // GetConversation 获取对话历史
-func (cm *ConversationManager) GetConversation(conversationID string) []Message {
+func (cm *ConversationManager) GetConversation(conversationID string) []aiconfig.Message {
 	cm.mu.RLock()
 	defer cm.mu.RUnlock()
 

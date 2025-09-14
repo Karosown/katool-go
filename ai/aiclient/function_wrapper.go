@@ -1,8 +1,9 @@
-package aiconfig
+package aiclient
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/karosown/katool-go/ai/aiconfig"
 	"reflect"
 	"strings"
 )
@@ -157,13 +158,13 @@ func (r *FunctionRegistry) generateParameterDefinition(paramType reflect.Type) (
 }
 
 // GetTools 获取所有注册的工具
-func (r *FunctionRegistry) GetTools() []Tool {
-	tools := make([]Tool, 0, len(r.functions))
+func (r *FunctionRegistry) GetTools() []aiconfig.Tool {
+	tools := make([]aiconfig.Tool, 0, len(r.functions))
 
 	for _, wrapper := range r.functions {
-		tools = append(tools, Tool{
+		tools = append(tools, aiconfig.Tool{
 			Type: "function",
-			Function: ToolFunction{
+			Function: aiconfig.ToolFunction{
 				Name:        wrapper.Name,
 				Description: wrapper.Description,
 				Parameters:  wrapper.Parameters,

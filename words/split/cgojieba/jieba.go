@@ -6,13 +6,13 @@ import (
 )
 
 // Client CGO版本的中文分词客户端结构体（基于gojieba库）
-// Client is a CGO-based Chinese word segmentation client structure (based on gojieba library)
+// Client is a CGO-based Chinese word segmentation aiclient structure (based on gojieba library)
 type Client struct {
 	jieba *gojieba.Jieba // CGO分词器实例 / CGO segmenter instance
 }
 
 // New 创建一个新的CGO版本中文分词客户端实例
-// New creates a new CGO-based Chinese word segmentation client instance
+// New creates a new CGO-based Chinese word segmentation aiclient instance
 func New(paths ...string) *Client {
 	return &Client{
 		jieba: gojieba.NewJieba(),

@@ -131,7 +131,7 @@ func (r *Req) Method(method string) ReqApi {
 }
 
 // HttpClient 设置HTTP客户端
-// HttpClient sets the HTTP client
+// HttpClient sets the HTTP aiclient
 func (r *Req) HttpClient(client *resty.Client) ReqApi {
 	r.httpClient = client
 	return r

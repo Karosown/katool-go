@@ -1,14 +1,15 @@
-package ai_tool
+package main
 
 import (
 	"context"
 	"fmt"
+	client2 "github.com/karosown/katool-go/ai/aiclient"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/karosown/katool-go/ai_tool/aiconfig"
+	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 // TestOllamaBasicChat 测试Ollama基本聊天功能
@@ -19,9 +20,9 @@ func TestOllamaBasicChat(t *testing.T) {
 	}
 
 	// 创建Ollama客户端
-	client, err := NewAIClientFromEnv(aiconfig.ProviderOllama)
+	client, err := client2.NewAIClientFromEnv(aiconfig.ProviderOllama)
 	if err != nil {
-		t.Fatalf("Failed to create Ollama client: %v", err)
+		t.Fatalf("Failed to create Ollama aiclient: %v", err)
 	}
 
 	// 测试基本聊天
@@ -67,9 +68,9 @@ func TestOllamaStreamChat(t *testing.T) {
 	}
 
 	// 创建Ollama客户端
-	client, err := NewAIClientFromEnv(aiconfig.ProviderOllama)
+	client, err := client2.NewAIClientFromEnv(aiconfig.ProviderOllama)
 	if err != nil {
-		t.Fatalf("Failed to create Ollama client: %v", err)
+		t.Fatalf("Failed to create Ollama aiclient: %v", err)
 	}
 
 	// 测试流式聊天
@@ -133,9 +134,9 @@ func TestOllamaModels(t *testing.T) {
 	}
 
 	// 创建Ollama客户端
-	client, err := NewAIClientFromEnv(aiconfig.ProviderOllama)
+	client, err := client2.NewAIClientFromEnv(aiconfig.ProviderOllama)
 	if err != nil {
-		t.Fatalf("Failed to create Ollama client: %v", err)
+		t.Fatalf("Failed to create Ollama aiclient: %v", err)
 	}
 
 	// 获取支持的模型列表
@@ -179,9 +180,9 @@ func TestOllamaWithCustomConfig(t *testing.T) {
 	}
 
 	// 创建客户端
-	client, err := NewAIClient(aiconfig.ProviderOllama, config)
+	client, err := client2.NewAIClient(aiconfig.ProviderOllama, config)
 	if err != nil {
-		t.Fatalf("Failed to create Ollama client with custom config: %v", err)
+		t.Fatalf("Failed to create Ollama aiclient with custom config: %v", err)
 	}
 
 	// 测试聊天
@@ -218,12 +219,12 @@ func TestOllamaManager(t *testing.T) {
 	}
 
 	// 创建客户端管理器
-	manager := NewAIClientManager()
+	manager := client2.NewAIClientManager()
 
 	// 添加Ollama客户端
 	err := manager.AddClientFromEnv(aiconfig.ProviderOllama)
 	if err != nil {
-		t.Fatalf("Failed to add Ollama client to manager: %v", err)
+		t.Fatalf("Failed to add Ollama aiclient to manager: %v", err)
 	}
 
 	// 验证客户端已添加
@@ -241,7 +242,7 @@ func TestOllamaManager(t *testing.T) {
 	}
 
 	if !found {
-		t.Fatal("Ollama client not found in manager")
+		t.Fatal("Ollama aiclient not found in manager")
 	}
 
 	// 测试通过管理器聊天
@@ -278,7 +279,7 @@ func TestOllamaFallback(t *testing.T) {
 	}
 
 	// 创建客户端管理器
-	manager := NewAIClientManager()
+	manager := client2.NewAIClientManager()
 
 	// 添加多个客户端（包括Ollama作为降级选项）
 	providers := []aiconfig.ProviderType{
@@ -290,7 +291,7 @@ func TestOllamaFallback(t *testing.T) {
 	// 尝试添加所有提供者
 	for _, provider := range providers {
 		if err := manager.AddClientFromEnv(provider); err != nil {
-			t.Logf("Failed to add %s client: %v", provider, err)
+			t.Logf("Failed to add %s aiclient: %v", provider, err)
 		}
 	}
 
@@ -328,9 +329,9 @@ func TestOllamaErrorHandling(t *testing.T) {
 		Timeout: 5 * time.Second,
 	}
 
-	client, err := NewAIClient(aiconfig.ProviderOllama, invalidConfig)
+	client, err := client2.NewAIClient(aiconfig.ProviderOllama, invalidConfig)
 	if err != nil {
-		t.Fatalf("Failed to create client with invalid config: %v", err)
+		t.Fatalf("Failed to create aiclient with invalid config: %v", err)
 	}
 
 	// 尝试聊天，应该失败
@@ -360,9 +361,9 @@ func TestOllamaConcurrent(t *testing.T) {
 	}
 
 	// 创建Ollama客户端
-	client, err := NewAIClientFromEnv(aiconfig.ProviderOllama)
+	client, err := client2.NewAIClientFromEnv(aiconfig.ProviderOllama)
 	if err != nil {
-		t.Fatalf("Failed to create Ollama client: %v", err)
+		t.Fatalf("Failed to create Ollama aiclient: %v", err)
 	}
 
 	// 并发请求数量
@@ -427,7 +428,7 @@ func isOllamaAvailable() bool {
 		Timeout: 5 * time.Second,
 	}
 
-	client, err := NewAIClient(aiconfig.ProviderOllama, config)
+	client, err := client2.NewAIClient(aiconfig.ProviderOllama, config)
 	if err != nil {
 		return false
 	}
@@ -452,9 +453,9 @@ func BenchmarkOllamaChat(b *testing.B) {
 	}
 
 	// 创建Ollama客户端
-	client, err := NewAIClientFromEnv(aiconfig.ProviderOllama)
+	client, err := client2.NewAIClientFromEnv(aiconfig.ProviderOllama)
 	if err != nil {
-		b.Fatalf("Failed to create Ollama client: %v", err)
+		b.Fatalf("Failed to create Ollama aiclient: %v", err)
 	}
 
 	// 基准测试

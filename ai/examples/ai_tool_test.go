@@ -1,10 +1,10 @@
-package ai_tool
+package main
 
 import (
 	"testing"
 	"time"
 
-	"github.com/karosown/katool-go/ai_tool/aiconfig"
+	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 func TestConfig(t *testing.T) {
