@@ -73,7 +73,6 @@ func (r *FunctionRegistry) generateParameters(fnType reflect.Type) (map[string]i
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate parameter definition for %s: %v", paramName, err)
 		}
-
 		properties[paramName] = paramDef
 		required = append(required, paramName)
 	}

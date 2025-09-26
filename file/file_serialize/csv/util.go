@@ -292,7 +292,7 @@ func getFieldString(fv reflect.Value) string {
 	}
 
 	// 支持 TextMarshaler
-	if fv.Addr().Type().Implements(reflect.TypeOf((*encoding.TextMarshaler)(nil)).Elem()) {
+	if fv.CanAddr() && fv.Addr().Type().Implements(reflect.TypeOf((*encoding.TextMarshaler)(nil)).Elem()) {
 		b, err := fv.Addr().Interface().(encoding.TextMarshaler).MarshalText()
 		if err == nil {
 			return string(b)
