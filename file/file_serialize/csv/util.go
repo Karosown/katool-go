@@ -12,6 +12,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/karosown/katool-go/helper/jsonhp"
 )
 
 // ReadBytes 通过字节切片读取 CSV，返回 []T
@@ -167,6 +169,9 @@ func Write[T any](w io.Writer, data []T) error {
 	}
 
 	if tType.Kind() != reflect.Struct {
+		if tType.Kind() == reflect.Map {
+			return WriteMaps(w, *jsonhp.JsonUnMarshal[[]map[string]any](jsonhp.ToJSON(data)))
+		}
 		return fmt.Errorf("T must be a struct, got %s", tType.Kind())
 	}
 
