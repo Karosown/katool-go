@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -40,6 +41,29 @@ func Read[T any](r io.Reader) ([]T, error) {
 	// 目标类型
 	tType := reflect.TypeOf((*T)(nil)).Elem()
 	if tType.Kind() != reflect.Struct {
+		if tType.Kind() == reflect.Map {
+			// 读取为 []map[string]any，再强转为 []T
+			maps, err := ReadCSVToMaps(r)
+			if err != nil {
+				return nil, err
+			}
+			// 将 []map[string]any 转换为 []T（前提：T 可以是 map[string]any，或通过映射实现赋值）
+			tt := reflect.MakeSlice(reflect.SliceOf(tType), len(maps), len(maps))
+			for i, m := range maps {
+				// 逐项将 map 转换为 T
+				// 如果 T 实际就是 map[string]any，则直接赋值
+				vt := tt.Index(i)
+				// 使用类型断言：若 T 是 map[string]any
+				if vt.IsValid() && vt.Kind() == reflect.Map {
+					vt.Set(reflect.ValueOf(m))
+				} else {
+					// 尝试通过简单赋值/转换
+					// 你可以在这里加入更复杂的自定义映射逻辑
+					return nil, fmt.Errorf("unsupported map-to-struct conversion for generic T")
+				}
+			}
+			return tt.Interface().([]T), nil
+		}
 		return zero, fmt.Errorf("T must be a struct, got %s", tType.Kind())
 	}
 
@@ -317,4 +341,90 @@ func getFieldString(fv reflect.Value) string {
 		// 未支持类型返回空字符串或可考虑 JSON
 		return ""
 	}
+}
+
+// KeysFromMaps collects the union of keys from all maps and returns a
+// sorted header slice. It assumes items are maps with string keys.
+func headerFromMaps[T ~map[string]any](data []T) []string {
+	keySet := make(map[string]struct{})
+	for _, m := range data {
+		for k := range m {
+			keySet[k] = struct{}{}
+		}
+	}
+	// 排序实现稳定的 header 顺序
+	keys := make([]string, 0, len(keySet))
+	for k := range keySet {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// getValueFromMap safely gets the string representation for the given key in map.
+// If key not present, returns empty string.
+func recordFromMap(row map[string]any, headers []string) []string {
+	record := make([]string, len(headers))
+	for i, h := range headers {
+		if v, ok := row[h]; ok && v != nil {
+			record[i] = fmt.Sprint(v)
+		} else {
+			record[i] = ""
+		}
+	}
+	return record
+}
+func WriteMaps(w io.Writer, data []map[string]any) error {
+	cr := csv.NewWriter(w)
+	defer cr.Flush()
+
+	// 空数据时，header 不确定；按业务需求返回错误或写空内容。
+	if len(data) == 0 {
+		// 这里选择：返回一个明确错误，避免误导性输出。如果你希望允许空数据写入，请改为 return nil
+		return fmt.Errorf("empty data: cannot determine headers from zero-length data")
+	}
+
+	// 1) 通过数据推断 header（按键集合并排序）
+	headers := headerFromMaps(data)
+
+	// 写 header
+	if err := cr.Write(headers); err != nil {
+		return err
+	}
+
+	// 写数据
+	for _, row := range data {
+		rec := recordFromMap(row, headers)
+		if err := cr.Write(rec); err != nil {
+			return err
+		}
+	}
+
+	return cr.Error()
+}
+
+// 简单示例：读取成 []map[string]string
+func ReadCSVToMaps(r io.Reader) ([]map[string]string, error) {
+	cr := csv.NewReader(r)
+	records, err := cr.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	if len(records) == 0 {
+		return nil, nil
+	}
+	header := records[0]
+	var out []map[string]string
+	for _, row := range records[1:] {
+		m := make(map[string]string)
+		for i, h := range header {
+			if i < len(row) {
+				m[h] = row[i]
+			} else {
+				m[h] = ""
+			}
+		}
+		out = append(out, m)
+	}
+	return out, nil
 }
