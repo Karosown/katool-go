@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"reflect"
 	"strings"
 	"time"
 
+	"github.com/karosown/katool-go/container/optional"
 	"github.com/karosown/katool-go/net/format/baseformat"
 	"github.com/karosown/katool-go/xlog"
 
@@ -220,13 +220,13 @@ func (r *Req) Build(backDao any) (any, *Error) {
 		otherErr := fmt.Sprintf("url:%s,method:%s,status_code:%d,status:%s", url, r.method, res.StatusCode(),
 			res.Status())
 		if nil != r.Logger {
-			if res.StatusCode() != http.StatusOK {
+			if !optional.In(res.StatusCode(), 200, 201, 202, 203, 204, 205, 206, 207, 208, 226) {
 				r.Logger.Error(noOkErr)
 			} else {
 				r.Logger.Info(otherErr)
 			}
 		} else {
-			if res.StatusCode() != http.StatusOK {
+			if !optional.In(res.StatusCode(), 200, 201, 202, 203, 204, 205, 206, 207, 208, 226) {
 				sys.Warn(noOkErr.Error())
 			} else {
 				sys.Warn(otherErr)
@@ -273,7 +273,7 @@ func (r *Req) Build(backDao any) (any, *Error) {
 		}
 		//fmt.Println(string(body))
 		res, err := (r.decodeHandler).SystemDecode(r.decodeHandler, body, backDao)
-		if response.StatusCode() != http.StatusOK {
+		if !optional.In(response.StatusCode(), 200, 201, 202, 203, 204, 205, 206, 207, 208, 226) {
 			return res, &Error{
 				HttpErr:   errors.New(response.Status()),
 				DecodeErr: err,

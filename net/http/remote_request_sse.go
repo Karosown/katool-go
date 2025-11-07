@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/karosown/katool-go/net/format"
-	"github.com/karosown/katool-go/xlog"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
+
+	"github.com/karosown/katool-go/container/optional"
+	"github.com/karosown/katool-go/net/format"
+	"github.com/karosown/katool-go/xlog"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -235,7 +237,7 @@ func (r *SSEReq[T]) Connect() error {
 	}
 
 	// 检查响应状态
-	if resp.StatusCode != http.StatusOK {
+	if !optional.In(resp.StatusCode, 200, 201, 202, 203, 204, 205, 206, 207, 208, 226) {
 		resp.Body.Close()
 		err := fmt.Errorf("SSE连接失败，状态码: %d, 状态: %s", resp.StatusCode, resp.Status)
 		if r.errorHandler != nil {

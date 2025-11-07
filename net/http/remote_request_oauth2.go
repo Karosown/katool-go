@@ -3,11 +3,11 @@ package remote
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/karosown/katool-go/container/optional"
 	"github.com/karosown/katool-go/xlog"
 
 	"github.com/go-resty/resty/v2"
@@ -45,7 +45,7 @@ func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string,
 
 	var result map[string]interface{}
 
-	if resp.StatusCode != http.StatusOK {
+	if !optional.In(resp.StatusCode, 200, 201, 202, 203, 204, 205, 206, 207, 208, 226) {
 		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 			return nil, nil, fmt.Errorf("error parsing refresh token response: %v", err)
 		} else {
