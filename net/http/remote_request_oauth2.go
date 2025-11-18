@@ -3,11 +3,13 @@ package remote
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/karosown/katool-go/container/optional"
+	"github.com/karosown/katool-go/container/xmap"
 	"github.com/karosown/katool-go/xlog"
 
 	"github.com/go-resty/resty/v2"
@@ -23,6 +25,7 @@ type OAuth2Req struct {
 	tokenHeaderName          string
 	refreshUrl               string
 	tokenValurPrefix         string
+	RefreshTokenHeader       xmap.Map[string, string]
 	CallBackFunction         func(*OAuth2Req, string, string)
 	PersistenceTokenFunction func(obj *FileWithOAuth2TokenStorage) error
 	GetTokenFunction         func(platform string) (*FileWithOAuth2TokenStorage, error)
@@ -34,10 +37,23 @@ func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string,
 		O.httpClient = resty.New()
 		O.httpClient.SetTimeout(30 * time.Second)
 	}
-
-	resp, err := O.httpClient.GetClient().PostForm(O.refreshUrl, O.refreshParam)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error refreshing token: %v", err)
+	var resp *http.Response
+	var err error
+	if O.RefreshTokenHeader.Len() > 0 {
+		req, e := http.NewRequest("POST", O.refreshUrl, strings.NewReader(O.refreshParam.Encode()))
+		if e != nil {
+			return nil, nil, fmt.Errorf("failed to create new request: %v", err)
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		O.RefreshTokenHeader.ForEach(func(k string, v string) {
+			req.Header.Set(k, v)
+		})
+		resp, err = O.httpClient.GetClient().Do(req)
+	} else {
+		resp, err = O.httpClient.GetClient().PostForm(O.refreshUrl, O.refreshParam)
+		if err != nil {
+			return nil, nil, fmt.Errorf("error refreshing token: %v", err)
+		}
 	}
 	defer func() {
 		_ = resp.Body.Close()
