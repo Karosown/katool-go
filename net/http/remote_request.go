@@ -222,12 +222,22 @@ func (r *Req) Build(backDao any) (any, *Error) {
 		if nil != r.Logger {
 			if !optional.In(res.StatusCode(), 200, 201, 202, 203, 204, 205, 206, 207, 208, 226) {
 				r.Logger.Error(noOkErr)
+				return res, &Error{
+					HttpErr:   errors.New(res.Status()),
+					DecodeErr: err,
+					Err:       errors.New(string(body)),
+				}
 			} else {
 				r.Logger.Info(otherErr)
 			}
 		} else {
 			if !optional.In(res.StatusCode(), 200, 201, 202, 203, 204, 205, 206, 207, 208, 226) {
 				sys.Warn(noOkErr.Error())
+				return res, &Error{
+					HttpErr:   errors.New(res.Status()),
+					DecodeErr: err,
+					Err:       errors.New(string(body)),
+				}
 			} else {
 				sys.Warn(otherErr)
 			}
@@ -272,14 +282,14 @@ func (r *Req) Build(backDao any) (any, *Error) {
 				response.Status())
 		}
 		//fmt.Println(string(body))
-		res, err := (r.decodeHandler).SystemDecode(r.decodeHandler, body, backDao)
 		if !optional.In(response.StatusCode(), 200, 201, 202, 203, 204, 205, 206, 207, 208, 226) {
-			return res, &Error{
+			return nil, &Error{
 				HttpErr:   errors.New(response.Status()),
 				DecodeErr: err,
 				Err:       errors.New(string(body)),
 			}
 		}
+		res, err := (r.decodeHandler).SystemDecode(r.decodeHandler, body, backDao)
 		if err != nil {
 			return res, &Error{
 				HttpErr:   nil,
