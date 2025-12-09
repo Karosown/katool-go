@@ -99,7 +99,7 @@ func fromURL(pageURL string, timeout time.Duration, requestModifiers ...RequestW
 	}
 
 	// Fetch page from URL
-	client := &http.Client{Timeout: timeout}
+	client := NewCloudscraperClient(timeout)
 	req, err := http.NewRequest("GET", pageURL, nil)
 	if requestModifiers != nil && len(requestModifiers) > 0 {
 		for _, modifer := range requestModifiers {
@@ -141,7 +141,7 @@ func execFun(url, js string, rendorFunc func(*rod.Page)) (*proto.RuntimeRemoteOb
 			}
 		}()
 	}()
-	mustPage := WebChrome.MustPage(url)
+	mustPage := WebChrome.PageWithStealth(url)
 	defer mustPage.Close()
 	// Wait for the page loading...
 	if rendorFunc != nil {

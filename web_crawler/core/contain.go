@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
+	"github.com/go-rod/stealth"
 	"github.com/karosown/katool-go/lock"
 )
 
@@ -66,6 +67,16 @@ func NewCotain(path string, headless bool) *Contain {
 // GetContainer gets the browser instance
 func (c *Contain) GetContainer() *rod.Browser {
 	return c.Browser
+}
+
+// PageWithStealth 创建一个带有Stealth模式的页面
+// PageWithStealth creates a page with Stealth mode
+func (c *Contain) PageWithStealth(url string) *rod.Page {
+	page := stealth.MustPage(c.Browser)
+	if url != "" {
+		page.MustNavigate(url)
+	}
+	return page
 }
 
 // Close 关闭浏览器实例并归还到池中

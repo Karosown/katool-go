@@ -115,10 +115,12 @@ func TestReadClaude(t *testing.T) {
 }
 func TestReadOpenAI(t *testing.T) {
 	//for {
-	u := "https://www.landiannews.com/feed"
+	u := "https://openai.com/news/rss.xml"
 	web_crawler.ReadRSS(u).Channel.Sites().Stream().Map(func(i rss.Item) any {
 		path := web_crawler.ParsePath(u, i.Link)
-		article := web_crawler.GetArticleWithChrome(path, nil, func(article web_crawler.Article) bool {
+		article := web_crawler.GetArticleWithChrome(path, func(page *rod.Page) {
+			page.MustWaitLoad()
+		}, func(article web_crawler.Article) bool {
 			return article.Title == ""
 		})
 		if article.IsErr() {

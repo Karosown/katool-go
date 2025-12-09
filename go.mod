@@ -9,6 +9,7 @@ require (
 	github.com/duke-git/lancet/v2 v2.3.3
 	github.com/go-resty/resty/v2 v2.16.2
 	github.com/go-rod/rod v0.116.2
+	github.com/go-rod/stealth v0.4.9
 	github.com/go-shiori/go-readability v0.0.0-20250217085726-9f5bf5ca7612
 	github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible

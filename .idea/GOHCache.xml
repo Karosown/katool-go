@@ -1,0 +1,2537 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GoORMHelperCache">
+    <option name="schemaMapping">
+      <map>
+        <entry key="AIClientManager">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiclient/client.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Article">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/web_reader.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/web_reader.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AtomAuthor">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AtomCategory">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AtomEntry">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AtomFeed">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AtomLink">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rss/rss.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/rss/rss.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AtomText">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AttrValue">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/obj_value.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/obj_value.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AvatarGenerator">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/avatar/file.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AvatarResult">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/avatar/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Batch">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/collect/lists/batch.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="BrowserOptions">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_reader/core/contain.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="BytesDecodeFormatValid">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/format_detail.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="CSVEnDecodeFormat">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/baseformat/csv.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="CSVSerializer">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/file/file_serialize/csv.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Channel">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rss/rss.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/rss/rss.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ChatRequest">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ChatRequestBuilder">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiclient/ai_framework.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ChatResponse">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Choice">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ClaudeContent">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/providers/claude.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ClaudeMessage">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/providers/claude.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ClaudeProvider">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/providers/claude.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ClaudeRequest">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/providers/claude.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ClaudeResponse">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/providers/claude.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ClaudeStreamResponse">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/providers/claude.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ClaudeUsage">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/providers/claude.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Client">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/xmongo/options/client.go" />
+              <option value="file://$PROJECT_DIR$/web_crawler/client.go" />
+              <option value="file://$PROJECT_DIR$/words/split/cgojieba/jieba.go" />
+              <option value="file://$PROJECT_DIR$/words/split/jieba/jieba.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="CloudscraperTransport">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/cloudscraper.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Collection">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/xmongo/coll/collection.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="CollectionFactory">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/xmongo/coll/common_collection.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="CollectionFactoryBuilder">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/xmongo/data.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="CompleteEmailInfo">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/mailutil/edu.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Config">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ConfigManager">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/config.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Contain">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/core/contain.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/core/contain.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ConversationManager">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiclient/ai_framework.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Crawler">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_reader/web_reader.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="DefaultEnDeCodeFormat">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/format_detail.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="DocumentPartitionHelper">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/xmongo/mongoutil/partition.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="EduEmailVerify">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/mailutil/edu.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="EmailClient">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/mailutil/sender.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="EmailConfig">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/mailutil/sender.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="EmptyEnDecodeFormatNode">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/common.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Engine">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/template/engine.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Entry">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/stream/map.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Error">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/http/remote_request.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ErrorResponse">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ExecuteResult">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ruleengine/engine.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FileDownloader">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/file/file_downloader/file_downloader.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FileInfo">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/ziputil/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FileSaveFormat">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/baseformat/file.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FileWithOAuth2TokenStorage">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/http/remote_request_oauth2.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FontBuilder">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/avatar/font.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FontConfig">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/avatar/font.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FontRegistry">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/avatar/font.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Framework">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiclient/ai_framework.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Function">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiclient/function_client.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FunctionRegistry">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiclient/function_wrapper.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="FunctionWrapper">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiclient/function_wrapper.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="GUID">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rss/rss.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/rss/rss.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="GzipEnDecodeFormat">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/baseformat/gzip.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="HashBasedMap">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xmap/hashbasedmap.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Heap">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xheap/heap.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Item">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rss/rss.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/rss/rss.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="JSONArrayEnDeCodeFormat">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/baseformat/json.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="JSONEnDeCodeFormat">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/baseformat/json.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="JsonValue">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/obj_value.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/obj_value.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="KV">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/similarity/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="LockSupport">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/lock/lock.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="LogError">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/xlog/xtype/err.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="LogMessage">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/xlog/xtype/log_message.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="LogWrapper">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/xlog/log_wrapper.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="LogrusAdapter">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/xlog/logrus_adapter.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="MailAdapter">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/template/common.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="MemoryFile">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/avatar/file.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Message">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ModelInfo">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Node">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/markdown/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="OAuth2Req">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/http/remote_request_oauth2.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="OpenAICompatibleProvider">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/openai_compatible.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="OptSwitch">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/optional/case_chain.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Option">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/stream/options.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Optional">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/optional/optional.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Pager">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/pager/pager.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="PeriodTime">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/dateutil/date.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="PeriodTimeStamp">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/dateutil/date.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ProviderConfig">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Query">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/xmongo/wrapper/query.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RSS">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rss/rss.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/rss/rss.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RemoteMultiMultiFileDeCodeFormat">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/complexformat/remote_multi_file.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Req">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/http/remote_request.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RuleBuilder">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ruleengine/engine.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RuleEngine">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ruleengine/engine.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RuleNode">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ruleengine/tree.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RuleNodeMeta">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ruleengine/tree.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RuleTree">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ruleengine/tree.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RunBackErrWorker">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/pool/work.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RunWorker">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/pool/work.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SMSAdapter">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/template/common.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SSEEvent">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/http/remote_request_sse.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SSERawEvent">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SSEReq">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/http/remote_request_sse.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SafeHeap">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xheap/safe_heap.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SafeMap">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xmap/safemap.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Segment">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/splitutil/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SimpleAIClient">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiclient/client.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Sort">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/xmongo/wrapper/query.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SortedMap">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xmap/sorted_map.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SourceCode">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/source_code.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/source_code.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SpecNumUtil">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/dumper/spec_num_dump.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SpecTimeUtil">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/dumper/spec_time_dump.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SplitDumpTask">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/dumper/spec_num_dump.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Stream">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/stream/stream.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="StreamEvent">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Temp">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/container_test/optional_test.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="TestCSV">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/file/file_serialize/file_test.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="TextEnDecodeFormat">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/baseformat/text.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="TextFileSerializer">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/file/file_serialize/text.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="TimeDumpTask">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/dumper/spec_time_dump.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Tool">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ToolCall">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ToolCallFunction">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ToolFunction">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Usage">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Util">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/dumper/dump.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="WebReaderError">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/web_reader.go" />
+              <option value="file://$PROJECT_DIR$/web_reader/web_reader.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Wrapper">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/pathutil/path.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="XMLEnDeCodeFormat">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/format/baseformat/xml.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ZipInfo">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/ziputil/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="fieldInfo">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/file/file_serialize/csv/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="memoryFileInfo">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/avatar/file.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="osFileWrapper">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/util/avatar/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="user">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/container_test/stream_test.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="userVo">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/container_test/stream_test.go" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="scannedPathMapping">
+      <map>
+        <entry key="file://$PROJECT_DIR$/ai/aiclient/ai_framework.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757878589095" />
+              <option name="schema">
+                <list>
+                  <option value="Framework" />
+                  <option value="ChatRequestBuilder" />
+                  <option value="ConversationManager" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/aiclient/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757844017086" />
+              <option name="schema">
+                <list>
+                  <option value="SimpleAIClient" />
+                  <option value="AIClientManager" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/aiclient/function_client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757878537045" />
+              <option name="schema">
+                <list>
+                  <option value="Function" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/aiclient/function_wrapper.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757844017121" />
+              <option name="schema">
+                <list>
+                  <option value="FunctionWrapper" />
+                  <option value="FunctionRegistry" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/aiconfig/config.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757844323133" />
+              <option name="schema">
+                <list>
+                  <option value="ConfigManager" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/aiconfig/openai_compatible.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757844323134" />
+              <option name="schema">
+                <list>
+                  <option value="OpenAICompatibleProvider" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/aiconfig/types.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757844323135" />
+              <option name="schema">
+                <list>
+                  <option value="Message" />
+                  <option value="ChatRequest" />
+                  <option value="ChatResponse" />
+                  <option value="Choice" />
+                  <option value="Usage" />
+                  <option value="Tool" />
+                  <option value="ToolFunction" />
+                  <option value="ToolCall" />
+                  <option value="ToolCallFunction" />
+                  <option value="Config" />
+                  <option value="StreamEvent" />
+                  <option value="SSERawEvent" />
+                  <option value="ErrorResponse" />
+                  <option value="ModelInfo" />
+                  <option value="ProviderConfig" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/providers/claude.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757844017051" />
+              <option name="schema">
+                <list>
+                  <option value="ClaudeProvider" />
+                  <option value="ClaudeRequest" />
+                  <option value="ClaudeMessage" />
+                  <option value="ClaudeResponse" />
+                  <option value="ClaudeContent" />
+                  <option value="ClaudeUsage" />
+                  <option value="ClaudeStreamResponse" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/providers/deepseek.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757844017046" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/providers/localai.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757844017055" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/providers/ollama.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757844017107" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/providers/openai.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757844017070" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/algorithm/array.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693198" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/algorithm/bin.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542759" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/algorithm/hash.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693199" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/collect/lists/batch.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542760" />
+              <option name="schema">
+                <list>
+                  <option value="Batch" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/collect/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542760" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/container_test/optional_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542761" />
+              <option name="schema">
+                <list>
+                  <option value="Temp" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/container_test/parallel_compare_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693199" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/container_test/partition_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542761" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/container_test/stream_map_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542761" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/container_test/stream_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693200" />
+              <option name="schema">
+                <list>
+                  <option value="user" />
+                  <option value="userVo" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/cutil/list.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542762" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/cutil/obj.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542762" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/ioc/ioc.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542763" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/optional/case_chain.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542764" />
+              <option name="schema">
+                <list>
+                  <option value="OptSwitch" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/optional/optional.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542764" />
+              <option name="schema">
+                <list>
+                  <option value="Optional" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/stream/map.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542765" />
+              <option name="schema">
+                <list>
+                  <option value="Entry" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/stream/options.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542765" />
+              <option name="schema">
+                <list>
+                  <option value="Option" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/stream/stream.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693200" />
+              <option name="schema">
+                <list>
+                  <option value="Stream" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/xheap/convertor.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542766" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/xheap/heap.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542767" />
+              <option name="schema">
+                <list>
+                  <option value="Heap" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/xheap/safe_heap.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542767" />
+              <option name="schema">
+                <list>
+                  <option value="SafeHeap" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/xmap/hashbasedmap.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542767" />
+              <option name="schema">
+                <list>
+                  <option value="HashBasedMap" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/xmap/map.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542767" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/xmap/safemap.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542767" />
+              <option name="schema">
+                <list>
+                  <option value="SafeMap" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/xmap/sorted_map.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542767" />
+              <option name="schema">
+                <list>
+                  <option value="SortedMap" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/xmap/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542769" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/xtype/define.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542769" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/convert/dao_to_file.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542769" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/convert/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542769" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/pager/pager.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542769" />
+              <option name="schema">
+                <list>
+                  <option value="Pager" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xmongo/coll/collection.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542771" />
+              <option name="schema">
+                <list>
+                  <option value="Collection" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xmongo/coll/common_collection.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542771" />
+              <option name="schema">
+                <list>
+                  <option value="CollectionFactory" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xmongo/data.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542771" />
+              <option name="schema">
+                <list>
+                  <option value="CollectionFactoryBuilder" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xmongo/mongoutil/partition.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542772" />
+              <option name="schema">
+                <list>
+                  <option value="DocumentPartitionHelper" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xmongo/mongoutil/query_wrapper.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542772" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xmongo/mongoutil/struct2bson.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542772" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xmongo/mongoutil/time.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542773" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xmongo/options/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542773" />
+              <option name="schema">
+                <list>
+                  <option value="Client" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xmongo/wrapper/query.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542774" />
+              <option name="schema">
+                <list>
+                  <option value="Query" />
+                  <option value="Sort" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/file/file_downloader/file_downloader.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542775" />
+              <option name="schema">
+                <list>
+                  <option value="FileDownloader" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/file/file_serialize/base.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542775" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/file/file_serialize/csv.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542776" />
+              <option name="schema">
+                <list>
+                  <option value="CSVSerializer" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/file/file_serialize/csv/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1763393267435" />
+              <option name="schema">
+                <list>
+                  <option value="fieldInfo" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/file/file_serialize/file_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693202" />
+              <option name="schema">
+                <list>
+                  <option value="TestCSV" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/file/file_serialize/text.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542776" />
+              <option name="schema">
+                <list>
+                  <option value="TextFileSerializer" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/helper/jsonhp/json.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542777" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/lock/lock.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542777" />
+              <option name="schema">
+                <list>
+                  <option value="LockSupport" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/format/baseformat/csv.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542780" />
+              <option name="schema">
+                <list>
+                  <option value="CSVEnDecodeFormat" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/format/baseformat/file.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542780" />
+              <option name="schema">
+                <list>
+                  <option value="FileSaveFormat" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/format/baseformat/gzip.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542780" />
+              <option name="schema">
+                <list>
+                  <option value="GzipEnDecodeFormat" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/format/baseformat/json.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542780" />
+              <option name="schema">
+                <list>
+                  <option value="JSONEnDeCodeFormat" />
+                  <option value="JSONArrayEnDeCodeFormat" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/format/baseformat/text.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542781" />
+              <option name="schema">
+                <list>
+                  <option value="TextEnDecodeFormat" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/format/baseformat/xml.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542781" />
+              <option name="schema">
+                <list>
+                  <option value="XMLEnDeCodeFormat" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/format/common.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542782" />
+              <option name="schema">
+                <list>
+                  <option value="EmptyEnDecodeFormatNode" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/format/complexformat/remote_multi_file.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542782" />
+              <option name="schema">
+                <list>
+                  <option value="RemoteMultiMultiFileDeCodeFormat" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/format/format_detail.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542782" />
+              <option name="schema">
+                <list>
+                  <option value="DefaultEnDeCodeFormat" />
+                  <option value="BytesDecodeFormatValid" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/http/remote_request.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765209309239" />
+              <option name="schema">
+                <list>
+                  <option value="Error" />
+                  <option value="Req" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/http/remote_request_oauth2.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765209309240" />
+              <option name="schema">
+                <list>
+                  <option value="OAuth2Req" />
+                  <option value="FileWithOAuth2TokenStorage" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/http/remote_request_sse.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765209309240" />
+              <option name="schema">
+                <list>
+                  <option value="SSEEvent" />
+                  <option value="SSEReq" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/pool/work.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757758714468" />
+              <option name="schema">
+                <list>
+                  <option value="RunWorker" />
+                  <option value="RunBackErrWorker" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ruleengine/engine.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542786" />
+              <option name="schema">
+                <list>
+                  <option value="RuleEngine" />
+                  <option value="RuleBuilder" />
+                  <option value="ExecuteResult" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ruleengine/tree.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542788" />
+              <option name="schema">
+                <list>
+                  <option value="RuleNodeMeta" />
+                  <option value="RuleNode" />
+                  <option value="RuleTree" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/sys/common.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542788" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/sys/panic.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542788" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/avatar/avator_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693205" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/avatar/convertor.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693205" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/avatar/file.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693206" />
+              <option name="schema">
+                <list>
+                  <option value="MemoryFile" />
+                  <option value="memoryFileInfo" />
+                  <option value="AvatarGenerator" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/avatar/font.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693207" />
+              <option name="schema">
+                <list>
+                  <option value="FontConfig" />
+                  <option value="FontRegistry" />
+                  <option value="FontBuilder" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/avatar/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757737693208" />
+              <option name="schema">
+                <list>
+                  <option value="AvatarResult" />
+                  <option value="osFileWrapper" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/crypto/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542789" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/dateutil/date.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542789" />
+              <option name="schema">
+                <list>
+                  <option value="PeriodTimeStamp" />
+                  <option value="PeriodTime" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/dumper/dump.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542790" />
+              <option name="schema">
+                <list>
+                  <option value="Util" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/dumper/spec_num_dump.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542790" />
+              <option name="schema">
+                <list>
+                  <option value="SpecNumUtil" />
+                  <option value="SplitDumpTask" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/dumper/spec_time_dump.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542790" />
+              <option name="schema">
+                <list>
+                  <option value="SpecTimeUtil" />
+                  <option value="TimeDumpTask" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/locales/data.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542791" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/locales/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542791" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/mailutil/edu.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542791" />
+              <option name="schema">
+                <list>
+                  <option value="EduEmailVerify" />
+                  <option value="CompleteEmailInfo" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/mailutil/edu_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754842710256" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/mailutil/sender.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754842710256" />
+              <option name="schema">
+                <list>
+                  <option value="EmailConfig" />
+                  <option value="EmailClient" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/mailutil/sender_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1755028174229" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/markdown/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542793" />
+              <option name="schema">
+                <list>
+                  <option value="Node" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/pathutil/path.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542793" />
+              <option name="schema">
+                <list>
+                  <option value="Wrapper" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/randutil/random.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542793" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/similarity/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542794" />
+              <option name="schema">
+                <list>
+                  <option value="KV" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/splitutil/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542795" />
+              <option name="schema">
+                <list>
+                  <option value="Segment" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/template/common.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754842710256" />
+              <option name="schema">
+                <list>
+                  <option value="SMSAdapter" />
+                  <option value="MailAdapter" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/template/engine.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1755891720904" />
+              <option name="schema">
+                <list>
+                  <option value="Engine" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/util/ziputil/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542795" />
+              <option name="schema">
+                <list>
+                  <option value="FileInfo" />
+                  <option value="ZipInfo" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/article.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765215513476" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765215637049" />
+              <option name="schema">
+                <list>
+                  <option value="Client" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/cloudscraper.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765299593901" />
+              <option name="schema">
+                <list>
+                  <option value="CloudscraperTransport" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/core/contain.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765260337321" />
+              <option name="schema">
+                <list>
+                  <option value="Contain" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542796" />
+              <option name="schema">
+                <list>
+                  <option value="AtomFeed" />
+                  <option value="AtomEntry" />
+                  <option value="AtomText" />
+                  <option value="AtomAuthor" />
+                  <option value="AtomCategory" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/obj_value.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765215456189" />
+              <option name="schema">
+                <list>
+                  <option value="AttrValue" />
+                  <option value="JsonValue" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/render/render.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542797" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/rss/constants.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542797" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/rss/rss.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542798" />
+              <option name="schema">
+                <list>
+                  <option value="RSS" />
+                  <option value="Channel" />
+                  <option value="AtomLink" />
+                  <option value="Item" />
+                  <option value="GUID" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/source_code.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765287591255" />
+              <option name="schema">
+                <list>
+                  <option value="SourceCode" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/test/web_reader_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765287660836" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/web_reader.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765215456188" />
+              <option name="schema">
+                <list>
+                  <option value="WebReaderError" />
+                  <option value="Article" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_reader/article.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765214885287" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_reader/core/contain.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765214835090" />
+              <option name="schema">
+                <list>
+                  <option value="BrowserOptions" />
+                  <option value="Contain" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765214834954" />
+              <option name="schema">
+                <list>
+                  <option value="AtomFeed" />
+                  <option value="AtomEntry" />
+                  <option value="AtomText" />
+                  <option value="AtomAuthor" />
+                  <option value="AtomCategory" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_reader/obj_value.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765214885270" />
+              <option name="schema">
+                <list>
+                  <option value="AttrValue" />
+                  <option value="JsonValue" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_reader/rss/rss.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765214834999" />
+              <option name="schema">
+                <list>
+                  <option value="RSS" />
+                  <option value="Channel" />
+                  <option value="AtomLink" />
+                  <option value="Item" />
+                  <option value="GUID" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_reader/source_code.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765214885275" />
+              <option name="schema">
+                <list>
+                  <option value="SourceCode" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_reader/test/web_reader_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765215076247" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_reader/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765209290522" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_reader/web_reader.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765214885293" />
+              <option name="schema">
+                <list>
+                  <option value="Crawler" />
+                  <option value="WebReaderError" />
+                  <option value="Article" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/words/split/cgojieba/jieba.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757843831007" />
+              <option name="schema">
+                <list>
+                  <option value="Client" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/words/split/jieba/jieba.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1757843830991" />
+              <option name="schema">
+                <list>
+                  <option value="Client" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/words/split/slice.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542828" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/words/utils.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542828" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/xlog/log_wrapper.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542828" />
+              <option name="schema">
+                <list>
+                  <option value="LogWrapper" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/xlog/logger.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542829" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/xlog/logrus_adapter.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542829" />
+              <option name="schema">
+                <list>
+                  <option value="LogrusAdapter" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/xlog/xtype/err.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542830" />
+              <option name="schema">
+                <list>
+                  <option value="LogError" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/xlog/xtype/log_message.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542830" />
+              <option name="schema">
+                <list>
+                  <option value="LogMessage" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/xlog/xtype/log_type.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1754667542830" />
+            </ScannedPath>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="tableStructMapping">
+      <map>
+        <entry key="ai_client_manager" value="AIClientManager" />
+        <entry key="article" value="Article" />
+        <entry key="atom_author" value="AtomAuthor" />
+        <entry key="atom_category" value="AtomCategory" />
+        <entry key="atom_entry" value="AtomEntry" />
+        <entry key="atom_feed" value="AtomFeed" />
+        <entry key="atom_link" value="AtomLink" />
+        <entry key="atom_text" value="AtomText" />
+        <entry key="attr_value" value="AttrValue" />
+        <entry key="avatar_generator" value="AvatarGenerator" />
+        <entry key="avatar_result" value="AvatarResult" />
+        <entry key="batch" value="Batch" />
+        <entry key="browser_options" value="BrowserOptions" />
+        <entry key="bytes_decode_format_valid" value="BytesDecodeFormatValid" />
+        <entry key="channel" value="Channel" />
+        <entry key="chat_request" value="ChatRequest" />
+        <entry key="chat_request_builder" value="ChatRequestBuilder" />
+        <entry key="chat_response" value="ChatResponse" />
+        <entry key="choice" value="Choice" />
+        <entry key="claude_content" value="ClaudeContent" />
+        <entry key="claude_message" value="ClaudeMessage" />
+        <entry key="claude_provider" value="ClaudeProvider" />
+        <entry key="claude_request" value="ClaudeRequest" />
+        <entry key="claude_response" value="ClaudeResponse" />
+        <entry key="claude_stream_response" value="ClaudeStreamResponse" />
+        <entry key="claude_usage" value="ClaudeUsage" />
+        <entry key="client" value="Client" />
+        <entry key="cloudscraper_transport" value="CloudscraperTransport" />
+        <entry key="collection" value="Collection" />
+        <entry key="collection_factory" value="CollectionFactory" />
+        <entry key="collection_factory_builder" value="CollectionFactoryBuilder" />
+        <entry key="complete_email_info" value="CompleteEmailInfo" />
+        <entry key="config" value="Config" />
+        <entry key="config_manager" value="ConfigManager" />
+        <entry key="contain" value="Contain" />
+        <entry key="conversation_manager" value="ConversationManager" />
+        <entry key="crawler" value="Crawler" />
+        <entry key="csv_en_decode_format" value="CSVEnDecodeFormat" />
+        <entry key="csv_serializer" value="CSVSerializer" />
+        <entry key="default_en_de_code_format" value="DefaultEnDeCodeFormat" />
+        <entry key="document_partition_helper" value="DocumentPartitionHelper" />
+        <entry key="edu_email_verify" value="EduEmailVerify" />
+        <entry key="email_client" value="EmailClient" />
+        <entry key="email_config" value="EmailConfig" />
+        <entry key="empty_en_decode_format_node" value="EmptyEnDecodeFormatNode" />
+        <entry key="engine" value="Engine" />
+        <entry key="entry" value="Entry" />
+        <entry key="error" value="Error" />
+        <entry key="error_response" value="ErrorResponse" />
+        <entry key="execute_result" value="ExecuteResult" />
+        <entry key="field_info" value="fieldInfo" />
+        <entry key="file_downloader" value="FileDownloader" />
+        <entry key="file_info" value="FileInfo" />
+        <entry key="file_save_format" value="FileSaveFormat" />
+        <entry key="file_with_o_auth2_token_storage" value="FileWithOAuth2TokenStorage" />
+        <entry key="font_builder" value="FontBuilder" />
+        <entry key="font_config" value="FontConfig" />
+        <entry key="font_registry" value="FontRegistry" />
+        <entry key="framework" value="Framework" />
+        <entry key="function" value="Function" />
+        <entry key="function_registry" value="FunctionRegistry" />
+        <entry key="function_wrapper" value="FunctionWrapper" />
+        <entry key="guid" value="GUID" />
+        <entry key="gzip_en_decode_format" value="GzipEnDecodeFormat" />
+        <entry key="hash_based_map" value="HashBasedMap" />
+        <entry key="heap" value="Heap" />
+        <entry key="item" value="Item" />
+        <entry key="json_array_en_de_code_format" value="JSONArrayEnDeCodeFormat" />
+        <entry key="json_en_de_code_format" value="JSONEnDeCodeFormat" />
+        <entry key="json_value" value="JsonValue" />
+        <entry key="kv" value="KV" />
+        <entry key="lock_support" value="LockSupport" />
+        <entry key="log_error" value="LogError" />
+        <entry key="log_message" value="LogMessage" />
+        <entry key="log_wrapper" value="LogWrapper" />
+        <entry key="logrus_adapter" value="LogrusAdapter" />
+        <entry key="mail_adapter" value="MailAdapter" />
+        <entry key="memory_file" value="MemoryFile" />
+        <entry key="memory_file_info" value="memoryFileInfo" />
+        <entry key="message" value="Message" />
+        <entry key="model_info" value="ModelInfo" />
+        <entry key="node" value="Node" />
+        <entry key="o_auth2_req" value="OAuth2Req" />
+        <entry key="open_ai_compatible_provider" value="OpenAICompatibleProvider" />
+        <entry key="opt_switch" value="OptSwitch" />
+        <entry key="option" value="Option" />
+        <entry key="optional" value="Optional" />
+        <entry key="os_file_wrapper" value="osFileWrapper" />
+        <entry key="pager" value="Pager" />
+        <entry key="period_time" value="PeriodTime" />
+        <entry key="period_time_stamp" value="PeriodTimeStamp" />
+        <entry key="provider_config" value="ProviderConfig" />
+        <entry key="query" value="Query" />
+        <entry key="remote_multi_multi_file_de_code_format" value="RemoteMultiMultiFileDeCodeFormat" />
+        <entry key="req" value="Req" />
+        <entry key="rss" value="RSS" />
+        <entry key="rule_builder" value="RuleBuilder" />
+        <entry key="rule_engine" value="RuleEngine" />
+        <entry key="rule_node" value="RuleNode" />
+        <entry key="rule_node_meta" value="RuleNodeMeta" />
+        <entry key="rule_tree" value="RuleTree" />
+        <entry key="run_back_err_worker" value="RunBackErrWorker" />
+        <entry key="run_worker" value="RunWorker" />
+        <entry key="safe_heap" value="SafeHeap" />
+        <entry key="safe_map" value="SafeMap" />
+        <entry key="segment" value="Segment" />
+        <entry key="simple_ai_client" value="SimpleAIClient" />
+        <entry key="sms_adapter" value="SMSAdapter" />
+        <entry key="sort" value="Sort" />
+        <entry key="sorted_map" value="SortedMap" />
+        <entry key="source_code" value="SourceCode" />
+        <entry key="spec_num_util" value="SpecNumUtil" />
+        <entry key="spec_time_util" value="SpecTimeUtil" />
+        <entry key="split_dump_task" value="SplitDumpTask" />
+        <entry key="sse_event" value="SSEEvent" />
+        <entry key="sse_raw_event" value="SSERawEvent" />
+        <entry key="sse_req" value="SSEReq" />
+        <entry key="stream" value="Stream" />
+        <entry key="stream_event" value="StreamEvent" />
+        <entry key="temp" value="Temp" />
+        <entry key="test_csv" value="TestCSV" />
+        <entry key="text_en_decode_format" value="TextEnDecodeFormat" />
+        <entry key="text_file_serializer" value="TextFileSerializer" />
+        <entry key="time_dump_task" value="TimeDumpTask" />
+        <entry key="tool" value="Tool" />
+        <entry key="tool_call" value="ToolCall" />
+        <entry key="tool_call_function" value="ToolCallFunction" />
+        <entry key="tool_function" value="ToolFunction" />
+        <entry key="usage" value="Usage" />
+        <entry key="user" value="user" />
+        <entry key="user_vo" value="userVo" />
+        <entry key="util" value="Util" />
+        <entry key="web_reader_error" value="WebReaderError" />
+        <entry key="wrapper" value="Wrapper" />
+        <entry key="xml_en_de_code_format" value="XMLEnDeCodeFormat" />
+        <entry key="zip_info" value="ZipInfo" />
+      </map>
+    </option>
+    <option name="lastTimeChecked" value="1765208931545" />
+  </component>
+</project>
