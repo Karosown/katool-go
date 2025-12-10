@@ -109,6 +109,13 @@
             </set>
           </value>
         </entry>
+        <entry key="CFSession">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/cloudscraper.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="CSVEnDecodeFormat">
           <value>
             <set>
@@ -2061,7 +2068,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765215637049" />
+              <option name="lastModified" value="1765325300741" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -2073,9 +2080,10 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/cloudscraper.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765299593901" />
+              <option name="lastModified" value="1765325349265" />
               <option name="schema">
                 <list>
+                  <option value="CFSession" />
                   <option value="CloudscraperTransport" />
                 </list>
               </option>
@@ -2113,7 +2121,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/obj_value.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765215456189" />
+              <option name="lastModified" value="1765325673634" />
               <option name="schema">
                 <list>
                   <option value="AttrValue" />
@@ -2168,7 +2176,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/test/web_reader_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765287660836" />
+              <option name="lastModified" value="1765325931184" />
             </ScannedPath>
           </value>
         </entry>
@@ -2408,6 +2416,7 @@
         <entry key="batch" value="Batch" />
         <entry key="browser_options" value="BrowserOptions" />
         <entry key="bytes_decode_format_valid" value="BytesDecodeFormatValid" />
+        <entry key="cf_session" value="CFSession" />
         <entry key="channel" value="Channel" />
         <entry key="chat_request" value="ChatRequest" />
         <entry key="chat_request_builder" value="ChatRequestBuilder" />

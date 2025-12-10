@@ -20,15 +20,23 @@ type AttrValue struct {
 // ReadArray 读取数组数据
 // ReadArray reads array data
 func ReadArray(url, js string, renderFunc func(*rod.Page)) AttrValue {
+	return DefaultClient.ReadArray(url, js, renderFunc)
+}
+
+// ReadArray 读取数组数据
+// ReadArray reads array data
+func (c *Client) ReadArray(url, js string, renderFunc func(*rod.Page)) AttrValue {
 	var gen func() AttrValue
 	tryNum := 7
 	gen = func() AttrValue {
-		code := readArray(url, js, renderFunc)
+		code := c.readArray(url, js, renderFunc)
 		if code.IsErr() {
 			if tryNum != 0 {
 				tryNum--
 				if tryNum == 0 {
-					WebChrome.ReStart()
+					if c.getChrome() != nil {
+						c.getChrome().ReStart()
+					}
 				} else {
 					time.Sleep(time.Duration(7-tryNum+1) * time.Second)
 				}
@@ -48,8 +56,8 @@ func ReadArray(url, js string, renderFunc func(*rod.Page)) AttrValue {
 
 // readArray 内部读取数组方法
 // readArray is the internal method for reading arrays
-func readArray(url, js string, rendorFunc func(*rod.Page)) AttrValue {
-	results, err := execFun(url, js, rendorFunc)
+func (c *Client) readArray(url, js string, rendorFunc func(*rod.Page)) AttrValue {
+	results, err := c.execFun(url, js, rendorFunc)
 	if err != nil {
 		return AttrValue{
 			WebReaderValue{}, WebReaderError{err},
@@ -72,21 +80,34 @@ type JsonValue[T any] struct {
 // ReadToJson 读取JSON数据并反序列化为指定类型
 // ReadToJson reads JSON data and deserializes to specified type
 func ReadToJson[T any](url string, obj T, js string, renderFunc func(*rod.Page)) JsonValue[T] {
-	var gen func() JsonValue[T]
+	toJson := DefaultClient.ReadToJson(url, obj, js, renderFunc)
+	t := (*toJson.Value).(T)
+	return JsonValue[T]{
+		&t,
+		toJson.WebReaderError,
+	}
+}
+
+// ReadToJson 读取JSON数据并反序列化为指定类型
+// ReadToJson reads JSON data and deserializes to specified type
+func (c *Client) ReadToJson(url string, obj any, js string, renderFunc func(*rod.Page)) JsonValue[any] {
+	var gen func() JsonValue[any]
 	tryNum := 7
-	gen = func() JsonValue[T] {
-		code := readToJson(url, obj, js, renderFunc)
+	gen = func() JsonValue[any] {
+		code := c.readToJson(url, obj, js, renderFunc)
 		if code.IsErr() {
 			if tryNum != 0 {
 				tryNum--
 				if tryNum == 0 {
-					WebChrome.ReStart()
+					if c.getChrome() != nil {
+						c.getChrome().ReStart()
+					}
 				} else {
 					time.Sleep(time.Duration(7-tryNum+1) * time.Second)
 				}
 				return gen()
 			}
-			return JsonValue[T]{
+			return JsonValue[any]{
 				Value: nil,
 				WebReaderError: WebReaderError{
 					errors.New("the Json Get Error:" + code.error.Error()),
@@ -100,10 +121,10 @@ func ReadToJson[T any](url string, obj T, js string, renderFunc func(*rod.Page))
 
 // readToJson 内部读取JSON方法
 // readToJson is the internal method for reading JSON
-func readToJson[T any](url string, obj T, js string, rendorFunc func(*rod.Page)) JsonValue[T] {
-	result, err := execFun(url, js, rendorFunc)
+func (c *Client) readToJson(url string, obj any, js string, rendorFunc func(*rod.Page)) JsonValue[any] {
+	result, err := c.execFun(url, js, rendorFunc)
 	if result == nil || err != nil {
-		return JsonValue[T]{
+		return JsonValue[any]{
 			nil, WebReaderError{err},
 		}
 	}
@@ -111,7 +132,7 @@ func readToJson[T any](url string, obj T, js string, rendorFunc func(*rod.Page))
 	value := reflect.New(reflect.TypeOf(obj)).Interface()
 
 	err = json.Unmarshal([]byte(result.Value.String()), value)
-	return JsonValue[T]{
-		value.(*T), WebReaderError{err},
+	return JsonValue[any]{
+		value.(*any), WebReaderError{err},
 	}
 }

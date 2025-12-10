@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/karosown/katool-go/web_crawler/core"
 )
 
 // CFSession Cloudflare会话缓存
@@ -28,6 +30,7 @@ var (
 // CloudscraperTransport custom Transport to handle Cloudflare verification
 type CloudscraperTransport struct {
 	Transport http.RoundTripper
+	Chrome    *core.Contain
 }
 
 // RoundTrip 实现RoundTripper接口
@@ -66,7 +69,7 @@ func (t *CloudscraperTransport) RoundTrip(req *http.Request) (*http.Response, er
 
 		// 尝试解决验证
 		// Attempt to solve verification
-		cookies, userAgent, err := SolveChallenge(req.URL.String())
+		cookies, userAgent, err := SolveChallenge(t.Chrome, req.URL.String())
 		if err != nil {
 			return nil, fmt.Errorf("failed to solve Cloudflare challenge: %v", err)
 		}
@@ -125,14 +128,14 @@ func IsCloudflareChallenge(resp *http.Response) bool {
 
 // SolveChallenge 使用WebChrome解决Cloudflare验证
 // SolveChallenge solves Cloudflare verification using WebChrome
-func SolveChallenge(url string) ([]*http.Cookie, string, error) {
-	if WebChrome == nil {
+func SolveChallenge(chrome *core.Contain, url string) ([]*http.Cookie, string, error) {
+	if chrome == nil {
 		return nil, "", fmt.Errorf("WebChrome not initialized")
 	}
 
 	// 使用Stealth模式创建页面
 	// Create page using Stealth mode
-	page := WebChrome.PageWithStealth(url)
+	page := chrome.PageWithStealth(url)
 	defer page.Close()
 
 	// 移除 WaitLoad，直接轮询 Cookie，一旦 Cloudflare 写入 Cookie 立即返回，无需等待重定向后的页面加载
@@ -196,11 +199,12 @@ func SolveChallenge(url string) ([]*http.Cookie, string, error) {
 
 // NewCloudscraperClient 创建一个支持Cloudflare bypass的HTTP Client
 // NewCloudscraperClient creates an HTTP Client supporting Cloudflare bypass
-func NewCloudscraperClient(timeout time.Duration) *http.Client {
+func NewCloudscraperClient(chrome *core.Contain, timeout time.Duration) *http.Client {
 	return &http.Client{
 		Timeout: timeout,
 		Transport: &CloudscraperTransport{
 			Transport: http.DefaultTransport,
+			Chrome:    chrome,
 		},
 	}
 }

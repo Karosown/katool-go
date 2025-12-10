@@ -29,7 +29,13 @@ var ChromeRemoteURL string
 // ReadRSS 读取RSS订阅源
 // ReadRSS reads RSS feed source
 func ReadRSS(xmlURL string) rss.RSS {
-	code := ReadSourceCode(xmlURL,
+	return DefaultClient.ReadRSS(xmlURL)
+}
+
+// ReadRSS 读取RSS订阅源
+// ReadRSS reads RSS feed source
+func (c *Client) ReadRSS(xmlURL string) rss.RSS {
+	code := c.ReadSourceCode(xmlURL,
 		rss.SourceCodeGetFunc, func(page *rod.Page) {
 			page.MustWaitLoad()
 		})
@@ -42,7 +48,13 @@ func ReadRSS(xmlURL string) rss.RSS {
 // ReadFeed 读取Atom订阅源并转换为RSS格式
 // ReadFeed reads Atom feed source and converts to RSS format
 func ReadFeed(xmlURL string) rss.RSS {
-	code := ReadSourceCode(xmlURL, rss.SourceCodeGetFunc, func(page *rod.Page) {
+	return DefaultClient.ReadFeed(xmlURL)
+}
+
+// ReadFeed 读取Atom订阅源并转换为RSS格式
+// ReadFeed reads Atom feed source and converts to RSS format
+func (c *Client) ReadFeed(xmlURL string) rss.RSS {
+	code := c.ReadSourceCode(xmlURL, rss.SourceCodeGetFunc, func(page *rod.Page) {
 		page.MustWaitLoad()
 	})
 	r, err := feed.ParseAtomFeed([]byte(code.String()))
@@ -55,15 +67,23 @@ func ReadFeed(xmlURL string) rss.RSS {
 // ReadSourceCode 读取网页源代码（带重试机制）
 // ReadSourceCode reads web page source code (with retry mechanism)
 func ReadSourceCode(url, execJsFunc string, rendorFunc func(*rod.Page)) SourceCode {
+	return DefaultClient.ReadSourceCode(url, execJsFunc, rendorFunc)
+}
+
+// ReadSourceCode 读取网页源代码（带重试机制）
+// ReadSourceCode reads web page source code (with retry mechanism)
+func (c *Client) ReadSourceCode(url, execJsFunc string, rendorFunc func(*rod.Page)) SourceCode {
 	var gen func() SourceCode
 	tryNum := 7
 	gen = func() SourceCode {
-		code := readSourceCode(url, execJsFunc, rendorFunc)
+		code := c.readSourceCode(url, execJsFunc, rendorFunc)
 		if code.IsErr() {
 			if tryNum != 0 {
 				tryNum--
 				if tryNum == 0 {
-					WebChrome.ReStart()
+					if c.getChrome() != nil {
+						c.getChrome().ReStart()
+					}
 				} else {
 					time.Sleep(time.Duration(7-tryNum+1) * time.Second)
 				}
@@ -83,9 +103,9 @@ func ReadSourceCode(url, execJsFunc string, rendorFunc func(*rod.Page)) SourceCo
 
 // readSourceCode 内部读取源代码方法
 // readSourceCode is the internal method for reading source code
-func readSourceCode(url, execJsFunc string, rendorFunc func(*rod.Page)) SourceCode {
+func (c *Client) readSourceCode(url, execJsFunc string, rendorFunc func(*rod.Page)) SourceCode {
 
-	sourceCode, err := execFun(url, optional.IsTrue(execJsFunc != "", execJsFunc, "() => {"+
+	sourceCode, err := c.execFun(url, optional.IsTrue(execJsFunc != "", execJsFunc, "() => {"+
 		"	return document.documentElement.outerHTML"+
 		"}"), rendorFunc)
 	if err != nil {

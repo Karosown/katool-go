@@ -1,7 +1,6 @@
 package test
 
 import (
-	"encoding/xml"
 	"fmt"
 	"net/http"
 	"testing"
@@ -47,18 +46,6 @@ func TestWebReader(t *testing.T) {
 	fmt.Println()
 }
 
-func TestReadSourceCode(t *testing.T) {
-	code := web_crawler.ReadSourceCode("https://openai.com/news/rss.xml", "", func(page *rod.Page) {
-		page.MustStopLoading()
-	})
-	fmt.Println(code.String())
-	r := &rss.RSS{}
-	err := xml.Unmarshal([]byte(code.String()), r)
-	if err != nil {
-		t.Error(err)
-	}
-	fmt.Print(r)
-}
 func TestReadChrome(t *testing.T) {
 	for {
 		u := "https://openai.com/index/openai-and-the-csu-system/"

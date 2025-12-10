@@ -91,7 +91,7 @@ type RequestWith func(r *http.Request)
 // the readable content.
 // fromURL 从指定URL获取网页并解析响应以找到可读内容
 // fromURL fetches the web page from specified URL then parses the response to find the readable content
-func fromURL(pageURL string, timeout time.Duration, requestModifiers ...RequestWith) (readability.Article, error) {
+func (c *Client) fromURL(pageURL string, timeout time.Duration, requestModifiers ...RequestWith) (readability.Article, error) {
 	// Make sure URL is valid
 	parsedURL, err := nurl.ParseRequestURI(pageURL)
 	if err != nil {
@@ -99,7 +99,7 @@ func fromURL(pageURL string, timeout time.Duration, requestModifiers ...RequestW
 	}
 
 	// Fetch page from URL
-	client := NewCloudscraperClient(timeout)
+	client := NewCloudscraperClient(c.getChrome(), timeout)
 	req, err := http.NewRequest("GET", pageURL, nil)
 	if requestModifiers != nil && len(requestModifiers) > 0 {
 		for _, modifer := range requestModifiers {
@@ -127,7 +127,8 @@ func fromURL(pageURL string, timeout time.Duration, requestModifiers ...RequestW
 	parser := readability.NewParser()
 	return parser.Parse(resp.Body, parsedURL)
 }
-func execFun(url, js string, rendorFunc func(*rod.Page)) (*proto.RuntimeRemoteObject, error) {
+
+func (c *Client) execFun(url, js string, rendorFunc func(*rod.Page)) (*proto.RuntimeRemoteObject, error) {
 	var err error
 	defer func() {
 		if r := recover(); r != nil {
@@ -141,7 +142,11 @@ func execFun(url, js string, rendorFunc func(*rod.Page)) (*proto.RuntimeRemoteOb
 			}
 		}()
 	}()
-	mustPage := WebChrome.PageWithStealth(url)
+	chrome := c.getChrome()
+	if chrome == nil {
+		return nil, fmt.Errorf("chrome not initialized")
+	}
+	mustPage := chrome.PageWithStealth(url)
 	defer mustPage.Close()
 	// Wait for the page loading...
 	if rendorFunc != nil {
