@@ -68,3 +68,27 @@ func (c *Client) getChrome() *core.Contain {
 	}
 	return WebChrome
 }
+
+// GetChrome 获取Chrome实例（公开方法）
+// GetChrome gets the Chrome instance (public method)
+func (c *Client) GetChrome() *core.Contain {
+	return c.getChrome()
+}
+
+// GetConfig 获取配置（公开方法）
+// GetConfig gets the config (public method)
+func (c *Client) GetConfig() *AntiBotConfig {
+	if c != nil && c.Config != nil {
+		return c.Config
+	}
+	return DefaultAntiBotConfig()
+}
+
+// GetPolicies 获取策略列表（公开方法）
+// GetPolicies gets the policies list (public method)
+func (c *Client) GetPolicies() []ChallengePolicy {
+	if c != nil && len(c.Policies) > 0 {
+		return c.Policies
+	}
+	return GlobalPolicies
+}
