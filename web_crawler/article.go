@@ -2,11 +2,11 @@ package web_crawler
 
 import (
 	"bytes"
+	"codeberg.org/readeck/go-readability"
 	nurl "net/url"
 	"time"
 
 	"github.com/go-rod/rod"
-	"github.com/go-shiori/go-readability"
 )
 
 // GetArticleWithURL 通过URL获取文章内容

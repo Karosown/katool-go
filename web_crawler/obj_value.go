@@ -64,7 +64,7 @@ func (c *Client) readArray(url, js string, rendorFunc func(*rod.Page)) AttrValue
 		}
 	}
 	res := results.Value.String()[1:len(results.Value.String())]
-	result := strings.Split(res, " ")
+	result := strings.Split(strings.TrimRight(strings.TrimLeft(res, "["), "]"), " ")
 	return AttrValue{
 		NewWebReaderValue(result...), WebReaderError{err},
 	}

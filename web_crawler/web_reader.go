@@ -1,6 +1,7 @@
 package web_crawler
 
 import (
+	"codeberg.org/readeck/go-readability"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/go-shiori/go-readability"
 	"github.com/karosown/katool-go/container/optional"
 	"github.com/karosown/katool-go/container/stream"
 	"github.com/karosown/katool-go/web_crawler/core"
@@ -99,7 +99,11 @@ func (c *Client) fromURL(pageURL string, timeout time.Duration, requestModifiers
 	}
 
 	// Fetch page from URL
-	client := NewCloudscraperClient(c.getChrome(), timeout)
+	config := c.Config
+	if config == nil {
+		config = DefaultAntiBotConfig()
+	}
+	client := NewAntiBotClientWithConfig(c.getChrome(), timeout, config, c.Policies...)
 	req, err := http.NewRequest("GET", pageURL, nil)
 	if requestModifiers != nil && len(requestModifiers) > 0 {
 		for _, modifer := range requestModifiers {

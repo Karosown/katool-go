@@ -3,13 +3,28 @@ package web_crawler
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/proto"
 	"github.com/karosown/katool-go/web_crawler/core"
 )
+
+// ChallengePolicy 挑战策略接口
+// ChallengePolicy challenge policy interface
+type ChallengePolicy interface {
+	// ShouldHandle 检查是否应该处理该响应
+	// ShouldHandle checks if the response should be handled
+	ShouldHandle(resp *http.Response) bool
+
+	// Solve 解决挑战，返回Cookies, UserAgent和错误
+	// Solve solves the challenge, returning Cookies, UserAgent, and error
+	Solve(chrome *core.Contain, url string) ([]*http.Cookie, string, error)
+}
 
 // CFSession Cloudflare会话缓存
 // CFSession Cloudflare session cache
@@ -24,31 +39,71 @@ var (
 	// cfCache caches Cloudflare verification info (host -> *CFSession)
 	cfCache     = make(map[string]*CFSession)
 	cfCacheLock sync.RWMutex
+	// GlobalPolicies 全局策略列表
+	// GlobalPolicies global policy list
+	GlobalPolicies []ChallengePolicy
 )
 
-// CloudscraperTransport 自定义Transport，处理Cloudflare验证
-// CloudscraperTransport custom Transport to handle Cloudflare verification
-type CloudscraperTransport struct {
+func init() {
+	// 注册默认的Cloudflare策略
+	GlobalPolicies = append(GlobalPolicies, &CloudflarePolicy{})
+}
+
+// AntiBotConfig 反爬虫配置
+// AntiBotConfig anti-bot configuration
+type AntiBotConfig struct {
+	// EnableCloudflare 是否启用 Cloudflare 绕过
+	// EnableCloudflare whether to enable Cloudflare bypass
+	EnableCloudflare bool
+}
+
+// DefaultAntiBotConfig 返回默认配置
+// DefaultAntiBotConfig returns default configuration
+func DefaultAntiBotConfig() *AntiBotConfig {
+	return &AntiBotConfig{
+		EnableCloudflare: false, // 默认不启用启用
+	}
+}
+
+// AntiBotTransport 自定义Transport，处理各种反爬虫验证
+// AntiBotTransport custom Transport to handle various anti-bot verifications
+type AntiBotTransport struct {
 	Transport http.RoundTripper
 	Chrome    *core.Contain
+	Policies  []ChallengePolicy
+	Config    *AntiBotConfig
 }
 
 // RoundTrip 实现RoundTripper接口
 // RoundTrip implements RoundTripper interface
-func (t *CloudscraperTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	// 尝试注入缓存的Cookie和UA
-	// Attempt to inject cached Cookies and UA
-	host := req.URL.Host
-	cfCacheLock.RLock()
-	if session, ok := cfCache[host]; ok {
-		for _, cookie := range session.Cookies {
-			req.AddCookie(cookie)
-		}
-		if session.UserAgent != "" {
-			req.Header.Set("User-Agent", session.UserAgent)
-		}
+func (t *AntiBotTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// 应用配置过滤策略
+	// Apply config to filter policies
+	config := t.Config
+	if config == nil {
+		config = DefaultAntiBotConfig()
 	}
-	cfCacheLock.RUnlock()
+
+	// 获取主机名，用于缓存操作
+	// Get hostname for cache operations
+	host := req.URL.Host
+
+	// 尝试注入缓存的Cookie和UA (目前仅针对Cloudflare)
+	// Attempt to inject cached Cookies and UA (currently only for Cloudflare)
+	// 只有在启用 Cloudflare 时才注入缓存
+	// Only inject cache when Cloudflare is enabled
+	if config.EnableCloudflare {
+		cfCacheLock.RLock()
+		if session, ok := cfCache[host]; ok {
+			for _, cookie := range session.Cookies {
+				req.AddCookie(cookie)
+			}
+			if session.UserAgent != "" {
+				req.Header.Set("User-Agent", session.UserAgent)
+			}
+		}
+		cfCacheLock.RUnlock()
+	}
 
 	// 执行原始请求
 	// Execute original request
@@ -61,101 +116,109 @@ func (t *CloudscraperTransport) RoundTrip(req *http.Request) (*http.Response, er
 		return nil, err
 	}
 
-	// 检查是否遇到Cloudflare验证
-	// Check if Cloudflare verification is encountered
-	if IsCloudflareChallenge(resp) {
-		// 关闭旧的响应体
-		resp.Body.Close()
+	// 遍历所有策略，检查是否需要处理
+	// Iterate through all policies, check if handling is needed
+	policies := t.Policies
+	if len(policies) == 0 {
+		policies = GlobalPolicies
+	}
 
-		// 尝试解决验证
-		// Attempt to solve verification
-		cookies, userAgent, err := SolveChallenge(t.Chrome, req.URL.String())
-		if err != nil {
-			return nil, fmt.Errorf("failed to solve Cloudflare challenge: %v", err)
+	for _, policy := range policies {
+		// 如果策略是 CloudflarePolicy 且配置中禁用了 Cloudflare，则跳过
+		// If policy is CloudflarePolicy and Cloudflare is disabled in config, skip it
+		if _, ok := policy.(*CloudflarePolicy); ok && !config.EnableCloudflare {
+			continue
 		}
 
-		// 更新缓存
-		// Update cache
-		cfCacheLock.Lock()
-		cfCache[host] = &CFSession{
-			Cookies:   cookies,
-			UserAgent: userAgent,
-			// 假设有效期1小时，或者从cookie中获取最小过期时间
-			// Assume 1 hour validity, or get min expiration from cookies
-			Expires: time.Now().Add(1 * time.Hour),
-		}
-		cfCacheLock.Unlock()
+		if policy.ShouldHandle(resp) {
+			// 关闭旧的响应体
+			resp.Body.Close()
 
-		// 更新请求头
-		// Update request headers
-		for _, cookie := range cookies {
-			req.AddCookie(cookie)
-		}
-		if userAgent != "" {
-			req.Header.Set("User-Agent", userAgent)
-		}
+			// 尝试解决验证
+			cookies, userAgent, err := policy.Solve(t.Chrome, req.URL.String())
+			if err != nil {
+				return nil, fmt.Errorf("failed to solve challenge: %v", err)
+			}
 
-		// 重试请求
-		// Retry request
-		return transport.RoundTrip(req)
+			// 更新缓存 (如果是Cloudflare策略)
+			// Update cache (if it is Cloudflare policy)
+			if _, ok := policy.(*CloudflarePolicy); ok {
+				cfCacheLock.Lock()
+				cfCache[host] = &CFSession{
+					Cookies:   cookies,
+					UserAgent: userAgent,
+					Expires:   time.Now().Add(1 * time.Hour),
+				}
+				cfCacheLock.Unlock()
+			}
+
+			// 更新请求头
+			for _, cookie := range cookies {
+				req.AddCookie(cookie)
+			}
+			if userAgent != "" {
+				req.Header.Set("User-Agent", userAgent)
+			}
+
+			// 重试请求
+			return transport.RoundTrip(req)
+		}
 	}
 
 	return resp, nil
 }
 
-// IsCloudflareChallenge 检查响应是否为Cloudflare验证页面
-// IsCloudflareChallenge checks if the response is a Cloudflare verification page
-func IsCloudflareChallenge(resp *http.Response) bool {
+// CloudflarePolicy Cloudflare策略实现
+type CloudflarePolicy struct{}
+
+func (p *CloudflarePolicy) ShouldHandle(resp *http.Response) bool {
 	// 检查状态码
-	// Check status code
 	if resp.StatusCode != 503 && resp.StatusCode != 403 {
 		return false
 	}
-
 	// 检查Server头
-	// Check Server header
 	server := resp.Header.Get("Server")
-	if !strings.EqualFold(server, "cloudflare") && !strings.EqualFold(server, "cloudflare-nginx") {
-		return false
-	}
-
-	// 进一步检查（可选，读取body可能会消耗流，这里主要依赖头和状态码）
-	// Further checks (optional, reading body might consume stream, mainly relying on headers and status code here)
-	// 如果需要更精确，可以Peek body，但net/http的Response body是ReadCloser
-
-	return true
+	return strings.EqualFold(server, "cloudflare") || strings.EqualFold(server, "cloudflare-nginx")
 }
 
-// SolveChallenge 使用WebChrome解决Cloudflare验证
-// SolveChallenge solves Cloudflare verification using WebChrome
+func (p *CloudflarePolicy) Solve(chrome *core.Contain, url string) ([]*http.Cookie, string, error) {
+	return SolveChallenge(chrome, url)
+}
+
+// SolveChallenge 使用WebChrome解决验证（通用逻辑，保留给CF使用）
 func SolveChallenge(chrome *core.Contain, url string) ([]*http.Cookie, string, error) {
 	if chrome == nil {
 		return nil, "", fmt.Errorf("WebChrome not initialized")
 	}
 
-	// 使用Stealth模式创建页面
-	// Create page using Stealth mode
 	page := chrome.PageWithStealth(url)
 	defer page.Close()
 
-	// 移除 WaitLoad，直接轮询 Cookie，一旦 Cloudflare 写入 Cookie 立即返回，无需等待重定向后的页面加载
-	// Remove WaitLoad, poll Cookie directly. Return immediately once Cloudflare writes Cookie, no need to wait for redirected page load.
-	// page.MustWaitLoad()
-
-	// 使用Context控制超时，缩短轮询间隔以提高效率
-	// Use Context to control timeout, shorten polling interval to improve efficiency
+	// 并发尝试点击验证框
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	// 每100ms检查一次，追求极致响应速度
-	// Check every 100ms, pursuing extreme response speed
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				attemptClickChallenge(page)
+			}
+		}
+	}()
+
+	// 每100ms检查一次Cookie
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
-			return nil, "", fmt.Errorf("timeout waiting for Cloudflare challenge")
+			return nil, "", fmt.Errorf("timeout waiting for challenge")
 		case <-ticker.C:
 			cookies, err := page.Cookies([]string{url})
 			if err != nil {
@@ -171,10 +234,7 @@ func SolveChallenge(chrome *core.Contain, url string) ([]*http.Cookie, string, e
 			}
 
 			if found {
-				// 获取最终的Cookies和User-Agent
-				// Get final Cookies and User-Agent
 				netCookies := cookies
-
 				httpCookies := make([]*http.Cookie, len(netCookies))
 				for i, c := range netCookies {
 					httpCookies[i] = &http.Cookie{
@@ -197,14 +257,58 @@ func SolveChallenge(chrome *core.Contain, url string) ([]*http.Cookie, string, e
 	}
 }
 
-// NewCloudscraperClient 创建一个支持Cloudflare bypass的HTTP Client
-// NewCloudscraperClient creates an HTTP Client supporting Cloudflare bypass
+// attemptClickChallenge 尝试寻找并点击Cloudflare验证框
+func attemptClickChallenge(page *rod.Page) {
+	iframes, err := page.Elements("iframe")
+	if err == nil {
+		for _, frame := range iframes {
+			framePage, err := frame.Frame()
+			if err != nil {
+				continue
+			}
+			if el, err := framePage.Element(`input[type="checkbox"]`); err == nil {
+				box, err := el.Shape()
+				if err == nil {
+					center := box.OnePointInside()
+					page.Mouse.MoveTo(*center)
+					time.Sleep(time.Duration(rand.Intn(200)+100) * time.Millisecond)
+					page.Mouse.Click(proto.InputMouseButtonLeft, 1)
+				}
+				return
+			}
+		}
+	}
+	if el, err := page.Element("#challenge-stage input[type='checkbox']"); err == nil {
+		el.Click(proto.InputMouseButtonLeft, 1)
+	}
+}
+
+// NewCloudscraperClient 创建一个支持反爬虫Bypass的HTTP Client
+// NewCloudscraperClient creates an HTTP Client supporting anti-bot bypass
+// Deprecated: use NewAntiBotClient instead
 func NewCloudscraperClient(chrome *core.Contain, timeout time.Duration) *http.Client {
+	return NewAntiBotClient(chrome, timeout)
+}
+
+// NewAntiBotClient 创建一个支持反爬虫Bypass的HTTP Client
+// NewAntiBotClient creates an HTTP Client supporting anti-bot bypass
+func NewAntiBotClient(chrome *core.Contain, timeout time.Duration, policies ...ChallengePolicy) *http.Client {
+	return NewAntiBotClientWithConfig(chrome, timeout, DefaultAntiBotConfig(), policies...)
+}
+
+// NewAntiBotClientWithConfig 创建一个支持反爬虫Bypass的HTTP Client（带配置）
+// NewAntiBotClientWithConfig creates an HTTP Client supporting anti-bot bypass (with config)
+func NewAntiBotClientWithConfig(chrome *core.Contain, timeout time.Duration, config *AntiBotConfig, policies ...ChallengePolicy) *http.Client {
+	if config == nil {
+		config = DefaultAntiBotConfig()
+	}
 	return &http.Client{
 		Timeout: timeout,
-		Transport: &CloudscraperTransport{
+		Transport: &AntiBotTransport{
 			Transport: http.DefaultTransport,
 			Chrome:    chrome,
+			Policies:  policies,
+			Config:    config,
 		},
 	}
 }

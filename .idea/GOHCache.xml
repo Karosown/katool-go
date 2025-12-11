@@ -10,11 +10,24 @@
             </set>
           </value>
         </entry>
+        <entry key="AntiBotConfig">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/cloudscraper.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AntiBotTransport">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/cloudscraper.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Article">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/web_reader.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/web_reader.go" />
             </set>
           </value>
         </entry>
@@ -22,7 +35,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go" />
             </set>
           </value>
         </entry>
@@ -30,7 +42,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go" />
             </set>
           </value>
         </entry>
@@ -38,7 +49,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go" />
             </set>
           </value>
         </entry>
@@ -46,7 +56,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go" />
             </set>
           </value>
         </entry>
@@ -54,7 +63,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/rss/rss.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/rss/rss.go" />
             </set>
           </value>
         </entry>
@@ -62,7 +70,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/feed/atom_feed.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go" />
             </set>
           </value>
         </entry>
@@ -70,7 +77,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/obj_value.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/obj_value.go" />
             </set>
           </value>
         </entry>
@@ -92,13 +98,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/collect/lists/batch.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="BrowserOptions">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/web_reader/core/contain.go" />
             </set>
           </value>
         </entry>
@@ -130,11 +129,17 @@
             </set>
           </value>
         </entry>
+        <entry key="CaptchaSolver">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/captcha.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Channel">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/rss/rss.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/rss/rss.go" />
             </set>
           </value>
         </entry>
@@ -225,7 +230,7 @@
             </set>
           </value>
         </entry>
-        <entry key="CloudscraperTransport">
+        <entry key="CloudflarePolicy">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/cloudscraper.go" />
@@ -278,7 +283,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/core/contain.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/core/contain.go" />
             </set>
           </value>
         </entry>
@@ -289,10 +293,10 @@
             </set>
           </value>
         </entry>
-        <entry key="Crawler">
+        <entry key="DeduplicationDocumentRefiner">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/web_reader/web_reader.go" />
+              <option value="file://$PROJECT_DIR$/../lynx/ai/rag/document_refiner_deduplication.go" />
             </set>
           </value>
         </entry>
@@ -454,7 +458,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/rss/rss.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/rss/rss.go" />
             </set>
           </value>
         </entry>
@@ -483,7 +486,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/rss/rss.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/rss/rss.go" />
             </set>
           </value>
         </entry>
@@ -505,7 +507,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/obj_value.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/obj_value.go" />
             </set>
           </value>
         </entry>
@@ -621,6 +622,13 @@
             </set>
           </value>
         </entry>
+        <entry key="Options">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../lynx/ai/model/audio/tts/request.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Pager">
           <value>
             <set>
@@ -660,7 +668,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/rss/rss.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/rss/rss.go" />
             </set>
           </value>
         </entry>
@@ -675,6 +682,13 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/net/http/remote_request.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Request">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../lynx/ai/model/audio/tts/request.go" />
             </set>
           </value>
         </entry>
@@ -801,7 +815,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/source_code.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/source_code.go" />
             </set>
           </value>
         </entry>
@@ -921,7 +934,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/web_reader.go" />
-              <option value="file://$PROJECT_DIR$/web_reader/web_reader.go" />
             </set>
           </value>
         </entry>
@@ -2061,14 +2073,26 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/article.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765215513476" />
+              <option name="lastModified" value="1765371952661" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/captcha.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765375140447" />
+              <option name="schema">
+                <list>
+                  <option value="CaptchaSolver" />
+                </list>
+              </option>
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/web_crawler/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765325300741" />
+              <option name="lastModified" value="1765374762115" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -2080,11 +2104,13 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/cloudscraper.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765325349265" />
+              <option name="lastModified" value="1765427818734" />
               <option name="schema">
                 <list>
                   <option value="CFSession" />
-                  <option value="CloudscraperTransport" />
+                  <option value="AntiBotConfig" />
+                  <option value="AntiBotTransport" />
+                  <option value="CloudflarePolicy" />
                 </list>
               </option>
             </ScannedPath>
@@ -2093,7 +2119,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/core/contain.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765260337321" />
+              <option name="lastModified" value="1765300811098" />
               <option name="schema">
                 <list>
                   <option value="Contain" />
@@ -2121,7 +2147,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/obj_value.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765325673634" />
+              <option name="lastModified" value="1765383603346" />
               <option name="schema">
                 <list>
                   <option value="AttrValue" />
@@ -2164,7 +2190,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/source_code.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765287591255" />
+              <option name="lastModified" value="1765325220231" />
               <option name="schema">
                 <list>
                   <option value="SourceCode" />
@@ -2176,121 +2202,16 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/test/web_reader_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765325931184" />
+              <option name="lastModified" value="1765427836616" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/web_crawler/web_reader.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765215456188" />
+              <option name="lastModified" value="1765374762115" />
               <option name="schema">
                 <list>
-                  <option value="WebReaderError" />
-                  <option value="Article" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_reader/article.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765214885287" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_reader/core/contain.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765214835090" />
-              <option name="schema">
-                <list>
-                  <option value="BrowserOptions" />
-                  <option value="Contain" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_reader/feed/atom_feed.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765214834954" />
-              <option name="schema">
-                <list>
-                  <option value="AtomFeed" />
-                  <option value="AtomEntry" />
-                  <option value="AtomText" />
-                  <option value="AtomAuthor" />
-                  <option value="AtomCategory" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_reader/obj_value.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765214885270" />
-              <option name="schema">
-                <list>
-                  <option value="AttrValue" />
-                  <option value="JsonValue" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_reader/rss/rss.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765214834999" />
-              <option name="schema">
-                <list>
-                  <option value="RSS" />
-                  <option value="Channel" />
-                  <option value="AtomLink" />
-                  <option value="Item" />
-                  <option value="GUID" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_reader/source_code.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765214885275" />
-              <option name="schema">
-                <list>
-                  <option value="SourceCode" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_reader/test/web_reader_test.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765215076247" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_reader/util.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765209290522" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_reader/web_reader.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765214885293" />
-              <option name="schema">
-                <list>
-                  <option value="Crawler" />
                   <option value="WebReaderError" />
                   <option value="Article" />
                 </list>
@@ -2398,11 +2319,45 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/../lynx/ai/model/audio/tts/request.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765427578050" />
+              <option name="schema">
+                <list>
+                  <option value="Options" />
+                  <option value="Request" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../lynx/ai/rag/document_refiner_deduplication.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765427527560" />
+              <option name="schema">
+                <list>
+                  <option value="DeduplicationDocumentRefiner" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../lynx/ai/rag/query_transformer_translation_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765384652554" />
+            </ScannedPath>
+          </value>
+        </entry>
       </map>
     </option>
     <option name="tableStructMapping">
       <map>
         <entry key="ai_client_manager" value="AIClientManager" />
+        <entry key="anti_bot_config" value="AntiBotConfig" />
+        <entry key="anti_bot_transport" value="AntiBotTransport" />
         <entry key="article" value="Article" />
         <entry key="atom_author" value="AtomAuthor" />
         <entry key="atom_category" value="AtomCategory" />
@@ -2414,8 +2369,8 @@
         <entry key="avatar_generator" value="AvatarGenerator" />
         <entry key="avatar_result" value="AvatarResult" />
         <entry key="batch" value="Batch" />
-        <entry key="browser_options" value="BrowserOptions" />
         <entry key="bytes_decode_format_valid" value="BytesDecodeFormatValid" />
+        <entry key="captcha_solver" value="CaptchaSolver" />
         <entry key="cf_session" value="CFSession" />
         <entry key="channel" value="Channel" />
         <entry key="chat_request" value="ChatRequest" />
@@ -2430,7 +2385,7 @@
         <entry key="claude_stream_response" value="ClaudeStreamResponse" />
         <entry key="claude_usage" value="ClaudeUsage" />
         <entry key="client" value="Client" />
-        <entry key="cloudscraper_transport" value="CloudscraperTransport" />
+        <entry key="cloudflare_policy" value="CloudflarePolicy" />
         <entry key="collection" value="Collection" />
         <entry key="collection_factory" value="CollectionFactory" />
         <entry key="collection_factory_builder" value="CollectionFactoryBuilder" />
@@ -2439,9 +2394,9 @@
         <entry key="config_manager" value="ConfigManager" />
         <entry key="contain" value="Contain" />
         <entry key="conversation_manager" value="ConversationManager" />
-        <entry key="crawler" value="Crawler" />
         <entry key="csv_en_decode_format" value="CSVEnDecodeFormat" />
         <entry key="csv_serializer" value="CSVSerializer" />
+        <entry key="deduplication_document_refiner" value="DeduplicationDocumentRefiner" />
         <entry key="default_en_de_code_format" value="DefaultEnDeCodeFormat" />
         <entry key="document_partition_helper" value="DocumentPartitionHelper" />
         <entry key="edu_email_verify" value="EduEmailVerify" />
@@ -2490,6 +2445,7 @@
         <entry key="opt_switch" value="OptSwitch" />
         <entry key="option" value="Option" />
         <entry key="optional" value="Optional" />
+        <entry key="options" value="Options" />
         <entry key="os_file_wrapper" value="osFileWrapper" />
         <entry key="pager" value="Pager" />
         <entry key="period_time" value="PeriodTime" />
@@ -2498,6 +2454,7 @@
         <entry key="query" value="Query" />
         <entry key="remote_multi_multi_file_de_code_format" value="RemoteMultiMultiFileDeCodeFormat" />
         <entry key="req" value="Req" />
+        <entry key="request" value="Request" />
         <entry key="rss" value="RSS" />
         <entry key="rule_builder" value="RuleBuilder" />
         <entry key="rule_engine" value="RuleEngine" />
@@ -2541,6 +2498,6 @@
         <entry key="zip_info" value="ZipInfo" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1765208931545" />
+    <option name="lastTimeChecked" value="1765383378238" />
   </component>
 </project>

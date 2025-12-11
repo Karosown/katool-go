@@ -7,19 +7,57 @@ import (
 // Client 网络爬虫客户端
 // Client Web crawler client
 type Client struct {
-	Chrome *core.Contain
+	Chrome   *core.Contain
+	Policies []ChallengePolicy
+	Config   *AntiBotConfig
 }
 
 // DefaultClient 默认客户端实例
 // DefaultClient default client instance
-var DefaultClient = &Client{}
+var DefaultClient = &Client{
+	Policies: GlobalPolicies,
+	Config:   DefaultAntiBotConfig(),
+}
 
 // NewClient 创建新的客户端
 // NewClient creates a new client
-func NewClient(chrome *core.Contain) *Client {
-	return &Client{
-		Chrome: chrome,
+func NewClient(chrome *core.Contain, policies ...ChallengePolicy) *Client {
+	// 如果没有提供策略，则使用默认的全局策略
+	// If no policies provided, use default global policies
+	p := policies
+	if len(p) == 0 {
+		p = GlobalPolicies
 	}
+	return &Client{
+		Chrome:   chrome,
+		Policies: p,
+		Config:   DefaultAntiBotConfig(),
+	}
+}
+
+// NewClientWithConfig 创建新的客户端（带配置）
+// NewClientWithConfig creates a new client (with config)
+func NewClientWithConfig(chrome *core.Contain, config *AntiBotConfig, policies ...ChallengePolicy) *Client {
+	// 如果没有提供策略，则使用默认的全局策略
+	// If no policies provided, use default global policies
+	p := policies
+	if len(p) == 0 {
+		p = GlobalPolicies
+	}
+	if config == nil {
+		config = DefaultAntiBotConfig()
+	}
+	return &Client{
+		Chrome:   chrome,
+		Policies: p,
+		Config:   config,
+	}
+}
+
+// AddPolicy 添加验证策略
+// AddPolicy adds challenge policy
+func (c *Client) AddPolicy(policy ChallengePolicy) {
+	c.Policies = append(c.Policies, policy)
 }
 
 // getChrome 获取Chrome实例，优先使用Client内部实例，否则使用全局WebChrome
