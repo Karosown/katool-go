@@ -151,7 +151,7 @@ func (p *ClaudeProvider) ChatStream(req *aiconfig.ChatRequest) (<-chan *aiconfig
 	}
 
 	// 创建响应通道
-	responseChan := make(chan *aiconfig.ChatResponse, 100)
+	responseChan := make(aiconfig.StreamChatResponse, 100)
 
 	// 创建SSE请求
 	sseReq := remote.NewSSEReq[aiconfig.StreamEvent]().
@@ -175,14 +175,17 @@ func (p *ClaudeProvider) ChatStream(req *aiconfig.ChatRequest) (<-chan *aiconfig
 	sseReq.OnEvent(func(streamEvent aiconfig.StreamEvent) error {
 		// 处理流式数据
 		if streamEvent.Data == "[DONE]" {
-			close(responseChan)
+			responseChan.Close(nil)
 			return nil
 		}
 
 		// 解析Claude流式响应
 		var claudeStreamResponse ClaudeStreamResponse
 		if err := json.Unmarshal([]byte(streamEvent.Data), &claudeStreamResponse); err != nil {
-			p.logger.Error("Failed to parse Claude stream response:", err)
+			if p.logger != nil {
+				p.logger.Error("Failed to parse Claude stream response:", err)
+			}
+			responseChan.Close(err)
 			return nil
 		}
 
@@ -193,22 +196,28 @@ func (p *ClaudeProvider) ChatStream(req *aiconfig.ChatRequest) (<-chan *aiconfig
 		select {
 		case responseChan <- response:
 		default:
-			p.logger.Warn("Response channel is full, dropping response")
+			if p.logger != nil {
+				p.logger.Warn("Response channel is full, dropping response")
+			}
 		}
 
 		return nil
 	})
 
 	sseReq.OnError(func(err error) {
-		p.logger.Error("SSE error:", err)
-		close(responseChan)
+		if p.logger != nil {
+			p.logger.Error("SSE error:", err)
+		}
+		responseChan.Close(err)
 	})
 
 	// 启动连接
 	go func() {
 		if err := sseReq.Connect(); err != nil {
-			p.logger.Error("Failed to connect to Claude SSE:", err)
-			close(responseChan)
+			if p.logger != nil {
+				p.logger.Error("Failed to connect to Claude SSE:", err)
+			}
+			responseChan.Close(err)
 		}
 	}()
 
@@ -223,6 +232,7 @@ type ClaudeRequest struct {
 	Temperature float64         `json:"temperature,omitempty"`
 	TopP        float64         `json:"top_p,omitempty"`
 	Stream      bool            `json:"stream,omitempty"`
+	Format      interface{}     `json:"format,omitempty"` // 结构化输出格式（Claude 3.5+支持）
 }
 
 // ClaudeMessage Claude消息格式
@@ -274,13 +284,20 @@ func (p *ClaudeProvider) convertToClaudeFormat(req *aiconfig.ChatRequest) *Claud
 		}
 	}
 
-	return &ClaudeRequest{
+	claudeReq := &ClaudeRequest{
 		Model:       req.Model,
 		MaxTokens:   req.MaxTokens,
 		Messages:    claudeMessages,
 		Temperature: req.Temperature,
 		TopP:        req.TopP,
 	}
+
+	// 添加结构化输出格式（Claude 3.5+支持）
+	if req.Format != nil {
+		claudeReq.Format = req.Format
+	}
+
+	return claudeReq
 }
 
 // convertFromClaudeFormat 从Claude格式转换为通用格式

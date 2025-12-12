@@ -89,6 +89,16 @@ err := functionClient.RegisterFunction("my_tool", "我的工具", func(param str
 3. 某些工具调用需要模型支持函数调用功能
 4. 流式响应会实时显示AI输出
 
+### deserialize_example.go
+
+该示例展示了 **自动反序列化** 的用法，适用于“结构化输出在 delta 里逐步返回”的场景：
+
+- `ai.ChatWithDeserialize[T](client, req)`: 非流式，直接把最终 JSON 自动 `Unmarshal` 为泛型 `T`
+- `ai.ChatStreamWithDeserialize[T](client, req)`: 流式，边收 delta 边累积，结束时自动反序列化为 `T`（同时透出 `Delta/Accumulated/FinishReason`）
+- `(*ai.Client).ChatUnmarshalInto(req, &out)`: 非泛型版本（传指针），适合你想要的“自动反序列化到反射目标”的写法
+
+对应文件：`deserialize_example.go`
+
 ## 快速开始
 
 1. 启动Ollama服务

@@ -18,12 +18,29 @@ type ChatRequest struct {
 	Messages         []Message   `json:"messages"`                    // 消息列表
 	Tools            []Tool      `json:"tools,omitempty"`             // 可用工具列表
 	ToolChoice       interface{} `json:"tool_choice,omitempty"`       // 工具选择策略
+	Format           interface{} `json:"format,omitempty"`            // 结构化输出格式（JSON Schema）
 	Temperature      float64     `json:"temperature,omitempty"`       // 温度参数
 	MaxTokens        int         `json:"max_tokens,omitempty"`        // 最大token数
 	Stream           bool        `json:"stream,omitempty"`            // 是否流式响应
 	TopP             float64     `json:"top_p,omitempty"`             // Top-p参数
 	FrequencyPenalty float64     `json:"frequency_penalty,omitempty"` // 频率惩罚
 	PresencePenalty  float64     `json:"presence_penalty,omitempty"`  // 存在惩罚
+}
+
+type StreamChatResponse chan *ChatResponse
+
+func (s *StreamChatResponse) Close(err error) {
+	*s <- &ChatResponse{error: err}
+	close(*s)
+}
+
+// ChatErr 流式元素通用接口
+// 用于统一处理：错误、是否错误、是否完成（完成通常用“typed nil”或显式标记表示）
+// ChatErr is a common interface for stream items.
+type ChatErr interface {
+	Error() error
+	IsError() bool
+	IsComplete() bool
 }
 
 // ChatResponse 聊天响应
@@ -34,6 +51,22 @@ type ChatResponse struct {
 	Model   string   `json:"model"`           // 模型名称
 	Choices []Choice `json:"choices"`         // 选择列表
 	Usage   *Usage   `json:"usage,omitempty"` // 使用统计
+	error
+}
+
+func (s *ChatResponse) Error() error {
+	return s.error
+}
+
+func (s *ChatResponse) IsError() bool {
+	if s == nil {
+		return false
+	}
+	return s.error != nil
+}
+
+func (s *ChatResponse) IsComplete() bool {
+	return s == nil
 }
 
 // Choice 选择项

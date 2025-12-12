@@ -219,3 +219,7 @@ func In[T cmp.Ordered](item T, arr ...T) bool {
 	search := slices.Contains(arr, item)
 	return search
 }
+
+func Must[T any](value T, err error) T {
+	return value
+}

@@ -3,6 +3,7 @@ package aiconfig
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Tangerg/lynx/pkg/sync"
 	"os"
 	"time"
 
@@ -165,10 +166,20 @@ func (p *OpenAICompatibleProvider) Chat(req *ChatRequest) (*ChatResponse, error)
 		requestData["tool_choice"] = req.ToolChoice
 	}
 
-	// 移除空值
+	// 添加结构化输出格式（Ollama支持）
+	if req.Format != nil {
+		requestData["format"] = req.Format
+	}
+
+	// 移除空值（但保留format，因为它可能是有效的空map）
 	cleanRequestData := make(map[string]interface{})
 	for k, v := range requestData {
-		if v != nil && v != "" && v != 0 {
+		// format参数需要特殊处理，即使为空map也要保留
+		if k == "format" {
+			if v != nil {
+				cleanRequestData[k] = v
+			}
+		} else if v != nil && v != "" && v != 0 {
 			cleanRequestData[k] = v
 		}
 	}
@@ -242,10 +253,20 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ChatRequest) (<-chan *ChatRes
 		requestData["tool_choice"] = req.ToolChoice
 	}
 
-	// 移除空值
+	// 添加结构化输出格式（Ollama支持）
+	if req.Format != nil {
+		requestData["format"] = req.Format
+	}
+
+	// 移除空值（但保留format，因为它可能是有效的空map）
 	cleanRequestData := make(map[string]interface{})
 	for k, v := range requestData {
-		if v != nil && v != "" && v != 0 {
+		// format参数需要特殊处理，即使为空map也要保留
+		if k == "format" {
+			if v != nil {
+				cleanRequestData[k] = v
+			}
+		} else if v != nil && v != "" && v != 0 {
 			cleanRequestData[k] = v
 		}
 	}
@@ -268,7 +289,7 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ChatRequest) (<-chan *ChatRes
 	}
 
 	// 创建响应通道
-	responseChan := make(chan *ChatResponse, 100)
+	responseChan := make(StreamChatResponse, 100)
 
 	// 创建SSE请求
 	sseReq := remote.NewSSEReq[StreamEvent]().
@@ -292,14 +313,14 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ChatRequest) (<-chan *ChatRes
 	sseReq.OnEvent(func(streamEvent StreamEvent) error {
 		// 处理流式数据
 		if streamEvent.Data == "[DONE]" {
-			close(responseChan)
+			responseChan.Close(nil)
 			return nil
 		}
 
 		// 解析响应
 		var response ChatResponse
 		if err := json.Unmarshal([]byte(jsonhp.FixJson(streamEvent.Data)), &response); err != nil {
-			p.logger.Error("Failed to parse stream response:", err)
+			responseChan.Close(err)
 			return nil
 		}
 
@@ -307,7 +328,9 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ChatRequest) (<-chan *ChatRes
 		select {
 		case responseChan <- &response:
 		default:
-			p.logger.Warn("Response channel is full, dropping response")
+			if p.logger != nil {
+				p.logger.Warn("Response channel is full, dropping response")
+			}
 		}
 
 		return nil
@@ -315,16 +338,18 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ChatRequest) (<-chan *ChatRes
 
 	sseReq.OnError(func(err error) {
 		p.logger.Error("SSE error:", err)
-		close(responseChan)
+		responseChan.Close(err)
 	})
 
 	// 启动连接
-	go func() {
+	sync.Go(func() {
 		if err := sseReq.Connect(); err != nil {
-			p.logger.Error("Failed to connect to SSE:", err)
-			close(responseChan)
+			if p.logger != nil {
+				p.logger.Error("Failed to connect to SSE:", err)
+			}
+			responseChan.Close(err)
 		}
-	}()
+	})
 
 	return responseChan, nil
 }

@@ -223,6 +223,7 @@
         <entry key="Client">
           <value>
             <set>
+              <option value="file://$PROJECT_DIR$/ai/client.go" />
               <option value="file://$PROJECT_DIR$/db/xmongo/options/client.go" />
               <option value="file://$PROJECT_DIR$/web_crawler/client.go" />
               <option value="file://$PROJECT_DIR$/words/split/cgojieba/jieba.go" />
@@ -692,6 +693,13 @@
             </set>
           </value>
         </entry>
+        <entry key="RobotsTxt">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/robots/robots.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="RuleBuilder">
           <value>
             <set>
@@ -853,6 +861,13 @@
             </set>
           </value>
         </entry>
+        <entry key="StreamResult">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/deserialize.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Temp">
           <value>
             <set>
@@ -923,6 +938,20 @@
             </set>
           </value>
         </entry>
+        <entry key="User">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/client_test.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="UserAgentGroup">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/robots/robots.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Util">
           <value>
             <set>
@@ -972,10 +1001,45 @@
             </set>
           </value>
         </entry>
+        <entry key="mockDeserializeProvider">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/deserialize_test.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="mockProvider">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/client_test.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="mockStreamProvider">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/deserialize_test.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="osFileWrapper">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/util/avatar/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="person">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/deserialize_test.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ruleMatch">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/robots/robots.go" />
             </set>
           </value>
         </entry>
@@ -1059,7 +1123,7 @@
         <entry key="file://$PROJECT_DIR$/ai/aiconfig/openai_compatible.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1757844323134" />
+              <option name="lastModified" value="1765475275329" />
               <option name="schema">
                 <list>
                   <option value="OpenAICompatibleProvider" />
@@ -1071,7 +1135,7 @@
         <entry key="file://$PROJECT_DIR$/ai/aiconfig/types.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1757844323135" />
+              <option name="lastModified" value="1765478180821" />
               <option name="schema">
                 <list>
                   <option value="Message" />
@@ -1094,10 +1158,69 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/ai/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765463671449" />
+              <option name="schema">
+                <list>
+                  <option value="Client" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/client_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765479427953" />
+              <option name="schema">
+                <list>
+                  <option value="mockProvider" />
+                  <option value="User" />
+                  <option value="User" />
+                  <option value="User" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/deserialize.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765478288443" />
+              <option name="schema">
+                <list>
+                  <option value="StreamResult" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/deserialize_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765478298053" />
+              <option name="schema">
+                <list>
+                  <option value="mockDeserializeProvider" />
+                  <option value="person" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/roles_example.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765463500431" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/ai/providers/claude.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1757844017051" />
+              <option name="lastModified" value="1765475243539" />
               <option name="schema">
                 <list>
                   <option value="ClaudeProvider" />
@@ -1137,6 +1260,13 @@
           <value>
             <ScannedPath>
               <option name="lastModified" value="1757844017070" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/roles.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765463640594" />
             </ScannedPath>
           </value>
         </entry>
@@ -1262,7 +1392,7 @@
         <entry key="file://$PROJECT_DIR$/container/optional/optional.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1754667542764" />
+              <option name="lastModified" value="1765473874364" />
               <option name="schema">
                 <list>
                   <option value="Optional" />
@@ -2087,7 +2217,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765374762115" />
+              <option name="lastModified" value="1765430111090" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -2159,6 +2289,20 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/robots/robots.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765431502110" />
+              <option name="schema">
+                <list>
+                  <option value="RobotsTxt" />
+                  <option value="UserAgentGroup" />
+                  <option value="ruleMatch" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/web_crawler/robots/robots_test.go">
           <value>
             <ScannedPath>
@@ -2211,7 +2355,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/web_reader.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765374762115" />
+              <option name="lastModified" value="1765384082594" />
               <option name="schema">
                 <list>
                   <option value="WebReaderError" />
@@ -2440,6 +2584,9 @@
         <entry key="memory_file" value="MemoryFile" />
         <entry key="memory_file_info" value="memoryFileInfo" />
         <entry key="message" value="Message" />
+        <entry key="mock_deserialize_provider" value="mockDeserializeProvider" />
+        <entry key="mock_provider" value="mockProvider" />
+        <entry key="mock_stream_provider" value="mockStreamProvider" />
         <entry key="model_info" value="ModelInfo" />
         <entry key="node" value="Node" />
         <entry key="o_auth2_req" value="OAuth2Req" />
@@ -2452,14 +2599,17 @@
         <entry key="pager" value="Pager" />
         <entry key="period_time" value="PeriodTime" />
         <entry key="period_time_stamp" value="PeriodTimeStamp" />
+        <entry key="person" value="person" />
         <entry key="provider_config" value="ProviderConfig" />
         <entry key="query" value="Query" />
         <entry key="remote_multi_multi_file_de_code_format" value="RemoteMultiMultiFileDeCodeFormat" />
         <entry key="req" value="Req" />
         <entry key="request" value="Request" />
+        <entry key="robots_txt" value="RobotsTxt" />
         <entry key="rss" value="RSS" />
         <entry key="rule_builder" value="RuleBuilder" />
         <entry key="rule_engine" value="RuleEngine" />
+        <entry key="rule_match" value="ruleMatch" />
         <entry key="rule_node" value="RuleNode" />
         <entry key="rule_node_meta" value="RuleNodeMeta" />
         <entry key="rule_tree" value="RuleTree" />
@@ -2481,6 +2631,7 @@
         <entry key="sse_req" value="SSEReq" />
         <entry key="stream" value="Stream" />
         <entry key="stream_event" value="StreamEvent" />
+        <entry key="stream_result" value="StreamResult" />
         <entry key="temp" value="Temp" />
         <entry key="test_csv" value="TestCSV" />
         <entry key="text_en_decode_format" value="TextEnDecodeFormat" />
@@ -2491,7 +2642,8 @@
         <entry key="tool_call_function" value="ToolCallFunction" />
         <entry key="tool_function" value="ToolFunction" />
         <entry key="usage" value="Usage" />
-        <entry key="user" value="user" />
+        <entry key="user" value="User" />
+        <entry key="user_agent_group" value="UserAgentGroup" />
         <entry key="user_vo" value="userVo" />
         <entry key="util" value="Util" />
         <entry key="web_reader_error" value="WebReaderError" />
