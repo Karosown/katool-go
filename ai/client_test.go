@@ -321,26 +321,22 @@ func TestChatRes(t *testing.T) {
 	// Ollama 的 format 参数只接受 "json" 字符串，不接受 JSON Schema 对象
 	// 需要在 prompt 中描述期望的 JSON 结构
 	req := &aiconfig.ChatRequest{
-		Model: "llama3.1",
-		//Model: "Qwen2",
+		//Model: "llama3.1",
+		Model: "Qwen2",
 		Messages: []aiconfig.Message{
-			NewMessage(RoleSystem, `你是一个智能的AI助手。我需要给你一个关键词，你返回给我多个联想的问题和答案。
-返回格式是
+			NewMessage(RoleSystem, `你是一个智能的研究人员。我给你一个关键词，请你返回给我可能找到结果的网址。注意一定要高相关性！可以是二级域名返回给我，格式如下
 `+jsonhp.ToJSON([]struct {
-				Q string `json:"q" description:"Question"`
-				A string `json:"a" description:"Answer"`
+				Link string `json:"Link" description:"Link"`
 			}{{}})),
-			NewMessage(RoleUser, "五险一金"),
+			NewMessage(RoleUser, "电子科大计算机考研通知"),
 		},
 		Format: optional.Must(FormatArrayOf([]struct {
-			Q string `json:"q" description:"Question"`
-			A string `json:"a" description:"Answer"`
+			A string `json:"a" description:"Link"`
 		}{})), // Ollama 只接受 "json" 字符串
 	}
 
 	res, err := ChatStreamWithDeserialize[[]struct {
-		Q string `json:"q" description:"Question"`
-		A string `json:"a" description:"Answer"`
+		A string `json:"a" description:"Link"`
 	}](client, req)
 	if err != nil {
 		t.Logf("Chat failed (this is expected if Ollama is not running): %v", err)
