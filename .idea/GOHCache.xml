@@ -343,6 +343,13 @@
             </set>
           </value>
         </entry>
+        <entry key="Enhancer">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/stream/other.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Entry">
           <value>
             <set>
@@ -567,6 +574,13 @@
             </set>
           </value>
         </entry>
+        <entry key="MapEnhancer">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/stream/other.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="MemoryFile">
           <value>
             <set>
@@ -630,13 +644,6 @@
             </set>
           </value>
         </entry>
-        <entry key="Order">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/examples/format_tags_example.go" />
-            </set>
-          </value>
-        </entry>
         <entry key="Pager">
           <value>
             <set>
@@ -658,24 +665,10 @@
             </set>
           </value>
         </entry>
-        <entry key="Product">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/examples/format_tags_example.go" />
-            </set>
-          </value>
-        </entry>
         <entry key="ProviderConfig">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="QAItem">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/examples/format_auto_usage.go" />
             </set>
           </value>
         </entry>
@@ -956,8 +949,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/ai/client_test.go" />
-              <option value="file://$PROJECT_DIR$/ai/examples/format_auto_usage.go" />
-              <option value="file://$PROJECT_DIR$/ai/examples/format_tags_example.go" />
             </set>
           </value>
         </entry>
@@ -1232,113 +1223,10 @@
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/ai_tool_test.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604048891" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/format_auto_usage.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604127726" />
-              <option name="schema">
-                <list>
-                  <option value="User" />
-                  <option value="QAItem" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/format_map_example.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604049121" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/format_tags_example.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604053992" />
-              <option name="schema">
-                <list>
-                  <option value="Product" />
-                  <option value="Order" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/function_wrapper_test.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604048841" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/ollama_format_example.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604048861" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/ollama_test.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604048882" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/ollama_with_tools.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604048848" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/real_data_test.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604048902" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/roles_example.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604048896" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/simple_usage.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604049221" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/sse_test.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604048852" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/tool_calls_test.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765604048874" />
-            </ScannedPath>
-          </value>
-        </entry>
         <entry key="file://$PROJECT_DIR$/ai/format.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765465618425" />
+              <option name="lastModified" value="1765603955512" />
               <option name="schema">
                 <list>
                   <option value="FormatBuilder" />
@@ -1350,7 +1238,7 @@
         <entry key="file://$PROJECT_DIR$/ai/format_auto.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765476320476" />
+              <option name="lastModified" value="1765604133238" />
               <option name="schema">
                 <list>
                   <option value="FormatFromBuilder" />
@@ -1415,7 +1303,7 @@
         <entry key="file://$PROJECT_DIR$/ai/structured_output_helper.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765473693237" />
+              <option name="lastModified" value="1765603955513" />
             </ScannedPath>
           </value>
         </entry>
@@ -1495,7 +1383,7 @@
         <entry key="file://$PROJECT_DIR$/container/container_test/stream_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1757737693200" />
+              <option name="lastModified" value="1765648521638" />
               <option name="schema">
                 <list>
                   <option value="user" />
@@ -1550,6 +1438,20 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/container/stream/ctream/ctream.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765645733947" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/stream/interface.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765648285131" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/container/stream/map.go">
           <value>
             <ScannedPath>
@@ -1574,15 +1476,34 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/container/stream/other.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765648560891" />
+              <option name="schema">
+                <list>
+                  <option value="MapEnhancer" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/container/stream/stream.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1757737693200" />
+              <option name="lastModified" value="1765647063711" />
               <option name="schema">
                 <list>
                   <option value="Stream" />
                 </list>
               </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/container/stream/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765647676294" />
             </ScannedPath>
           </value>
         </entry>
@@ -2115,7 +2036,7 @@
         <entry key="file://$PROJECT_DIR$/util/avatar/font.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1757737693207" />
+              <option name="lastModified" value="1765646589807" />
               <option name="schema">
                 <list>
                   <option value="FontConfig" />
@@ -2441,7 +2362,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/robots/robots.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765431502110" />
+              <option name="lastModified" value="1765646589787" />
               <option name="schema">
                 <list>
                   <option value="RobotsTxt" />
@@ -2659,6 +2580,7 @@
         <entry key="email_config" value="EmailConfig" />
         <entry key="empty_en_decode_format_node" value="EmptyEnDecodeFormatNode" />
         <entry key="engine" value="Engine" />
+        <entry key="enhancer" value="Enhancer" />
         <entry key="entry" value="Entry" />
         <entry key="error" value="Error" />
         <entry key="error_response" value="ErrorResponse" />
@@ -2692,6 +2614,7 @@
         <entry key="log_wrapper" value="LogWrapper" />
         <entry key="logrus_adapter" value="LogrusAdapter" />
         <entry key="mail_adapter" value="MailAdapter" />
+        <entry key="map_enhancer" value="MapEnhancer" />
         <entry key="memory_file" value="MemoryFile" />
         <entry key="memory_file_info" value="memoryFileInfo" />
         <entry key="message" value="Message" />
@@ -2704,16 +2627,13 @@
         <entry key="opt_switch" value="OptSwitch" />
         <entry key="option" value="Option" />
         <entry key="optional" value="Optional" />
-        <entry key="order" value="Order" />
         <entry key="os_file_wrapper" value="osFileWrapper" />
         <entry key="pager" value="Pager" />
         <entry key="period_time" value="PeriodTime" />
         <entry key="period_time_stamp" value="PeriodTimeStamp" />
         <entry key="person" value="person" />
-        <entry key="product" value="Product" />
         <entry key="provider_config" value="ProviderConfig" />
         <entry key="qa" value="qa" />
-        <entry key="qa_item" value="QAItem" />
         <entry key="query" value="Query" />
         <entry key="remote_multi_multi_file_de_code_format" value="RemoteMultiMultiFileDeCodeFormat" />
         <entry key="req" value="Req" />
@@ -2754,7 +2674,7 @@
         <entry key="tool_call_function" value="ToolCallFunction" />
         <entry key="tool_function" value="ToolFunction" />
         <entry key="usage" value="Usage" />
-        <entry key="user" value="User" />
+        <entry key="user" value="user" />
         <entry key="user_agent_group" value="UserAgentGroup" />
         <entry key="user_vo" value="userVo" />
         <entry key="util" value="Util" />
@@ -2764,6 +2684,6 @@
         <entry key="zip_info" value="ZipInfo" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1765546567077" />
+    <option name="lastTimeChecked" value="1765645553475" />
   </component>
 </project>

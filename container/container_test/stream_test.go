@@ -132,6 +132,34 @@ func Test_Map(t *testing.T) {
 		fmt.Println(s)
 	})
 }
+func Test_MapE(t *testing.T) {
+	ul := userList[:]
+	// 计数
+	userStream := stream.ToStream(&ul).Parallel()
+	println(userStream.Count())
+	// 排序
+	stream.ToStream(&ul).
+		Parallel().
+		Sort(func(a user, b user) bool { return a.Id < b.Id }).ForEach(func(item user) { println(convert.ToString(item.Id) + " " + item.Name) })
+	// 求和
+	totalMoney := userStream.Reduce(int64(0), func(cntValue any, nxt user) any { return cntValue.(int64) + int64(nxt.Money) }, func(sum1, sum2 any) any {
+		return sum1.(int64) + sum2.(int64)
+	})
+	println(totalMoney.(int64))
+	// 过滤
+	userStream.Filter(func(item user) bool { return item.Sex != 0 }).DistinctBy(algorithm.HASH_WITH_JSON_MD5[user]).ToOptionList().ForEach(func(item user) { println(item.Name) })
+	// 转换
+	s := stream.Em[user, *userVo](userStream).Map(func(item user) *userVo {
+		properties, err := convert.CopyProperties(&item, &userVo{})
+		if err != nil {
+			sys.Panic(err)
+		}
+		return properties
+	}).ToOptionList()
+	s.ForEach(func(s *userVo) {
+		fmt.Println(s)
+	})
+}
 
 func Test_GroupBy(t *testing.T) {
 	users := userList[:]
