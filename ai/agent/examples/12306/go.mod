@@ -3,7 +3,7 @@ module 12306
 go 1.25.5
 
 require (
-	github.com/karosown/katool-go v0.0.0-20251214143754-f28d61b5a51a
+	github.com/karosown/katool-go v0.0.0-20251214155317-042dad9aab61
 	github.com/mark3labs/mcp-go v0.43.2
 )
 

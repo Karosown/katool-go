@@ -26,6 +26,7 @@ github.com/kaptinlin/jsonrepair v0.1.0 h1:71Pwmyqan+fZPStHDSBTJngPhxtTkjEeWciZF3
 github.com/kaptinlin/jsonrepair v0.1.0/go.mod h1:hW2xIfVQwmskoVSv9g8g3ITOkEiOKKRj934dDCVW6aM=
 github.com/karosown/katool-go v0.0.0-20251214143754-f28d61b5a51a h1:A0otVHNrBaB6EewlZKMQHZcPpZmaRF1TgevzwoQ3X+k=
 github.com/karosown/katool-go v0.0.0-20251214143754-f28d61b5a51a/go.mod h1:vAKfOKkpggYxPgtyJgImAtAJynCj1FcLcga2GLmBxqc=
+github.com/karosown/katool-go v0.0.0-20251214155317-042dad9aab61/go.mod h1:vAKfOKkpggYxPgtyJgImAtAJynCj1FcLcga2GLmBxqc=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
