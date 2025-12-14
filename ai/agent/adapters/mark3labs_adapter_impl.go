@@ -10,6 +10,8 @@
 
 package adapters
 
+// tryNewMark3LabsAdapterTyped 的声明在 wrapper.go 中，这里提供实现
+
 import (
 	"context"
 	"encoding/json"
