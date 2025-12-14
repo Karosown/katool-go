@@ -345,6 +345,23 @@ func (c *Client) GetRegisteredFunctions() []string {
 	return c.functionClient.GetRegisteredFunctions()
 }
 
+// HasFunction 检查函数是否已注册
+func (c *Client) HasFunction(name string) bool {
+	return c.functionClient.HasFunction(name)
+}
+
+// CallFunctionDirectly 直接调用函数
+func (c *Client) CallFunctionDirectly(name string, arguments string) (interface{}, error) {
+	return c.functionClient.CallFunctionDirectly(name, arguments)
+}
+
+// GetTools 获取所有已注册的工具定义
+func (c *Client) GetTools() []aiconfig.Tool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.functionClient.GetTools()
+}
+
 // SetLogger 设置日志记录器
 func (c *Client) SetLogger(logger xlog.Logger) {
 	c.mu.Lock()
