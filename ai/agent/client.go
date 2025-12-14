@@ -17,8 +17,11 @@ type Client struct {
 	// AI客户端
 	aiClient *ai.Client
 
-	// MCP适配器（可选）
+	// MCP适配器（可选，单个）
 	mcpAdapter *MCPAdapter
+
+	// 多MCP适配器（可选，多个）
+	multiMCPAdapter *MultiMCPAdapter
 
 	// 日志记录器
 	logger xlog.Logger
@@ -49,10 +52,17 @@ func NewClient(aiClient *ai.Client, opts ...ClientOption) (*Client, error) {
 // ClientOption 客户端选项函数
 type ClientOption func(*Client)
 
-// WithMCPAdapter 设置MCP适配器
+// WithMCPAdapter 设置MCP适配器（单个）
 func WithMCPAdapter(adapter *MCPAdapter) ClientOption {
 	return func(c *Client) {
 		c.mcpAdapter = adapter
+	}
+}
+
+// WithMultiMCPAdapter 设置多MCP适配器（多个）
+func WithMultiMCPAdapter(adapter *MultiMCPAdapter) ClientOption {
+	return func(c *Client) {
+		c.multiMCPAdapter = adapter
 	}
 }
 
@@ -84,11 +94,17 @@ func (c *Client) GetMCPTools() []aiconfig.Tool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	if c.mcpAdapter == nil {
-		return []aiconfig.Tool{}
+	// 优先使用多MCP适配器
+	if c.multiMCPAdapter != nil {
+		return c.multiMCPAdapter.GetTools()
 	}
 
-	return c.mcpAdapter.GetTools()
+	// 使用单个MCP适配器
+	if c.mcpAdapter != nil {
+		return c.mcpAdapter.GetTools()
+	}
+
+	return []aiconfig.Tool{}
 }
 
 // GetAllTools 获取所有工具（本地+MCP）
@@ -102,8 +118,11 @@ func (c *Client) GetAllTools() []aiconfig.Tool {
 	localTools := c.aiClient.GetTools()
 	tools = append(tools, localTools...)
 
-	// 添加MCP工具
-	if c.mcpAdapter != nil {
+	// 添加MCP工具（优先使用多MCP适配器）
+	if c.multiMCPAdapter != nil {
+		mcpTools := c.multiMCPAdapter.GetTools()
+		tools = append(tools, mcpTools...)
+	} else if c.mcpAdapter != nil {
 		mcpTools := c.mcpAdapter.GetTools()
 		tools = append(tools, mcpTools...)
 	}
@@ -121,7 +140,10 @@ func (c *Client) HasTool(name string) bool {
 		return true
 	}
 
-	// 检查MCP工具
+	// 检查MCP工具（优先使用多MCP适配器）
+	if c.multiMCPAdapter != nil && c.multiMCPAdapter.HasTool(name) {
+		return true
+	}
 	if c.mcpAdapter != nil && c.mcpAdapter.HasTool(name) {
 		return true
 	}
@@ -136,17 +158,27 @@ func (c *Client) HasTool(name string) bool {
 // CallTool 调用工具（本地函数或MCP工具）
 func (c *Client) CallTool(ctx context.Context, name string, arguments string) (interface{}, error) {
 	c.mu.RLock()
-	defer c.mu.RUnlock()
 
 	// 判断是本地函数还是MCP工具
 	if c.aiClient.HasFunction(name) {
 		// 本地函数
+		c.mu.RUnlock()
 		return c.aiClient.CallFunctionDirectly(name, arguments)
-	} else if c.mcpAdapter != nil && c.mcpAdapter.HasTool(name) {
-		// MCP工具
+	}
+
+	// 检查MCP工具（优先使用多MCP适配器）
+	if c.multiMCPAdapter != nil && c.multiMCPAdapter.HasTool(name) {
+		// 多MCP适配器
+		c.mu.RUnlock()
+		return c.multiMCPAdapter.CallTool(ctx, name, arguments)
+	}
+	if c.mcpAdapter != nil && c.mcpAdapter.HasTool(name) {
+		// 单个MCP适配器
+		c.mu.RUnlock()
 		return c.mcpAdapter.CallTool(ctx, name, arguments)
 	}
 
+	c.mu.RUnlock()
 	return nil, fmt.Errorf("tool %s not found", name)
 }
 
@@ -238,18 +270,32 @@ func (c *Client) GetAIClient() *ai.Client {
 	return c.aiClient
 }
 
-// GetMCPAdapter 获取MCP适配器
+// GetMCPAdapter 获取MCP适配器（单个）
 func (c *Client) GetMCPAdapter() *MCPAdapter {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.mcpAdapter
 }
 
-// SetMCPAdapter 设置MCP适配器
+// SetMCPAdapter 设置MCP适配器（单个）
 func (c *Client) SetMCPAdapter(adapter *MCPAdapter) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.mcpAdapter = adapter
+}
+
+// GetMultiMCPAdapter 获取多MCP适配器
+func (c *Client) GetMultiMCPAdapter() *MultiMCPAdapter {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.multiMCPAdapter
+}
+
+// SetMultiMCPAdapter 设置多MCP适配器
+func (c *Client) SetMultiMCPAdapter(adapter *MultiMCPAdapter) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.multiMCPAdapter = adapter
 }
 
 // GetLogger 获取日志记录器

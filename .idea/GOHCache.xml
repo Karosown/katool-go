@@ -1192,6 +1192,13 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/ai/agent/examples/12306/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765727563074" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/ai/agent/examples/adapters_example.go">
           <value>
             <ScannedPath>
