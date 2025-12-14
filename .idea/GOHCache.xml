@@ -1199,6 +1199,13 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/ai/agent/examples/amap/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765719148516" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/ai/agent/examples/basic_example.go">
           <value>
             <ScannedPath>

@@ -26,11 +26,25 @@ type Mark3LabsAdapter struct {
 }
 
 // Mark3LabsClient MCP客户端接口（避免直接依赖）
+// 注意：这个接口是为了向后兼容，实际的 mark3labs/mcp-go Client 使用类型安全的实现
+// 推荐使用 NewMark3LabsAdapterFromClient，它会自动选择最优实现
 type Mark3LabsClient interface {
+	// Initialize 初始化 MCP 连接
+	// 实际签名：Initialize(ctx context.Context, request mcp.InitializeRequest) (*mcp.InitializeResult, error)
 	Initialize(ctx context.Context, req interface{}) (interface{}, error)
+
+	// ListTools 列出所有工具
+	// 实际签名：ListTools(ctx context.Context, request mcp.ListToolsRequest) (*mcp.ListToolsResult, error)
 	ListTools(ctx context.Context, req interface{}) (interface{}, error)
+
+	// CallTool 调用工具
+	// 实际签名：CallTool(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error)
 	CallTool(ctx context.Context, req interface{}) (interface{}, error)
+
+	// Start 启动客户端（某些实现可能需要）
 	Start(ctx context.Context) error
+
+	// Close 关闭客户端连接
 	Close() error
 }
 

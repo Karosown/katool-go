@@ -21,15 +21,21 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
-// newMark3LabsAdapterFromClientTyped 从真实的 mark3labs/mcp-go Client创建适配器（类型安全版本）
-// 这是内部实现，外部应该使用 NewMark3LabsAdapterFromClient
-func newMark3LabsAdapterFromClientTyped(client *mcpclient.Client, logger xlog.Logger) (*agent.MCPAdapter, error) {
-	if client == nil {
+// tryNewMark3LabsAdapterTyped 尝试使用类型安全的实现
+// 这个函数实现了 wrapper.go 中声明的函数
+func tryNewMark3LabsAdapterTyped(client interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
+	// 尝试类型断言为 *mcpclient.Client
+	mcpClient, ok := client.(*mcpclient.Client)
+	if !ok {
+		return nil, fmt.Errorf("client is not *mcpclient.Client")
+	}
+
+	if mcpClient == nil {
 		return nil, fmt.Errorf("MCP client cannot be nil")
 	}
 
 	impl := &mark3LabsClientImpl{
-		client: client,
+		client: mcpClient,
 		logger: logger,
 	}
 
