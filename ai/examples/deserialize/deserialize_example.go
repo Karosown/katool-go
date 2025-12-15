@@ -1,4 +1,4 @@
-package examples
+package deserialize
 
 import (
 	"encoding/json"

@@ -31,6 +31,21 @@ type OAuth2Req struct {
 	GetTokenFunction         func(platform string) (*FileWithOAuth2TokenStorage, error)
 }
 
+func (O *OAuth2Req) FormData(datas map[string]string) *OAuth2Req {
+	O.Req.FormData(datas)
+	return O
+}
+
+func (O *OAuth2Req) Files(datas map[string]string) *OAuth2Req {
+	O.Req.Files(datas)
+	return O
+}
+
+func (O *OAuth2Req) ReHeader(k, v string) *OAuth2Req {
+	O.Req.ReHeader(k, v)
+	return O
+}
+
 func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string, refreshToken string)) (*string, *string, error) {
 	// todo: api解耦合
 	if O.httpClient == nil {
@@ -137,7 +152,6 @@ func (O *OAuth2Req) Data(dataobj any) *OAuth2Req {
 	O.Req.Data(dataobj)
 	return O
 }
-
 func (O *OAuth2Req) Method(method string) *OAuth2Req {
 	O.Req.Method(method)
 	return O

@@ -309,6 +309,27 @@
             </set>
           </value>
         </entry>
+        <entry key="Data">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../template/internal/data/stats/data.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="DeepSeekMessage">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/test/ai/deepseek_chat_manual.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="DeepSeekSSEResponse">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/test/ai/deepseek_chat_manual.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="DefaultEnDeCodeFormat">
           <value>
             <set>
@@ -631,6 +652,20 @@
             </set>
           </value>
         </entry>
+        <entry key="MockEvent">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/test/sse_test.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="MockSSEServer">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/test/sse_test.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="ModelInfo">
           <value>
             <set>
@@ -694,6 +729,13 @@
             </set>
           </value>
         </entry>
+        <entry key="Order">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/examples/format/format_tags_example.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Pager">
           <value>
             <set>
@@ -715,10 +757,31 @@
             </set>
           </value>
         </entry>
+        <entry key="Person">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/examples/deserialize/deserialize_example.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Product">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/examples/format/format_tags_example.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="ProviderConfig">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="QAItem">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/examples/format/format_auto_usage.go" />
             </set>
           </value>
         </entry>
@@ -828,6 +891,13 @@
           </value>
         </entry>
         <entry key="SSEReq">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/net/http/remote_request_sse.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SSEReqApi">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/net/http/remote_request_sse.go" />
@@ -1021,6 +1091,7 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/ai/client_test.go" />
+              <option value="file://$PROJECT_DIR$/ai/examples/format/format_auto_usage.go" />
             </set>
           </value>
         </entry>
@@ -1392,7 +1463,7 @@
         <entry key="file://$PROJECT_DIR$/ai/aiconfig/openai_compatible.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765475275329" />
+              <option name="lastModified" value="1765819743337" />
               <option name="schema">
                 <list>
                   <option value="OpenAICompatibleProvider" />
@@ -1480,6 +1551,79 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/deserialize/deserialize_example.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765819842789" />
+              <option name="schema">
+                <list>
+                  <option value="Person" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/format/format_auto_usage.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765819842744" />
+              <option name="schema">
+                <list>
+                  <option value="User" />
+                  <option value="QAItem" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/format/format_map_example.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765819842827" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/format/format_tags_example.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765819842777" />
+              <option name="schema">
+                <list>
+                  <option value="Product" />
+                  <option value="Order" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/ollama/ollama_format_example.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765819842821" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/ollama/ollama_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765819842754" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/ollama/ollama_with_tools.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765819842800" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/role/roles_example.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765819863048" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/ai/format.go">
           <value>
             <ScannedPath>
@@ -1507,7 +1651,7 @@
         <entry key="file://$PROJECT_DIR$/ai/providers/claude.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765475243539" />
+              <option name="lastModified" value="1765819743371" />
               <option name="schema">
                 <list>
                   <option value="ClaudeProvider" />
@@ -1686,7 +1830,7 @@
         <entry key="file://$PROJECT_DIR$/container/optional/optional.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765812968678" />
+              <option name="lastModified" value="1765813694548" />
               <option name="schema">
                 <list>
                   <option value="Optional" />
@@ -1698,7 +1842,7 @@
         <entry key="file://$PROJECT_DIR$/container/optional/test/example_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765812933714" />
+              <option name="lastModified" value="1765813761809" />
               <option name="schema">
                 <list>
                   <option value="StringOptional" />
@@ -2176,7 +2320,7 @@
         <entry key="file://$PROJECT_DIR$/net/http/remote_request.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765209309239" />
+              <option name="lastModified" value="1765819010137" />
               <option name="schema">
                 <list>
                   <option value="Error" />
@@ -2189,7 +2333,7 @@
         <entry key="file://$PROJECT_DIR$/net/http/remote_request_oauth2.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765209309240" />
+              <option name="lastModified" value="1765818898859" />
               <option name="schema">
                 <list>
                   <option value="OAuth2Req" />
@@ -2202,11 +2346,37 @@
         <entry key="file://$PROJECT_DIR$/net/http/remote_request_sse.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765209309240" />
+              <option name="lastModified" value="1765819732391" />
               <option name="schema">
                 <list>
                   <option value="SSEEvent" />
                   <option value="SSEReq" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/test/ai/deepseek_chat_manual.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765819743327" />
+              <option name="schema">
+                <list>
+                  <option value="DeepSeekMessage" />
+                  <option value="DeepSeekSSEResponse" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/net/test/sse_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765819792508" />
+              <option name="schema">
+                <list>
+                  <option value="MockSSEServer" />
+                  <option value="MockEvent" />
                 </list>
               </option>
             </ScannedPath>
@@ -2790,6 +2960,18 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/data.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765817041678" />
+              <option name="schema">
+                <list>
+                  <option value="Data" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/schema/task.go">
           <value>
             <ScannedPath>
@@ -2802,10 +2984,17 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/schema/task_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765815417107" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/task.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765808437103" />
+              <option name="lastModified" value="1765819400670" />
               <option name="schema">
                 <list>
                   <option value="Task" />
@@ -2814,10 +3003,17 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/task_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765815497995" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/../template/internal/data/util/util.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765812452367" />
+              <option name="lastModified" value="1765818128906" />
             </ScannedPath>
           </value>
         </entry>
@@ -2868,6 +3064,9 @@
         <entry key="conversation_manager" value="ConversationManager" />
         <entry key="csv_en_decode_format" value="CSVEnDecodeFormat" />
         <entry key="csv_serializer" value="CSVSerializer" />
+        <entry key="data" value="Data" />
+        <entry key="deep_seek_message" value="DeepSeekMessage" />
+        <entry key="deep_seek_sse_response" value="DeepSeekSSEResponse" />
         <entry key="default_en_de_code_format" value="DefaultEnDeCodeFormat" />
         <entry key="document_partition_helper" value="DocumentPartitionHelper" />
         <entry key="edu_email_verify" value="EduEmailVerify" />
@@ -2919,7 +3118,9 @@
         <entry key="memory_file_info" value="memoryFileInfo" />
         <entry key="message" value="Message" />
         <entry key="mock_deserialize_provider" value="mockDeserializeProvider" />
+        <entry key="mock_event" value="MockEvent" />
         <entry key="mock_provider" value="mockProvider" />
+        <entry key="mock_sse_server" value="MockSSEServer" />
         <entry key="model_info" value="ModelInfo" />
         <entry key="multi_mcp_adapter" value="MultiMCPAdapter" />
         <entry key="node" value="Node" />
@@ -2931,13 +3132,16 @@
         <entry key="opt_switch" value="OptSwitch" />
         <entry key="option" value="Option" />
         <entry key="optional" value="Optional" />
+        <entry key="order" value="Order" />
         <entry key="os_file_wrapper" value="osFileWrapper" />
         <entry key="pager" value="Pager" />
         <entry key="period_time" value="PeriodTime" />
         <entry key="period_time_stamp" value="PeriodTimeStamp" />
-        <entry key="person" value="person" />
+        <entry key="person" value="Person" />
+        <entry key="product" value="Product" />
         <entry key="provider_config" value="ProviderConfig" />
         <entry key="qa" value="qa" />
+        <entry key="qa_item" value="QAItem" />
         <entry key="query" value="Query" />
         <entry key="remote_multi_multi_file_de_code_format" value="RemoteMultiMultiFileDeCodeFormat" />
         <entry key="req" value="Req" />
@@ -2966,6 +3170,7 @@
         <entry key="sse_event" value="SSEEvent" />
         <entry key="sse_raw_event" value="SSERawEvent" />
         <entry key="sse_req" value="SSEReq" />
+        <entry key="sse_req_api" value="SSEReqApi" />
         <entry key="stream" value="Stream" />
         <entry key="stream_event" value="StreamEvent" />
         <entry key="stream_result" value="StreamResult" />
@@ -2981,7 +3186,7 @@
         <entry key="tool_call_function" value="ToolCallFunction" />
         <entry key="tool_function" value="ToolFunction" />
         <entry key="usage" value="Usage" />
-        <entry key="user" value="user" />
+        <entry key="user" value="User" />
         <entry key="user_agent_group" value="UserAgentGroup" />
         <entry key="user_vo" value="userVo" />
         <entry key="util" value="Util" />

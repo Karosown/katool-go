@@ -1,8 +1,9 @@
-package examples
+package ollama
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/karosown/katool-go/ai/examples/format"
 	"log"
 	"strings"
 
@@ -74,7 +75,7 @@ func main() {
 
 	// 解析JSON
 	fmt.Println("\n=== 解析后的结构化数据 ===")
-	var items []QAItem
+	var items []format.QAItem
 	if err := json.Unmarshal([]byte(response.Choices[0].Message.Content), &items); err != nil {
 		log.Printf("解析JSON失败: %v", err)
 		log.Printf("这可能是因为：\n1. 模型没有严格遵守JSON格式\n2. 返回内容包含了markdown标记\n3. format参数传递不正确")

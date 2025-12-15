@@ -28,20 +28,24 @@ func (e *Error) Error() string {
 		e.DecodeErr, e.Err)
 }
 
+type BaseReq[T any] interface {
+	Url(url string) T
+	QueryParam(psPair map[string]string) T
+	Data(dataobj any) T
+	Method(method string) T
+	Headers(headers map[string]string) T
+	HttpClient(client *resty.Client) T
+	ReHeader(k, v string) T
+	SetLogger(logger xlog.Logger) T
+}
+
 // ReqApi HTTP请求接口定义
 // ReqApi defines the HTTP request interface
-type ReqApi interface {
-	Url(url string) ReqApi
-	QueryParam(psPair map[string]string) ReqApi
-	Data(dataobj any) ReqApi
-	FormData(datas map[string]string) ReqApi
-	Files(datas map[string]string) ReqApi
-	Method(method string) ReqApi
-	Headers(headers map[string]string) ReqApi
-	HttpClient(client *resty.Client) ReqApi
-	DecodeHandler(format format.EnDeCodeFormat) ReqApi
-	ReHeader(k, v string) ReqApi
-	SetLogger(logger xlog.Logger) ReqApi
+type ReqApi[T any] interface {
+	BaseReq[T]
+	FormData(datas map[string]string) T
+	Files(datas map[string]string) T
+	DecodeHandler(format format.EnDeCodeFormat) T
 	Build(backDao any) (any, *Error)
 }
 
@@ -66,49 +70,49 @@ func NewReq() *Req {
 
 // Url 设置请求URL
 // Url sets the request URL
-func (r *Req) Url(url string) ReqApi {
+func (r *Req) Url(url string) *Req {
 	r.url = url
 	return r
 }
 
 // FormData 设置表单数据
 // FormData sets form data
-func (r *Req) FormData(datas map[string]string) ReqApi {
+func (r *Req) FormData(datas map[string]string) *Req {
 	r.form = datas
 	return r
 }
 
 // Files 设置文件数据
 // Files sets file data
-func (r *Req) Files(datas map[string]string) ReqApi {
+func (r *Req) Files(datas map[string]string) *Req {
 	r.files = datas
 	return r
 }
 
 // QueryParam 设置查询参数
 // QueryParam sets query parameters
-func (r *Req) QueryParam(psPair map[string]string) ReqApi {
+func (r *Req) QueryParam(psPair map[string]string) *Req {
 	r.queryParams = psPair
 	return r
 }
 
 // SetLogger 设置日志记录器
 // SetLogger sets the logger
-func (r *Req) SetLogger(logger xlog.Logger) ReqApi {
+func (r *Req) SetLogger(logger xlog.Logger) *Req {
 	r.Logger = logger
 	return r
 }
 
 // Headers 设置请求头
 // Headers sets request headers
-func (r *Req) Headers(headers map[string]string) ReqApi {
+func (r *Req) Headers(headers map[string]string) *Req {
 	r.headers = headers
 	return r
 }
 
 // Data 设置请求数据
 // Data sets request data
-func (r *Req) Data(dataobj any) ReqApi {
+func (r *Req) Data(dataobj any) *Req {
 	r.data = dataobj
 	return r
 }
@@ -125,21 +129,21 @@ const (
 
 // Method 设置请求方法
 // Method sets the request method
-func (r *Req) Method(method string) ReqApi {
+func (r *Req) Method(method string) *Req {
 	r.method = method
 	return r
 }
 
 // HttpClient 设置HTTP客户端
 // HttpClient sets the HTTP aiclient
-func (r *Req) HttpClient(client *resty.Client) ReqApi {
+func (r *Req) HttpClient(client *resty.Client) *Req {
 	r.httpClient = client
 	return r
 }
 
 // DecodeHandler 设置编解码处理器
 // DecodeHandler sets the encode/decode handler
-func (r *Req) DecodeHandler(format format.EnDeCodeFormat) ReqApi {
+func (r *Req) DecodeHandler(format format.EnDeCodeFormat) *Req {
 	r.decodeHandler = format
 	if nil == format.GetLogger() {
 		r.decodeHandler.SetLogger(r.Logger)
@@ -304,7 +308,7 @@ func (r *Req) Build(backDao any) (any, *Error) {
 
 // ReHeader 重新设置指定的请求头键值对
 // ReHeader resets a specific request header key-value pair
-func (r *Req) ReHeader(k, v string) ReqApi {
+func (r *Req) ReHeader(k, v string) *Req {
 	r.headers[k] = v
 	return r
 }

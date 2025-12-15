@@ -1,4 +1,4 @@
-package examples
+package ollama
 
 import (
 	"context"

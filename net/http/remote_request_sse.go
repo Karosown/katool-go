@@ -32,18 +32,12 @@ type SSEEventHandler[T any] func(event T) error
 
 // SSE请求接口
 type SSEReqApi[T any] interface {
-	Url(url string) SSEReqApi[T]
-	QueryParam(psPair map[string]string) SSEReqApi[T]
-	Headers(headers map[string]string) SSEReqApi[T]
-	HttpClient(client *resty.Client) SSEReqApi[T]
-	SetLogger(logger xlog.Logger) SSEReqApi[T]
-	ReHeader(k, v string) SSEReqApi[T]
-	Method(method string) SSEReqApi[T]
-	Data(data interface{}) SSEReqApi[T]
-	BeforeEvent(handler SSEEventPreHandler[T]) SSEReqApi[T]
-	OnEvent(handler SSEEventHandler[T]) SSEReqApi[T]
-	OnConnected(handler func() error) SSEReqApi[T]
-	OnError(handler func(err error)) SSEReqApi[T]
+	BaseReq[T]
+
+	BeforeEvent(handler SSEEventPreHandler[T]) T
+	OnEvent(handler SSEEventHandler[T]) T
+	OnConnected(handler func() error) T
+	OnError(handler func(err error)) T
 	Connect() error
 	Disconnect() error
 }
@@ -83,22 +77,22 @@ func NewSSEReq[T any]() *SSEReq[T] {
 	}
 }
 
-func (r *SSEReq[T]) Url(url string) SSEReqApi[T] {
+func (r *SSEReq[T]) Url(url string) *SSEReq[T] {
 	r.url = url
 	return r
 }
 
-func (r *SSEReq[T]) QueryParam(psPair map[string]string) SSEReqApi[T] {
+func (r *SSEReq[T]) QueryParam(psPair map[string]string) *SSEReq[T] {
 	r.queryParams = psPair
 	return r
 }
 
-func (r *SSEReq[T]) SetLogger(logger xlog.Logger) SSEReqApi[T] {
+func (r *SSEReq[T]) SetLogger(logger xlog.Logger) *SSEReq[T] {
 	r.Logger = logger
 	return r
 }
 
-func (r *SSEReq[T]) Headers(headers map[string]string) SSEReqApi[T] {
+func (r *SSEReq[T]) Headers(headers map[string]string) *SSEReq[T] {
 	if headers["Content-type"] == "" {
 		headers["Content-type"] = "application/json"
 	}
@@ -106,40 +100,40 @@ func (r *SSEReq[T]) Headers(headers map[string]string) SSEReqApi[T] {
 	return r
 }
 
-func (r *SSEReq[T]) HttpClient(client *resty.Client) SSEReqApi[T] {
+func (r *SSEReq[T]) HttpClient(client *resty.Client) *SSEReq[T] {
 	r.httpClient = client
 	return r
 }
 
-func (r *SSEReq[T]) ReHeader(k, v string) SSEReqApi[T] {
+func (r *SSEReq[T]) ReHeader(k, v string) *SSEReq[T] {
 	r.headers[k] = v
 	return r
 }
 
-func (r *SSEReq[T]) Method(method string) SSEReqApi[T] {
+func (r *SSEReq[T]) Method(method string) *SSEReq[T] {
 	r.method = method
 	return r
 }
 
-func (r *SSEReq[T]) Data(data interface{}) SSEReqApi[T] {
+func (r *SSEReq[T]) Data(data interface{}) *SSEReq[T] {
 	r.data = data
 	return r
 }
-func (r *SSEReq[T]) BeforeEvent(handler SSEEventPreHandler[T]) SSEReqApi[T] {
+func (r *SSEReq[T]) BeforeEvent(handler SSEEventPreHandler[T]) *SSEReq[T] {
 	r.eventPreHandler = handler
 	return r
 }
-func (r *SSEReq[T]) OnEvent(handler SSEEventHandler[T]) SSEReqApi[T] {
+func (r *SSEReq[T]) OnEvent(handler SSEEventHandler[T]) *SSEReq[T] {
 	r.eventHandler = handler
 	return r
 }
 
-func (r *SSEReq[T]) OnConnected(handler func() error) SSEReqApi[T] {
+func (r *SSEReq[T]) OnConnected(handler func() error) *SSEReq[T] {
 	r.connectedHandler = handler
 	return r
 }
 
-func (r *SSEReq[T]) OnError(handler func(err error)) SSEReqApi[T] {
+func (r *SSEReq[T]) OnError(handler func(err error)) *SSEReq[T] {
 	r.errorHandler = handler
 	return r
 }

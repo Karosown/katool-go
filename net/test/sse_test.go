@@ -277,7 +277,7 @@ func TestSSEReqReconnect(t *testing.T) {
 	var mu sync.Mutex
 
 	// 测试重连逻辑
-	connectSSE := func() (remote.SSEReqApi[string], error) {
+	connectSSE := func() (*remote.SSEReq[string], error) {
 		mu.Lock()
 		connectionCount++
 		currentCount := connectionCount
