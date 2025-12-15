@@ -156,3 +156,10 @@ func TestStringOptional(t *testing.T) {
 
 	fmt.Println("字符串处理结果:", result)
 }
+
+func TestIsNillable(t *testing.T) {
+	A := struct {
+		A string
+	}{}
+	print(optional.ToNillable(A) == nil)
+}

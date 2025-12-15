@@ -13,7 +13,6 @@
         <entry key="Agent">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/agent/agent.go" />
               <option value="file://$PROJECT_DIR$/ai/agent/executor.go" />
             </set>
           </value>
@@ -285,7 +284,6 @@
         <entry key="Config">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/agent/agent.go" />
               <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
             </set>
           </value>
@@ -360,13 +358,6 @@
             </set>
           </value>
         </entry>
-        <entry key="Enhancer">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/container/stream/other.go" />
-            </set>
-          </value>
-        </entry>
         <entry key="Entry">
           <value>
             <set>
@@ -396,20 +387,6 @@
           </value>
         </entry>
         <entry key="ExecutionResult">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/agent/executor.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="Executor">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/agent/executor.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="ExecutorConfig">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/ai/agent/executor.go" />
@@ -605,6 +582,20 @@
             </set>
           </value>
         </entry>
+        <entry key="MCPAdapter">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/agent/mcp_adapter.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="MCPTool">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/agent/mcp_adapter.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="MailAdapter">
           <value>
             <set>
@@ -647,6 +638,13 @@
             </set>
           </value>
         </entry>
+        <entry key="MultiMCPAdapter">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/agent/multi_mcp_adapter.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Node">
           <value>
             <set>
@@ -658,6 +656,13 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/net/http/remote_request_oauth2.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="OfficialMCPAdapter">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/agent/adapters/official_adapter.go" />
             </set>
           </value>
         </entry>
@@ -857,6 +862,13 @@
             </set>
           </value>
         </entry>
+        <entry key="SimpleMCPClient">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/agent/mcp_adapter.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Sort">
           <value>
             <set>
@@ -906,13 +918,6 @@
             </set>
           </value>
         </entry>
-        <entry key="StreamChunk">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/agent/agent.go" />
-            </set>
-          </value>
-        </entry>
         <entry key="StreamEvent">
           <value>
             <set>
@@ -924,6 +929,21 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/ai/deserialize.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="StringOptional">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/optional/test/example_test.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Task">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../template/internal/data/stats/schema/task.go" />
+              <option value="file://$PROJECT_DIR$/../template/internal/data/stats/task.go" />
             </set>
           </value>
         </entry>
@@ -1018,6 +1038,13 @@
             </set>
           </value>
         </entry>
+        <entry key="ViantMCPAdapter">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/agent/adapters/viant_adapter.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="WebReaderError">
           <value>
             <set>
@@ -1088,6 +1115,20 @@
             </set>
           </value>
         </entry>
+        <entry key="officialMCPClientImpl">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/agent/adapters/official_adapter_impl.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="officialMCPClientImplWrapper">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/agent/adapters/official_adapter.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="osFileWrapper">
           <value>
             <set>
@@ -1130,6 +1171,13 @@
             </set>
           </value>
         </entry>
+        <entry key="viantMCPClientImpl">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/ai/agent/adapters/viant_adapter.go" />
+            </set>
+          </value>
+        </entry>
       </map>
     </option>
     <option name="scannedPathMapping">
@@ -1137,7 +1185,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_adapter.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765710752702" />
+              <option name="lastModified" value="1765720575497" />
               <option name="schema">
                 <list>
                   <option value="Mark3LabsAdapter" />
@@ -1150,7 +1198,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_adapter_impl.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765708605000" />
+              <option name="lastModified" value="1765722259716" />
               <option name="schema">
                 <list>
                   <option value="mark3LabsClientImpl" />
@@ -1159,15 +1207,60 @@
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/ai/agent/agent.go">
+        <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_wrapper.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765708035559" />
+              <option name="lastModified" value="1765722259716" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_wrapper_fallback.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765722259716" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/agent/adapters/official_adapter.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765711486287" />
               <option name="schema">
                 <list>
-                  <option value="Agent" />
-                  <option value="Config" />
-                  <option value="StreamChunk" />
+                  <option value="OfficialMCPAdapter" />
+                  <option value="officialMCPClientImplWrapper" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/agent/adapters/official_adapter_impl.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765711486287" />
+              <option name="schema">
+                <list>
+                  <option value="officialMCPClientImpl" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/agent/adapters/official_wrapper.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765711486288" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/agent/adapters/viant_adapter.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765711486288" />
+              <option name="schema">
+                <list>
+                  <option value="ViantMCPAdapter" />
+                  <option value="viantMCPClientImpl" />
                 </list>
               </option>
             </ScannedPath>
@@ -1176,54 +1269,19 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/agent_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765704078143" />
+              <option name="lastModified" value="1765708565563" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/ai/agent/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765708015896" />
+              <option name="lastModified" value="1765727345288" />
               <option name="schema">
                 <list>
                   <option value="Client" />
                 </list>
               </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/agent/examples/12306/main.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765727563074" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/agent/examples/adapters_example.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765711433644" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/agent/examples/amap/main.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765719148516" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/agent/examples/basic_example.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765709799465" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/agent/examples/main.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765711468713" />
             </ScannedPath>
           </value>
         </entry>
@@ -1236,6 +1294,32 @@
                   <option value="Agent" />
                   <option value="AgentConfig" />
                   <option value="ExecutionResult" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/agent/mcp_adapter.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765711485721" />
+              <option name="schema">
+                <list>
+                  <option value="MCPAdapter" />
+                  <option value="MCPTool" />
+                  <option value="SimpleMCPClient" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/agent/multi_mcp_adapter.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765727345287" />
+              <option name="schema">
+                <list>
+                  <option value="MultiMCPAdapter" />
                 </list>
               </option>
             </ScannedPath>
@@ -1346,7 +1430,7 @@
         <entry key="file://$PROJECT_DIR$/ai/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765477609525" />
+              <option name="lastModified" value="1765696320890" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -1556,7 +1640,7 @@
         <entry key="file://$PROJECT_DIR$/container/container_test/stream_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765648521638" />
+              <option name="lastModified" value="1765808197766" />
               <option name="schema">
                 <list>
                   <option value="user" />
@@ -1602,7 +1686,7 @@
         <entry key="file://$PROJECT_DIR$/container/optional/optional.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765473874364" />
+              <option name="lastModified" value="1765812968678" />
               <option name="schema">
                 <list>
                   <option value="Optional" />
@@ -1611,10 +1695,15 @@
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/container/stream/ctream/ctream.go">
+        <entry key="file://$PROJECT_DIR$/container/optional/test/example_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765645733947" />
+              <option name="lastModified" value="1765812933714" />
+              <option name="schema">
+                <list>
+                  <option value="StringOptional" />
+                </list>
+              </option>
             </ScannedPath>
           </value>
         </entry>
@@ -2487,7 +2576,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/core/contain.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765300811098" />
+              <option name="lastModified" value="1765734292403" />
               <option name="schema">
                 <list>
                   <option value="Contain" />
@@ -2701,6 +2790,37 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/schema/task.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765808296251" />
+              <option name="schema">
+                <list>
+                  <option value="Task" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/task.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765808437103" />
+              <option name="schema">
+                <list>
+                  <option value="Task" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../template/internal/data/util/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1765812452367" />
+            </ScannedPath>
+          </value>
+        </entry>
       </map>
     </option>
     <option name="tableStructMapping">
@@ -2755,14 +2875,11 @@
         <entry key="email_config" value="EmailConfig" />
         <entry key="empty_en_decode_format_node" value="EmptyEnDecodeFormatNode" />
         <entry key="engine" value="Engine" />
-        <entry key="enhancer" value="Enhancer" />
         <entry key="entry" value="Entry" />
         <entry key="error" value="Error" />
         <entry key="error_response" value="ErrorResponse" />
         <entry key="execute_result" value="ExecuteResult" />
         <entry key="execution_result" value="ExecutionResult" />
-        <entry key="executor" value="Executor" />
-        <entry key="executor_config" value="ExecutorConfig" />
         <entry key="field_info" value="fieldInfo" />
         <entry key="file_downloader" value="FileDownloader" />
         <entry key="file_info" value="FileInfo" />
@@ -2796,14 +2913,20 @@
         <entry key="mark3_labs_adapter" value="Mark3LabsAdapter" />
         <entry key="mark3_labs_client_impl" value="mark3LabsClientImpl" />
         <entry key="mark3_labs_mcp_client" value="mark3LabsMCPClient" />
+        <entry key="mcp_adapter" value="MCPAdapter" />
+        <entry key="mcp_tool" value="MCPTool" />
         <entry key="memory_file" value="MemoryFile" />
         <entry key="memory_file_info" value="memoryFileInfo" />
         <entry key="message" value="Message" />
         <entry key="mock_deserialize_provider" value="mockDeserializeProvider" />
         <entry key="mock_provider" value="mockProvider" />
         <entry key="model_info" value="ModelInfo" />
+        <entry key="multi_mcp_adapter" value="MultiMCPAdapter" />
         <entry key="node" value="Node" />
         <entry key="o_auth2_req" value="OAuth2Req" />
+        <entry key="official_mcp_adapter" value="OfficialMCPAdapter" />
+        <entry key="official_mcp_client_impl" value="officialMCPClientImpl" />
+        <entry key="official_mcp_client_impl_wrapper" value="officialMCPClientImplWrapper" />
         <entry key="open_ai_compatible_provider" value="OpenAICompatibleProvider" />
         <entry key="opt_switch" value="OptSwitch" />
         <entry key="option" value="Option" />
@@ -2832,6 +2955,7 @@
         <entry key="safe_map" value="SafeMap" />
         <entry key="segment" value="Segment" />
         <entry key="simple_ai_client" value="SimpleAIClient" />
+        <entry key="simple_mcp_client" value="SimpleMCPClient" />
         <entry key="sms_adapter" value="SMSAdapter" />
         <entry key="sort" value="Sort" />
         <entry key="sorted_map" value="SortedMap" />
@@ -2843,9 +2967,10 @@
         <entry key="sse_raw_event" value="SSERawEvent" />
         <entry key="sse_req" value="SSEReq" />
         <entry key="stream" value="Stream" />
-        <entry key="stream_chunk" value="StreamChunk" />
         <entry key="stream_event" value="StreamEvent" />
         <entry key="stream_result" value="StreamResult" />
+        <entry key="string_optional" value="StringOptional" />
+        <entry key="task" value="Task" />
         <entry key="temp" value="Temp" />
         <entry key="test_csv" value="TestCSV" />
         <entry key="text_en_decode_format" value="TextEnDecodeFormat" />
@@ -2860,12 +2985,14 @@
         <entry key="user_agent_group" value="UserAgentGroup" />
         <entry key="user_vo" value="userVo" />
         <entry key="util" value="Util" />
+        <entry key="viant_mcp_adapter" value="ViantMCPAdapter" />
+        <entry key="viant_mcp_client_impl" value="viantMCPClientImpl" />
         <entry key="web_reader_error" value="WebReaderError" />
         <entry key="wrapper" value="Wrapper" />
         <entry key="xml_en_de_code_format" value="XMLEnDeCodeFormat" />
         <entry key="zip_info" value="ZipInfo" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1765645553475" />
+    <option name="lastTimeChecked" value="1765808113338" />
   </component>
 </project>

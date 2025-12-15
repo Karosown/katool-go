@@ -140,14 +140,21 @@ func Test_MapE(t *testing.T) {
 	// 排序
 	stream.ToStream(&ul).
 		Parallel().
-		Sort(func(a user, b user) bool { return a.Id < b.Id }).ForEach(func(item user) { println(convert.ToString(item.Id) + " " + item.Name) })
+		Sort(func(a user, b user) bool { return a.Id < b.Id }).
+		ForEach(func(item user) { println(convert.ToString(item.Id) + " " + item.Name) })
 	// 求和
-	totalMoney := userStream.Reduce(int64(0), func(cntValue any, nxt user) any { return cntValue.(int64) + int64(nxt.Money) }, func(sum1, sum2 any) any {
-		return sum1.(int64) + sum2.(int64)
-	})
+	totalMoney := userStream.
+		Reduce(int64(0),
+			func(cntValue any, nxt user) any { return cntValue.(int64) + int64(nxt.Money) },
+			func(sum1, sum2 any) any {
+				return sum1.(int64) + sum2.(int64)
+			})
 	println(totalMoney.(int64))
 	// 过滤
-	userStream.Filter(func(item user) bool { return item.Sex != 0 }).DistinctBy(algorithm.HASH_WITH_JSON_MD5[user]).ToOptionList().ForEach(func(item user) { println(item.Name) })
+	userStream.Filter(func(item user) bool { return item.Sex != 0 }).
+		DistinctBy(algorithm.HASH_WITH_JSON_MD5[user]).
+		ToOptionList().
+		ForEach(func(item user) { println(item.Name) })
 	// 转换
 	s := stream.Em[user, *userVo](userStream).Map(func(item user) *userVo {
 		properties, err := convert.CopyProperties(&item, &userVo{})

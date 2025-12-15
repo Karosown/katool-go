@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"reflect"
 	"slices"
 )
 
@@ -222,4 +223,11 @@ func In[T cmp.Ordered](item T, arr ...T) bool {
 
 func Must[T any](value T, err error) T {
 	return value
+}
+
+func ToNillable[T any](value T) *T {
+	if reflect.ValueOf(value).IsZero() {
+		return nil
+	}
+	return &value
 }
