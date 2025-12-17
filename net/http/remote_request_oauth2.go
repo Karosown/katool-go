@@ -29,7 +29,7 @@ type OAuth2Req struct {
 	RefreshTokenHeader       xmap.Map[string, string]
 	CallBackFunction         func(*OAuth2Req, string, string)
 	PersistenceTokenFunction func(obj *FileWithOAuth2TokenStorage) error
-	InterruptRetryCondition  func(err *Error) bool
+	InterruptRetryCondition  func(err *Error) error
 	GetTokenFunction         func(platform string) (*FileWithOAuth2TokenStorage, error)
 }
 
@@ -151,8 +151,10 @@ func (O *OAuth2Req) EnsureAccessToken() error {
 		)
 		// 自旋重试，如果在 150s 之内没有一次请求成功，那么抛出
 		for _, _, err = O.RefreshToken(O.CallBackFunction); err != nil && i <= 7; i++ {
-			if O.InterruptRetryCondition != nil && O.InterruptRetryCondition(err) {
-				break
+			if O.InterruptRetryCondition != nil {
+				if e := O.InterruptRetryCondition(err); e != nil {
+					return e
+				}
 			}
 			time.Sleep(time.Duration(5*i) * time.Second)
 			_, _, err = O.RefreshToken(O.CallBackFunction)
@@ -166,7 +168,7 @@ func (O *OAuth2Req) EnsureAccessToken() error {
 
 func (O *OAuth2Req) RefreshTokenConfig(url string, refreshTokenExpiry int64,
 	refreshParam url.Values, tokenHeaderName string,
-	tokenValuePrefix string, callbackFunction func(*OAuth2Req, string, string), interruptRetry ...func(err *Error) bool) *OAuth2Req {
+	tokenValuePrefix string, callbackFunction func(*OAuth2Req, string, string), interruptRetry ...func(err *Error) error) *OAuth2Req {
 	O.refreshUrl = url
 	O.refreshTokenExpiry = refreshTokenExpiry
 	O.refreshParam = refreshParam
@@ -221,11 +223,17 @@ func (O *OAuth2Req) SetLogger(logger xlog.Logger) *OAuth2Req {
 }
 func (O *OAuth2Req) Build(backDao any) (any, *Error) {
 	if err := O.EnsureAccessToken(); err != nil {
-		return nil, &Error{
-			HttpErr:   nil,
-			DecodeErr: nil,
-			Err:       fmt.Errorf("error ensuring access token:%s", err),
+		switch err.(type) {
+		case *Error:
+			return nil, err.(*Error)
+		default:
+			return nil, &Error{
+				HttpErr:   nil,
+				DecodeErr: fmt.Errorf("error ensuring access token:%s", err),
+				Err:       err,
+			}
 		}
+
 	}
 	return O.Req.Build(backDao)
 }
