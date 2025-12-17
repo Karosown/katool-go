@@ -2,6 +2,7 @@ package remote
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -28,6 +29,7 @@ type OAuth2Req struct {
 	RefreshTokenHeader       xmap.Map[string, string]
 	CallBackFunction         func(*OAuth2Req, string, string)
 	PersistenceTokenFunction func(obj *FileWithOAuth2TokenStorage) error
+	InterruptRetryCondition  func(err *Error) bool
 	GetTokenFunction         func(platform string) (*FileWithOAuth2TokenStorage, error)
 }
 
@@ -46,7 +48,7 @@ func (O *OAuth2Req) ReHeader(k, v string) *OAuth2Req {
 	return O
 }
 
-func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string, refreshToken string)) (*string, *string, error) {
+func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string, refreshToken string)) (*string, *string, *Error) {
 	// todo: api解耦合
 	if O.httpClient == nil {
 		O.httpClient = resty.New()
@@ -57,7 +59,11 @@ func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string,
 	if O.RefreshTokenHeader.Len() > 0 {
 		req, e := http.NewRequest("POST", O.refreshUrl, strings.NewReader(O.refreshParam.Encode()))
 		if e != nil {
-			return nil, nil, fmt.Errorf("failed to create new request: %v", err)
+			return nil, nil, &Error{
+				HttpErr:   nil,
+				DecodeErr: err,
+				Err:       fmt.Errorf("failed to create new request: %v", err),
+			}
 		}
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 		O.RefreshTokenHeader.ForEach(func(k string, v string) {
@@ -67,7 +73,13 @@ func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string,
 	} else {
 		resp, err = O.httpClient.GetClient().PostForm(O.refreshUrl, O.refreshParam)
 		if err != nil {
-			return nil, nil, fmt.Errorf("error refreshing token: %v", err)
+			return nil, nil, &Error{
+				HttpErr: optional.IsTrueByFunc(resp != nil, func() error {
+					return errors.New(resp.Status)
+				}, optional.Identity[error](nil)),
+				DecodeErr: nil,
+				Err:       fmt.Errorf("error refreshing token: %v", err),
+			}
 		}
 	}
 	defer func() {
@@ -78,14 +90,32 @@ func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string,
 
 	if !optional.In(resp.StatusCode, 200, 201, 202, 203, 204, 205, 206, 207, 208, 226) {
 		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-			return nil, nil, fmt.Errorf("error parsing refresh token response: %v", err)
+			return nil, nil, &Error{
+				HttpErr: optional.IsTrueByFunc(resp != nil, func() error {
+					return errors.New(resp.Status)
+				}, optional.Identity[error](nil)),
+				DecodeErr: fmt.Errorf("error parsing refresh token response: %v", err),
+				Err:       errors.New(fmt.Sprintf("error refreshing token: %v", err)),
+			}
 		} else {
-			return nil, nil, fmt.Errorf("failed to refresh token, status code: %d err = %+v", resp.StatusCode, result)
+			return nil, nil, &Error{
+				HttpErr: optional.IsTrueByFunc(resp != nil, func() error {
+					return errors.New(resp.Status)
+				}, optional.Identity[error](nil)),
+				DecodeErr: nil,
+				Err:       fmt.Errorf("failed to refresh token, status code: %d err = %+v", resp.StatusCode, result),
+			}
 		}
 
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, nil, fmt.Errorf("error parsing refresh token response: %v", err)
+		return nil, nil, &Error{
+			HttpErr: optional.IsTrueByFunc(resp != nil, func() error {
+				return errors.New(resp.Status)
+			}, optional.Identity[error](nil)),
+			DecodeErr: fmt.Errorf("error parsing refresh token response: %v", err),
+			Err:       nil,
+		}
 	}
 	if accessToken, ok := result["access_token"].(string); ok {
 		trimPrefix := strings.TrimSpace(O.tokenValurPrefix)
@@ -105,7 +135,11 @@ func (O *OAuth2Req) RefreshToken(runner func(req *OAuth2Req, accessToken string,
 		}
 		return &accessToken, &refreshToken, nil
 	} else {
-		return nil, nil, fmt.Errorf("no access_token found in response")
+		return nil, nil, &Error{
+			HttpErr:   fmt.Errorf("no access_token found in response"),
+			DecodeErr: fmt.Errorf("no access_token found in response"),
+			Err:       fmt.Errorf("no access_token found in response"),
+		}
 	}
 }
 
@@ -113,10 +147,13 @@ func (O *OAuth2Req) EnsureAccessToken() error {
 	if time.Now().Unix() >= O.refreshTokenExpiry {
 		var (
 			i   int64
-			err error
+			err *Error
 		)
 		// 自旋重试，如果在 150s 之内没有一次请求成功，那么抛出
 		for _, _, err = O.RefreshToken(O.CallBackFunction); err != nil && i <= 7; i++ {
+			if O.InterruptRetryCondition != nil && O.InterruptRetryCondition(err) {
+				break
+			}
 			time.Sleep(time.Duration(5*i) * time.Second)
 			_, _, err = O.RefreshToken(O.CallBackFunction)
 		}
@@ -129,13 +166,19 @@ func (O *OAuth2Req) EnsureAccessToken() error {
 
 func (O *OAuth2Req) RefreshTokenConfig(url string, refreshTokenExpiry int64,
 	refreshParam url.Values, tokenHeaderName string,
-	tokenValuePrefix string, callbackFunction func(*OAuth2Req, string, string)) *OAuth2Req {
+	tokenValuePrefix string, callbackFunction func(*OAuth2Req, string, string), interruptRetry ...func(err *Error) bool) *OAuth2Req {
 	O.refreshUrl = url
 	O.refreshTokenExpiry = refreshTokenExpiry
 	O.refreshParam = refreshParam
 	O.tokenHeaderName = tokenHeaderName
 	O.tokenValurPrefix = tokenValuePrefix
 	O.CallBackFunction = callbackFunction
+	if len(interruptRetry) > 0 && interruptRetry[0] != nil {
+		if len(interruptRetry) > 1 {
+			O.LogErr("the RefreshTokenConfig's interruptRetry size must be 0 or 1")
+		}
+		O.InterruptRetryCondition = interruptRetry[0]
+	}
 	return O
 }
 func (O *OAuth2Req) Url(url string) *OAuth2Req {
