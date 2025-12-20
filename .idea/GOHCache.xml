@@ -42,8 +42,20 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/web_reader.go" />
-              <option value="file://$PROJECT_DIR$/../template/internal/data/stats/article.go" />
-              <option value="file://$PROJECT_DIR$/../template/internal/data/stats/schema/article.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ArticleLink">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/article_list.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ArticleLinkValue">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/article_list.go" />
             </set>
           </value>
         </entry>
@@ -124,6 +136,13 @@
             </set>
           </value>
         </entry>
+        <entry key="BytesSerializer">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/xredis/template.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="CFSession">
           <value>
             <set>
@@ -149,6 +168,13 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/captcha.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ChanBroker">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/mq/cmq/client.go" />
             </set>
           </value>
         </entry>
@@ -242,6 +268,7 @@
               <option value="file://$PROJECT_DIR$/ai/agent/client.go" />
               <option value="file://$PROJECT_DIR$/ai/client.go" />
               <option value="file://$PROJECT_DIR$/db/xmongo/options/client.go" />
+              <option value="file://$PROJECT_DIR$/db/xredis/client.go" />
               <option value="file://$PROJECT_DIR$/web_crawler/client.go" />
               <option value="file://$PROJECT_DIR$/words/split/cgojieba/jieba.go" />
               <option value="file://$PROJECT_DIR$/words/split/jieba/jieba.go" />
@@ -287,6 +314,7 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/worker.go" />
             </set>
           </value>
         </entry>
@@ -528,10 +556,24 @@
             </set>
           </value>
         </entry>
+        <entry key="JSONCodec">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xmap/redis_map.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="JSONEnDeCodeFormat">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/net/format/baseformat/json.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="JSONSerializer">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/xredis/template.go" />
             </set>
           </value>
         </entry>
@@ -546,6 +588,20 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/util/similarity/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="KafkaClient">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/mq/kfmq/client.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="LinkExtractOptions">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/article_list.go" />
             </set>
           </value>
         </entry>
@@ -633,6 +689,13 @@
             </set>
           </value>
         </entry>
+        <entry key="Metadata">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/mq/types.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="ModelInfo">
           <value>
             <set>
@@ -696,6 +759,20 @@
             </set>
           </value>
         </entry>
+        <entry key="OrderDetail">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/mq/cmq/example/main.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="PageWaitOptions">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/page_wait.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Pager">
           <value>
             <set>
@@ -724,6 +801,13 @@
             </set>
           </value>
         </entry>
+        <entry key="PublishOptions">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/mq/publish.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Query">
           <value>
             <set>
@@ -738,10 +822,24 @@
             </set>
           </value>
         </entry>
-        <entry key="ReSource">
+        <entry key="RedisClient">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/../template/internal/data/stats/schema/source.go" />
+              <option value="file://$PROJECT_DIR$/mq/rdmq/client.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RedisMap">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xmap/redis_map.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RedisTemplate">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/db/xredis/template.go" />
             </set>
           </value>
         </entry>
@@ -763,6 +861,20 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/robots/robots.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RodPasteOptions">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rod_paste.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="RodPasteResult">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rod_paste.go" />
             </set>
           </value>
         </entry>
@@ -878,6 +990,13 @@
             </set>
           </value>
         </entry>
+        <entry key="SimpleWorker">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/simple.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Sort">
           <value>
             <set>
@@ -941,11 +1060,17 @@
             </set>
           </value>
         </entry>
-        <entry key="Tag">
+        <entry key="StringSerializer">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/../template/internal/data/stats/schema/tag.go" />
-              <option value="file://$PROJECT_DIR$/../template/internal/data/stats/tag.go" />
+              <option value="file://$PROJECT_DIR$/db/xredis/template.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SubscribeOptions">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/mq/subcribe.go" />
             </set>
           </value>
         </entry>
@@ -1054,6 +1179,13 @@
             </set>
           </value>
         </entry>
+        <entry key="WorkerLoader">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/worker.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Wrapper">
           <value>
             <set>
@@ -1075,10 +1207,80 @@
             </set>
           </value>
         </entry>
+        <entry key="bytesValueCodec">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xmap/redis_map.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="chanMessage">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/mq/cmq/client.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="consumerGroup">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/mq/cmq/client.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="fieldInfo">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/file/file_serialize/csv/util.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="harCookieNV">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rod_paste_formats.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="harEntry">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rod_paste_formats.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="harFile">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rod_paste_formats.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="harLog">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rod_paste_formats.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="harNameVal">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rod_paste_formats.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="harRequest">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/rod_paste_formats.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="kafkaMessage">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/mq/kfmq/sub.go" />
             </set>
           </value>
         </entry>
@@ -1156,6 +1358,27 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/robots/robots.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="streamMessage">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/mq/rdmq/sub.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="stringKeyCodec">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xmap/redis_map.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="stringValueCodec">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xmap/redis_map.go" />
             </set>
           </value>
         </entry>
@@ -1479,6 +1702,13 @@
                   <option value="qa" />
                 </list>
               </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/ollama/ollama_with_tools.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766234201853" />
             </ScannedPath>
           </value>
         </entry>
@@ -1809,6 +2039,22 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/container/xmap/redis_map.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766161342610" />
+              <option name="schema">
+                <list>
+                  <option value="JSONCodec" />
+                  <option value="RedisMap" />
+                  <option value="stringKeyCodec" />
+                  <option value="stringValueCodec" />
+                  <option value="bytesValueCodec" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/container/xmap/safemap.go">
           <value>
             <ScannedPath>
@@ -1967,6 +2213,40 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/db/xredis/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766161914086" />
+              <option name="schema">
+                <list>
+                  <option value="Client" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xredis/json.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766162051137" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/db/xredis/template.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766162475339" />
+              <option name="schema">
+                <list>
+                  <option value="JSONSerializer" />
+                  <option value="StringSerializer" />
+                  <option value="BytesSerializer" />
+                  <option value="RedisTemplate" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/file/file_downloader/file_downloader.go">
           <value>
             <ScannedPath>
@@ -2050,6 +2330,172 @@
                   <option value="LockSupport" />
                 </list>
               </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766080473504" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/cmq/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766158000194" />
+              <option name="schema">
+                <list>
+                  <option value="chanMessage" />
+                  <option value="consumerGroup" />
+                  <option value="ChanBroker" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/cmq/example/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766157994015" />
+              <option name="schema">
+                <list>
+                  <option value="OrderDetail" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/cmq/pub.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766158000188" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/cmq/sub.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766158004948" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/cmq/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766080686779" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/kfmq/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766159990279" />
+              <option name="schema">
+                <list>
+                  <option value="KafkaClient" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/kfmq/pub.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766160065789" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/kfmq/sub.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766160110889" />
+              <option name="schema">
+                <list>
+                  <option value="kafkaMessage" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/publish.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766080887533" />
+              <option name="schema">
+                <list>
+                  <option value="PublishOptions" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/rdmq/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766158767788" />
+              <option name="schema">
+                <list>
+                  <option value="RedisClient" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/rdmq/pub.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766158792654" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/rdmq/sub.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766159117642" />
+              <option name="schema">
+                <list>
+                  <option value="streamMessage" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/rdmq/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766158779849" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/subcribe.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766081378844" />
+              <option name="schema">
+                <list>
+                  <option value="SubscribeOptions" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/types.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766080456474" />
+              <option name="schema">
+                <list>
+                  <option value="Metadata" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/mq/util.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766157640757" />
             </ScannedPath>
           </value>
         </entry>
@@ -2524,6 +2970,20 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/article_list.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766167924476" />
+              <option name="schema">
+                <list>
+                  <option value="ArticleLink" />
+                  <option value="ArticleLinkValue" />
+                  <option value="LinkExtractOptions" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/web_crawler/captcha.go">
           <value>
             <ScannedPath>
@@ -2566,7 +3026,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/core/contain.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765813003763" />
+              <option name="lastModified" value="1766238998169" />
               <option name="schema">
                 <list>
                   <option value="Contain" />
@@ -2604,6 +3064,18 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/page_wait.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766168641903" />
+              <option name="schema">
+                <list>
+                  <option value="PageWaitOptions" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/web_crawler/render/render.go">
           <value>
             <ScannedPath>
@@ -2629,6 +3101,43 @@
           <value>
             <ScannedPath>
               <option name="lastModified" value="1765431483498" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/rod_paste.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766226240261" />
+              <option name="schema">
+                <list>
+                  <option value="RodPasteOptions" />
+                  <option value="RodPasteResult" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/rod_paste_crawl.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766226363495" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/rod_paste_formats.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766226314338" />
+              <option name="schema">
+                <list>
+                  <option value="harFile" />
+                  <option value="harLog" />
+                  <option value="harEntry" />
+                  <option value="harRequest" />
+                  <option value="harNameVal" />
+                  <option value="harCookieNV" />
+                </list>
+              </option>
             </ScannedPath>
           </value>
         </entry>
@@ -2667,10 +3176,24 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/test/example/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766239044770" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/test/web_reader_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766235620287" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/web_crawler/web_reader.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765384082594" />
+              <option name="lastModified" value="1766219060007" />
               <option name="schema">
                 <list>
                   <option value="WebReaderError" />
@@ -2780,68 +3303,26 @@
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/article.go">
+        <entry key="file://$PROJECT_DIR$/../template/internal/cron/simple.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765909375118" />
+              <option name="lastModified" value="1766217312632" />
               <option name="schema">
                 <list>
-                  <option value="Article" />
+                  <option value="SimpleWorker" />
                 </list>
               </option>
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/provider.go">
+        <entry key="file://$PROJECT_DIR$/../template/internal/cron/worker.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765909259428" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/schema/article.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765909156411" />
+              <option name="lastModified" value="1766165636846" />
               <option name="schema">
                 <list>
-                  <option value="Article" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/schema/source.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765909238863" />
-              <option name="schema">
-                <list>
-                  <option value="ReSource" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/schema/tag.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765909649118" />
-              <option name="schema">
-                <list>
-                  <option value="Tag" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/data/stats/tag.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765909430370" />
-              <option name="schema">
-                <list>
-                  <option value="Tag" />
+                  <option value="Config" />
+                  <option value="WorkerLoader" />
                 </list>
               </option>
             </ScannedPath>
@@ -2857,6 +3338,8 @@
         <entry key="anti_bot_config" value="AntiBotConfig" />
         <entry key="anti_bot_transport" value="AntiBotTransport" />
         <entry key="article" value="Article" />
+        <entry key="article_link" value="ArticleLink" />
+        <entry key="article_link_value" value="ArticleLinkValue" />
         <entry key="atom_author" value="AtomAuthor" />
         <entry key="atom_category" value="AtomCategory" />
         <entry key="atom_entry" value="AtomEntry" />
@@ -2868,8 +3351,12 @@
         <entry key="avatar_result" value="AvatarResult" />
         <entry key="batch" value="Batch" />
         <entry key="bytes_decode_format_valid" value="BytesDecodeFormatValid" />
+        <entry key="bytes_serializer" value="BytesSerializer" />
+        <entry key="bytes_value_codec" value="bytesValueCodec" />
         <entry key="captcha_solver" value="CaptchaSolver" />
         <entry key="cf_session" value="CFSession" />
+        <entry key="chan_broker" value="ChanBroker" />
+        <entry key="chan_message" value="chanMessage" />
         <entry key="channel" value="Channel" />
         <entry key="chat_request" value="ChatRequest" />
         <entry key="chat_request_builder" value="ChatRequestBuilder" />
@@ -2890,6 +3377,7 @@
         <entry key="complete_email_info" value="CompleteEmailInfo" />
         <entry key="config" value="Config" />
         <entry key="config_manager" value="ConfigManager" />
+        <entry key="consumer_group" value="consumerGroup" />
         <entry key="contain" value="Contain" />
         <entry key="conversation_manager" value="ConversationManager" />
         <entry key="csv_en_decode_format" value="CSVEnDecodeFormat" />
@@ -2922,13 +3410,24 @@
         <entry key="function_wrapper" value="FunctionWrapper" />
         <entry key="guid" value="GUID" />
         <entry key="gzip_en_decode_format" value="GzipEnDecodeFormat" />
+        <entry key="har_cookie_nv" value="harCookieNV" />
+        <entry key="har_entry" value="harEntry" />
+        <entry key="har_file" value="harFile" />
+        <entry key="har_log" value="harLog" />
+        <entry key="har_name_val" value="harNameVal" />
+        <entry key="har_request" value="harRequest" />
         <entry key="hash_based_map" value="HashBasedMap" />
         <entry key="heap" value="Heap" />
         <entry key="item" value="Item" />
         <entry key="json_array_en_de_code_format" value="JSONArrayEnDeCodeFormat" />
+        <entry key="json_codec" value="JSONCodec" />
         <entry key="json_en_de_code_format" value="JSONEnDeCodeFormat" />
+        <entry key="json_serializer" value="JSONSerializer" />
         <entry key="json_value" value="JsonValue" />
+        <entry key="kafka_client" value="KafkaClient" />
+        <entry key="kafka_message" value="kafkaMessage" />
         <entry key="kv" value="KV" />
+        <entry key="link_extract_options" value="LinkExtractOptions" />
         <entry key="lock_support" value="LockSupport" />
         <entry key="log_error" value="LogError" />
         <entry key="log_message" value="LogMessage" />
@@ -2944,6 +3443,7 @@
         <entry key="memory_file" value="MemoryFile" />
         <entry key="memory_file_info" value="memoryFileInfo" />
         <entry key="message" value="Message" />
+        <entry key="metadata" value="Metadata" />
         <entry key="mock_deserialize_provider" value="mockDeserializeProvider" />
         <entry key="mock_provider" value="mockProvider" />
         <entry key="model_info" value="ModelInfo" />
@@ -2957,18 +3457,25 @@
         <entry key="opt_switch" value="OptSwitch" />
         <entry key="option" value="Option" />
         <entry key="optional" value="Optional" />
+        <entry key="order_detail" value="OrderDetail" />
         <entry key="os_file_wrapper" value="osFileWrapper" />
+        <entry key="page_wait_options" value="PageWaitOptions" />
         <entry key="pager" value="Pager" />
         <entry key="period_time" value="PeriodTime" />
         <entry key="period_time_stamp" value="PeriodTimeStamp" />
         <entry key="person" value="person" />
         <entry key="provider_config" value="ProviderConfig" />
+        <entry key="publish_options" value="PublishOptions" />
         <entry key="qa" value="qa" />
         <entry key="query" value="Query" />
-        <entry key="re_source" value="ReSource" />
+        <entry key="redis_client" value="RedisClient" />
+        <entry key="redis_map" value="RedisMap" />
+        <entry key="redis_template" value="RedisTemplate" />
         <entry key="remote_multi_multi_file_de_code_format" value="RemoteMultiMultiFileDeCodeFormat" />
         <entry key="req" value="Req" />
         <entry key="robots_txt" value="RobotsTxt" />
+        <entry key="rod_paste_options" value="RodPasteOptions" />
+        <entry key="rod_paste_result" value="RodPasteResult" />
         <entry key="rss" value="RSS" />
         <entry key="rule_builder" value="RuleBuilder" />
         <entry key="rule_engine" value="RuleEngine" />
@@ -2983,6 +3490,7 @@
         <entry key="segment" value="Segment" />
         <entry key="simple_ai_client" value="SimpleAIClient" />
         <entry key="simple_mcp_client" value="SimpleMCPClient" />
+        <entry key="simple_worker" value="SimpleWorker" />
         <entry key="sms_adapter" value="SMSAdapter" />
         <entry key="sort" value="Sort" />
         <entry key="sorted_map" value="SortedMap" />
@@ -2995,8 +3503,12 @@
         <entry key="sse_req" value="SSEReq" />
         <entry key="stream" value="Stream" />
         <entry key="stream_event" value="StreamEvent" />
+        <entry key="stream_message" value="streamMessage" />
         <entry key="stream_result" value="StreamResult" />
-        <entry key="tag" value="Tag" />
+        <entry key="string_key_codec" value="stringKeyCodec" />
+        <entry key="string_serializer" value="StringSerializer" />
+        <entry key="string_value_codec" value="stringValueCodec" />
+        <entry key="subscribe_options" value="SubscribeOptions" />
         <entry key="temp" value="Temp" />
         <entry key="test_csv" value="TestCSV" />
         <entry key="text_en_decode_format" value="TextEnDecodeFormat" />
@@ -3014,11 +3526,12 @@
         <entry key="viant_mcp_adapter" value="ViantMCPAdapter" />
         <entry key="viant_mcp_client_impl" value="viantMCPClientImpl" />
         <entry key="web_reader_error" value="WebReaderError" />
+        <entry key="worker_loader" value="WorkerLoader" />
         <entry key="wrapper" value="Wrapper" />
         <entry key="xml_en_de_code_format" value="XMLEnDeCodeFormat" />
         <entry key="zip_info" value="ZipInfo" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1765908277013" />
+    <option name="lastTimeChecked" value="1766157944271" />
   </component>
 </project>

@@ -1,6 +1,6 @@
 module 12306
 
-go 1.25.5
+go 1.24.0
 
 require (
 	github.com/karosown/katool-go v0.0.0-20251214155317-042dad9aab61

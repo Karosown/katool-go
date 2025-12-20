@@ -1,6 +1,7 @@
 package core
 
 import (
+	"os"
 	"sync"
 	"sync/atomic"
 
@@ -59,12 +60,24 @@ func NewContainWithoutPool(path string, headless bool) *Contain {
 // NewContainWithPool creates a new Contain instance (with option to use global pool)
 func NewContainWithPool(path string, headless bool, useGlobalPool bool) *Contain {
 	l := launcher.NewUserMode()
-	launch := l.NoSandbox(true).Headless(headless).Set("disable-gpu").
-		Set("disable-dev-shm-usage").
-		Set("disable-setuid-sandbox").
-		Set("no-sandbox").
-		Set("disable-web-security").
-		Set("disable-infobars").Bin(path).MustLaunch()
+	l = l.NoSandbox(true).
+		Set("--disable-setuid-sandbox").
+		Set("--disable-dev-shm-usage").
+		Set("--disable-accelerated-2d-canvas").
+		Set("--no-first-run").
+		Set("--no-zygote").
+		Set("--disable-gpu").
+		Set("user-data-dir", os.TempDir())
+	if headless {
+		l = l.Set("--headless")
+	}
+	//Set("--user-data-dir").
+	// 注意：你提供的列表中没有 web-security 和 infobars，所以我去掉了它们，
+	// 如果你需要保留原有的这两个设置，请取消下面两行的注释：
+	// Set("--disable-web-security").
+	// Set("--disable-infobars").
+	launch := l.Bin(path).
+		MustLaunch()
 
 	var browser *rod.Browser
 
@@ -77,7 +90,7 @@ func NewContainWithPool(path string, headless bool, useGlobalPool bool) *Contain
 		})
 		if err != nil {
 			// 如果从池中获取失败，直接创建新浏览器
-			browser = rod.New().ControlURL(launch).MustConnect()
+			browser = rod.New().MustIncognito().ControlURL(launch).MustConnect()
 		} else {
 			// 成功从池中获取，减少计数器
 			atomic.AddInt32(&poolSize, -1)
@@ -85,7 +98,7 @@ func NewContainWithPool(path string, headless bool, useGlobalPool bool) *Contain
 		}
 	} else {
 		// 不使用全局池，直接创建新浏览器
-		browser = rod.New().ControlURL(launch).MustConnect()
+		browser = rod.New().MustIncognito().ControlURL(launch).MustConnect()
 	}
 
 	return &Contain{
@@ -134,12 +147,20 @@ func createBrowserForPool(path string, headless bool) {
 
 	// 创建新浏览器
 	l := launcher.NewUserMode()
-	launch := l.NoSandbox(true).Headless(headless).Set("disable-gpu").
-		Set("disable-dev-shm-usage").
+	launch := l.NoSandbox(true).Headless(headless).
 		Set("disable-setuid-sandbox").
-		Set("no-sandbox").
-		Set("disable-web-security").
-		Set("disable-infobars").Bin(path).MustLaunch()
+		Set("disable-dev-shm-usage").
+		Set("disable-accelerated-2d-canvas").
+		Set("no-first-run").
+		Set("no-zygote").
+		Set("disable-gpu").
+		Set("user-data-dir", os.TempDir()).
+		// 注意：你提供的列表中没有 web-security 和 infobars，所以我去掉了它们，
+		// 如果你需要保留原有的这两个设置，请取消下面两行的注释：
+		// Set("--disable-web-security").
+		// Set("--disable-infobars").
+		Bin(path).
+		MustLaunch()
 	browser := rod.New().ControlURL(launch).MustConnect()
 
 	// 放入池中（rod.Pool 会自动处理容量限制）
