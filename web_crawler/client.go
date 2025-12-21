@@ -2,14 +2,19 @@ package web_crawler
 
 import (
 	"github.com/karosown/katool-go/web_crawler/core"
+	"sync"
 )
+
+var globalLock = &sync.Mutex{}
 
 // Client 网络爬虫客户端
 // Client Web crawler client
 type Client struct {
-	Chrome   *core.Contain
-	Policies []ChallengePolicy
-	Config   *AntiBotConfig
+	Chrome         *core.Contain
+	Policies       []ChallengePolicy
+	Config         *AntiBotConfig
+	lock           *sync.Mutex
+	ClosePageLimit int
 }
 
 // DefaultClient 默认客户端实例
@@ -21,7 +26,7 @@ var DefaultClient = &Client{
 
 // NewClient 创建新的客户端
 // NewClient creates a new client
-func NewClient(chrome *core.Contain, policies ...ChallengePolicy) *Client {
+func NewClient(chrome *core.Contain, closePage int, policies ...ChallengePolicy) *Client {
 	// 如果没有提供策略，则使用默认的全局策略
 	// If no policies provided, use default global policies
 	p := policies
@@ -29,9 +34,11 @@ func NewClient(chrome *core.Contain, policies ...ChallengePolicy) *Client {
 		p = GlobalPolicies
 	}
 	return &Client{
-		Chrome:   chrome,
-		Policies: p,
-		Config:   DefaultAntiBotConfig(),
+		Chrome:         chrome,
+		Policies:       p,
+		ClosePageLimit: closePage,
+		lock:           &sync.Mutex{},
+		Config:         DefaultAntiBotConfig(),
 	}
 }
 
@@ -60,12 +67,16 @@ func (c *Client) AddPolicy(policy ChallengePolicy) {
 	c.Policies = append(c.Policies, policy)
 }
 
+var ClosePageLimit = 0
+
 // getChrome 获取Chrome实例，优先使用Client内部实例，否则使用全局WebChrome
 // getChrome gets the Chrome instance, prioritizing the internal instance, otherwise using global WebChrome
 func (c *Client) getChrome() *core.Contain {
 	if c != nil && c.Chrome != nil {
 		return c.Chrome
 	}
+	c.lock = globalLock
+	c.ClosePageLimit = ClosePageLimit
 	return WebChrome
 }
 

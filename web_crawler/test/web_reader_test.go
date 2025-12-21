@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/proto"
-	"github.com/go-rod/stealth"
 	"github.com/karosown/katool-go/container/stream"
 	"github.com/karosown/katool-go/sys"
 	"github.com/karosown/katool-go/web_crawler"
@@ -17,7 +15,6 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 	"unicode"
 )
 
@@ -143,7 +140,7 @@ func TestSourceRead(t *testing.T) {
 }
 func init() {
 	web_crawler.ChromeRemoteURL = "127.0.0.1:9222"
-	web_crawler.WebChrome = core.NewCotain("C:\\Program Files\\Google\\Chrome\\Application\\Chrome.exe", false)
+	web_crawler.WebChrome = core.NewContain("C:\\Program Files\\Google\\Chrome\\Application\\Chrome.exe", "", false, false)
 }
 
 func TestWordAnalyzed(t *testing.T) {
@@ -233,29 +230,4 @@ func TestReadArr(t *testing.T) {
 		})
 		fmt.Println(chrome.Article.Title)
 	})
-}
-
-func TestReadLink(t *testing.T) {
-	web_crawler.ReadArticleLinksAuto("https://www.zhihu.com/", func(page *rod.Page) {
-		page.MustEvalOnNewDocument(stealth.JS)
-		page.MustWaitLoad()
-		page.MustWaitRequestIdle()
-		page.MustSetUserAgent(&proto.NetworkSetUserAgentOverride{UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3\""})
-		page.MustElement("body").MustHTML()
-		page.WaitIdle(5 * time.Second)
-	}, func(r *http.Request) {
-		r.Header = http.Header{
-			"User-Agent": []string{"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3\""},
-		}
-	}).Stream().ForEach(func(item web_crawler.ArticleLink) {
-		fmt.Println(item)
-	})
-}
-func TestGenaerte(t *testing.T) {
-	snippet, err := web_crawler.GenerateRodPageSetupSnippetFromCURL("curl \"https://www.zhihu.com/hot\" ^\n  -H \"authority: www.zhihu.com\" ^\n  -H \"accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\" ^\n  -H \"accept-language: zh-CN,zh;q=0.9,en;q=0.8\" ^\n  -H \"cache-control: max-age=0\" ^\n  -H \"cookie: _zap=d495d78c-7631-4845-a130-5f004e24afb3; d_c0=iIbTlMGuQBuPTjTVO9CyIa2kngnD41bLNYk=^|1760977246; __snaker__id=nGDK5t0boNwgFCJS; q_c1=d316d753f0a74ef8ad2fdd2344912ef5^|1760977283000^|1760977283000; _xsrf=fGHZ2JNZuQi7pJcKkkjLOhd6rDcn1yFz; Hm_lvt_98beee57fd2ef70ccdd5ca52b9740c49=1764082829,1764863435; z_c0=2^|1:0^|10:1765377656^|4:z_c0^|92:Mi4xUnR0OUN3QUFBQUNJaHRPVXdhNUFHeVlBQUFCZ0FsVk4wNDBTYWdEb3BBWEhYWDhZTGthUDVvTW1TTEZkU0gtTFRB^|c20bcb2ca37e3641dfb3e09cd80485e11887a804e754ba465ad53f3c1fcab271; __zse_ck=004_d/1en7XDkyGmw=o3zqJVzA10X2rDt=VM0iEJRiQSEvTiCEOUQWW9A6T9jnbGs5oF5zmDxWY9KgZTMD5qgnAzMuFrZenkfi3RFBdMkyUKSmPUXU2Ny5OtX7EitXGOGNLi-7tq72p4IIo1epXYqrZGQ672e92DUL873et2GE8zFYCeLf8A5N718ZrZ+OaTUnMuRus6htbWWYkUYrsmi7JYEe2BJTLm2pOvs/umQLSsxg4N9uk8KfoJiVoRBMLyhw0Nf; BEC=fc13dc7850b2e749d88c66e883fdd0e4; SESSIONID=qhx0ZZvBjgwxvGNTGrilNEiRHdHBCoKk3FEgHNRyxh0; JOID=UFEWB08mVJTm_pEKRbLIRlI7OUdfXDbr1qLAdgBKOOmZiNBPG6st1YnzkAdCbwM7WM30T0IKS7L3YBQ5izRy0gE=; osd=UVEQBk0nVJLn_JAKQ7PKR1I9OEVeXDDq1KPAcAFIOemfidJOG60s14jzlgZAbgM9Wc_1T0QLSbP3ZhU7ijR00wM=\" ^\n  -H \"sec-ch-ua: ^\\^\"Not_A Brand^\\^\";v=^\\^\"99^\\^\", ^\\^\"Google Chrome^\\^\";v=^\\^\"109^\\^\", ^\\^\"Chromium^\\^\";v=^\\^\"109^\\^\"\" ^\n  -H \"sec-ch-ua-mobile: ?0\" ^\n  -H \"sec-ch-ua-platform: ^\\^\"Windows^\\^\"\" ^\n  -H \"sec-fetch-dest: document\" ^\n  -H \"sec-fetch-mode: navigate\" ^\n  -H \"sec-fetch-site: none\" ^\n  -H \"sec-fetch-user: ?1\" ^\n  -H \"upgrade-insecure-requests: 1\" ^\n  -H \"user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36\" ^\n  --compressed")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(snippet)
-
 }

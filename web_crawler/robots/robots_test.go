@@ -211,7 +211,7 @@ func ExampleFetchFromURL() {
 func ExampleFetchFromClient() {
 	// 创建客户端
 	// Create client
-	client := web_crawler.NewClient(nil)
+	client := web_crawler.NewClient(nil, 10)
 
 	// 获取 robots.txt
 	// Fetch robots.txt

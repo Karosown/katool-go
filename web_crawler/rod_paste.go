@@ -3,6 +3,7 @@ package web_crawler
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	nurl "net/url"
 	"sort"
 	"strconv"
@@ -217,6 +218,40 @@ func (r *RodPasteResult) MustApplyToPage(page *rod.Page) (cleanup func()) {
 func (r *RodPasteResult) RenderFunc() func(*rod.Page) {
 	return func(page *rod.Page) {
 		_ = r.MustApplyToPage(page)
+	}
+}
+
+// RequestModifier 构建一个用于 HTTP 请求的 RequestWith，注入 headers/cookies。
+// RequestModifier builds a RequestWith that applies headers/cookies to http requests.
+func (r *RodPasteResult) RequestModifier() RequestWith {
+	if r == nil {
+		return nil
+	}
+	return func(req *http.Request) {
+		if req == nil {
+			return
+		}
+		if r.UserAgent != "" {
+			req.Header.Set("User-Agent", r.UserAgent)
+		}
+		if r.AcceptLanguage != "" {
+			req.Header.Set("Accept-Language", r.AcceptLanguage)
+		}
+		for k, v := range r.Headers {
+			if strings.TrimSpace(k) == "" {
+				continue
+			}
+			req.Header.Set(k, v)
+		}
+		for _, c := range r.Cookies {
+			if c == nil || strings.TrimSpace(c.Name) == "" {
+				continue
+			}
+			req.AddCookie(&http.Cookie{
+				Name:  c.Name,
+				Value: c.Value,
+			})
+		}
 	}
 }
 

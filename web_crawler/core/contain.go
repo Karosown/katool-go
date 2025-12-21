@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/go-rod/rod/lib/launcher/flags"
 	"os"
 	"sync"
 	"sync/atomic"
@@ -11,114 +12,350 @@ import (
 	"github.com/karosown/katool-go/lock"
 )
 
-// Contain 浏览器容器结构体
-// Contain represents a browser container structure
+// Contain represents a browser container.
 type Contain struct {
-	Path               string // 浏览器可执行文件路径 / Browser executable path
-	Headless           bool   // 是否无头模式 / Whether headless mode
-	URL                string // 启动器URL / Launcher URL
-	useGlobalPool      bool   // 是否使用全局池 / Whether to use global pool
-	*launcher.Launcher        // 启动器实例 / Launcher instance
-	*rod.Browser              // 浏览器实例 / Browser instance
+	Path          string
+	UserDataDir   string
+	Headless      bool
+	URL           string
+	useGlobalPool bool
+	*launcher.Launcher
+	*rod.Browser
+	LakeLess   bool
+	RemoteURL  string
+	IsRemote   bool
+	Options    *ContainOptions
+	CustomPool rod.Pool[rod.Browser]
 }
 
-// WebReaderSysLock 全局读写锁
-// WebReaderSysLock is a global read-write lock
+// ContainOptions provides customization for launching Chrome.
+type ContainOptions struct {
+	Headless       bool
+	Leakless       bool
+	UseGlobalPool  bool
+	UseUserMode    bool
+	UseDefaultArgs bool
+	UserDataDir    string
+	UserAgent      string
+	Flags          []string
+	Args           map[string]string
+}
+
+// DefaultContainOptions returns default options.
+func DefaultContainOptions() *ContainOptions {
+	return &ContainOptions{
+		Headless:       false,
+		Leakless:       false,
+		UseGlobalPool:  true,
+		UseUserMode:    true,
+		UseDefaultArgs: true,
+		UserDataDir:    os.TempDir(),
+		Flags:          nil,
+		Args:           map[string]string{},
+	}
+}
+
+func (o *ContainOptions) WithHeadless(v bool) *ContainOptions {
+	o.Headless = v
+	return o
+}
+
+func (o *ContainOptions) WithLeakless(v bool) *ContainOptions {
+	o.Leakless = v
+	return o
+}
+
+func (o *ContainOptions) WithGlobalPool(v bool) *ContainOptions {
+	o.UseGlobalPool = v
+	return o
+}
+
+func (o *ContainOptions) WithUserMode(v bool) *ContainOptions {
+	o.UseUserMode = v
+	return o
+}
+
+func (o *ContainOptions) WithDefaultArgs(v bool) *ContainOptions {
+	o.UseDefaultArgs = v
+	return o
+}
+
+func (o *ContainOptions) WithUserDataDir(dir string) *ContainOptions {
+	o.UserDataDir = dir
+	return o
+}
+
+func (o *ContainOptions) WithUserAgent(ua string) *ContainOptions {
+	o.UserAgent = ua
+	return o
+}
+
+func (o *ContainOptions) AddFlag(flag string) *ContainOptions {
+	if flag == "" {
+		return o
+	}
+	o.Flags = append(o.Flags, flag)
+	return o
+}
+
+func (o *ContainOptions) SetArg(key, val string) *ContainOptions {
+	if key == "" {
+		return o
+	}
+	if o.Args == nil {
+		o.Args = map[string]string{}
+	}
+	o.Args[key] = val
+	return o
+}
+
+// WebReaderSysLock is a global read-write lock.
 var WebReaderSysLock *sync.RWMutex = &sync.RWMutex{}
 
-// browserPool 全局浏览器池
-// browserPool is a global browser pool
+// browserPool is a global browser pool.
 var browserPool rod.Pool[rod.Browser]
 
-// poolSize 池中浏览器数量计数器（用于跟踪池的大小）
-// poolSize is a counter for the number of browsers in the pool (used to track pool size)
+// poolSize is a counter for the number of browsers in the pool.
 var poolSize int32
 
-// maxPoolSize 池的最大大小
-// maxPoolSize is the maximum size of the pool
-const maxPoolSize = 10
+// maxPoolSize is the maximum size of the pool.
+var maxPoolSize int32 = 10
 
-// init 初始化浏览器池
-// init initializes the browser pool
 func init() {
-	browserPool = rod.NewBrowserPool(maxPoolSize) // 设置池大小为10
+	browserPool = rod.NewBrowserPool(int(maxPoolSize))
 }
 
-// NewCotain 创建新的Contain实例（使用全局池）
-// NewCotain creates a new Contain instance (using global pool)
-func NewCotain(path string, headless bool) *Contain {
-	return NewContainWithPool(path, headless, true)
-}
-
-// NewContainWithoutPool 创建新的Contain实例（不使用全局池，独立管理浏览器）
-// NewContainWithoutPool creates a new Contain instance (without global pool, manages browser independently)
-func NewContainWithoutPool(path string, headless bool) *Contain {
-	return NewContainWithPool(path, headless, false)
-}
-
-// NewContainWithPool 创建新的Contain实例（可选择是否使用全局池）
-// NewContainWithPool creates a new Contain instance (with option to use global pool)
-func NewContainWithPool(path string, headless bool, useGlobalPool bool) *Contain {
-	l := launcher.NewUserMode()
-	l = l.NoSandbox(true).
-		Set("--disable-setuid-sandbox").
-		Set("--disable-dev-shm-usage").
-		Set("--disable-accelerated-2d-canvas").
-		Set("--no-first-run").
-		Set("--no-zygote").
-		Set("--disable-gpu").
-		Set("user-data-dir", os.TempDir())
-	if headless {
-		l = l.Set("--headless")
+// SetBrowserPool replaces the global browser pool.
+func SetBrowserPool(pool rod.Pool[rod.Browser]) {
+	if pool == nil {
+		return
 	}
-	//Set("--user-data-dir").
-	// 注意：你提供的列表中没有 web-security 和 infobars，所以我去掉了它们，
-	// 如果你需要保留原有的这两个设置，请取消下面两行的注释：
-	// Set("--disable-web-security").
-	// Set("--disable-infobars").
-	launch := l.Bin(path).
-		MustLaunch()
+	browserPool = pool
+	atomic.StoreInt32(&poolSize, 0)
+	maxPoolSize = int32(cap(pool))
+}
+
+// SetBrowserPoolSize resets the global pool size.
+func SetBrowserPoolSize(size int) {
+	if size <= 0 {
+		return
+	}
+	browserPool = rod.NewBrowserPool(size)
+	atomic.StoreInt32(&poolSize, 0)
+	maxPoolSize = int32(size)
+}
+
+// NewCotain creates a new Contain instance using default options.
+func NewCotain(path string, headlessAndLeakLess ...bool) *Contain {
+	headless := false
+	leakless := false
+	if len(headlessAndLeakLess) > 0 {
+		headless = headlessAndLeakLess[0]
+	}
+	if len(headlessAndLeakLess) > 1 {
+		leakless = headlessAndLeakLess[1]
+	}
+	opts := DefaultContainOptions().
+		WithHeadless(headless).
+		WithLeakless(leakless).
+		WithGlobalPool(true)
+	return NewContainWithOptions(path, opts)
+}
+
+// NewContain creates a new Contain instance using the global pool.
+func NewContain(path, userDataDir string, headless, leakless bool) *Contain {
+	opts := DefaultContainOptions().
+		WithHeadless(headless).
+		WithLeakless(leakless).
+		WithGlobalPool(true)
+	if userDataDir != "" {
+		opts.WithUserDataDir(userDataDir).WithUserMode(true)
+	} else {
+		opts.WithUserDataDir("").WithUserMode(false)
+	}
+	return NewContainWithOptions(path, opts)
+}
+
+// NewContainWithoutPool creates a new Contain instance without using the global pool.
+func NewContainWithoutPool(path, userDataDir string, headless bool, leakless bool) *Contain {
+	opts := DefaultContainOptions().
+		WithHeadless(headless).
+		WithLeakless(leakless).
+		WithGlobalPool(false)
+	if userDataDir != "" {
+		opts.WithUserDataDir(userDataDir).WithUserMode(true)
+	} else {
+		opts.WithUserDataDir("").WithUserMode(false)
+	}
+	return NewContainWithOptions(path, opts)
+}
+
+// NewContainWithPool creates a new Contain instance with optional global pool usage.
+func NewContainWithPool(path, userDataDir string, headless bool, useGlobalPool bool, leakless bool) *Contain {
+	opts := DefaultContainOptions().
+		WithHeadless(headless).
+		WithLeakless(leakless).
+		WithGlobalPool(useGlobalPool)
+	if userDataDir != "" {
+		opts.WithUserDataDir(userDataDir).WithUserMode(true)
+	} else {
+		opts.WithUserDataDir("").WithUserMode(false)
+	}
+	return NewContainWithOptions(path, opts)
+}
+
+// NewContainWithOptions creates a new Contain instance with options.
+func NewContainWithOptions(path string, options *ContainOptions) *Contain {
+	opts := cloneContainOptions(options)
+	if opts == nil {
+		opts = DefaultContainOptions()
+	}
+	l := newLauncherWithOptions(opts)
+	launch := l.Bin(path).MustLaunch()
 
 	var browser *rod.Browser
-
-	if useGlobalPool {
-		// 从全局浏览器池中获取浏览器实例
+	if opts.UseGlobalPool {
 		elem, err := browserPool.Get(func() (*rod.Browser, error) {
-			// 池为空时创建新浏览器（不减少计数器，因为这是新创建的）
 			connect := rod.New().ControlURL(launch).MustConnect()
 			return connect, nil
 		})
 		if err != nil {
-			// 如果从池中获取失败，直接创建新浏览器
 			browser = rod.New().MustIncognito().ControlURL(launch).MustConnect()
 		} else {
-			// 成功从池中获取，减少计数器
 			atomic.AddInt32(&poolSize, -1)
 			browser = elem
 		}
 	} else {
-		// 不使用全局池，直接创建新浏览器
 		browser = rod.New().MustIncognito().ControlURL(launch).MustConnect()
 	}
 
 	return &Contain{
 		Path:          path,
-		Headless:      headless,
+		UserDataDir:   opts.UserDataDir,
+		Headless:      opts.Headless,
+		LakeLess:      opts.Leakless,
 		URL:           launch,
-		useGlobalPool: useGlobalPool,
+		useGlobalPool: opts.UseGlobalPool,
 		Launcher:      l,
+		Browser:       browser,
+		Options:       cloneContainOptions(opts),
+	}
+}
+
+// NewContainWithCustomPool creates a new Contain instance using a custom pool.
+func NewContainWithCustomPool(path, userDataDir string, headless bool, leakless bool, pool rod.Pool[rod.Browser]) *Contain {
+	opts := DefaultContainOptions().
+		WithHeadless(headless).
+		WithLeakless(leakless).
+		WithGlobalPool(false)
+	if userDataDir != "" {
+		opts.WithUserDataDir(userDataDir).WithUserMode(true)
+	} else {
+		opts.WithUserDataDir("").WithUserMode(false)
+	}
+	return NewContainWithOptionsAndPool(path, opts, pool)
+}
+
+// NewContainWithOptionsAndPool creates a new Contain instance with options and a custom pool.
+func NewContainWithOptionsAndPool(path string, options *ContainOptions, pool rod.Pool[rod.Browser]) *Contain {
+	opts := cloneContainOptions(options)
+	if opts == nil {
+		opts = DefaultContainOptions()
+	}
+	l := newLauncherWithOptions(opts)
+	launch := l.Bin(path).MustLaunch()
+
+	var browser *rod.Browser
+	if pool != nil {
+		elem, err := pool.Get(func() (*rod.Browser, error) {
+			connect := rod.New().ControlURL(launch).MustConnect()
+			return connect, nil
+		})
+		if err != nil {
+			browser = rod.New().MustIncognito().ControlURL(launch).MustConnect()
+		} else {
+			browser = elem
+		}
+	} else {
+		browser = rod.New().MustIncognito().ControlURL(launch).MustConnect()
+	}
+
+	return &Contain{
+		Path:          path,
+		UserDataDir:   opts.UserDataDir,
+		Headless:      opts.Headless,
+		LakeLess:      opts.Leakless,
+		URL:           launch,
+		useGlobalPool: false,
+		Launcher:      l,
+		Browser:       browser,
+		Options:       cloneContainOptions(opts),
+		CustomPool:    pool,
+	}
+}
+
+// NewContainRemote connects to a remote Chrome instance.
+func NewContainRemote(remoteURL string) *Contain {
+	return NewContainRemoteWithPool(remoteURL, false)
+}
+
+// NewContainRemoteWithPool connects to remote Chrome with optional global pool usage.
+func NewContainRemoteWithPool(remoteURL string, useGlobalPool bool) *Contain {
+	var browser *rod.Browser
+	if useGlobalPool {
+		elem, err := browserPool.Get(func() (*rod.Browser, error) {
+			connect := rod.New().ControlURL(remoteURL).MustConnect()
+			return connect, nil
+		})
+		if err != nil {
+			browser = rod.New().ControlURL(remoteURL).MustConnect()
+		} else {
+			atomic.AddInt32(&poolSize, -1)
+			browser = elem
+		}
+	} else {
+		browser = rod.New().ControlURL(remoteURL).MustConnect()
+	}
+	return &Contain{
+		URL:           remoteURL,
+		RemoteURL:     remoteURL,
+		IsRemote:      true,
+		useGlobalPool: useGlobalPool,
 		Browser:       browser,
 	}
 }
 
-// GetContainer 获取浏览器实例
-// GetContainer gets the browser instance
+// NewContainRemoteWithCustomPool connects to remote Chrome using a custom pool.
+func NewContainRemoteWithCustomPool(remoteURL string, pool rod.Pool[rod.Browser]) *Contain {
+	var browser *rod.Browser
+	if pool != nil {
+		elem, err := pool.Get(func() (*rod.Browser, error) {
+			connect := rod.New().ControlURL(remoteURL).MustConnect()
+			return connect, nil
+		})
+		if err != nil {
+			browser = rod.New().ControlURL(remoteURL).MustConnect()
+		} else {
+			browser = elem
+		}
+	} else {
+		browser = rod.New().ControlURL(remoteURL).MustConnect()
+	}
+	return &Contain{
+		URL:        remoteURL,
+		RemoteURL:  remoteURL,
+		IsRemote:   true,
+		Browser:    browser,
+		CustomPool: pool,
+	}
+}
+
+// GetContainer gets the browser instance.
 func (c *Contain) GetContainer() *rod.Browser {
 	return c.Browser
 }
 
-// PageWithStealth 创建一个带有Stealth模式的页面
-// PageWithStealth creates a page with Stealth mode
+// PageWithStealth creates a page with stealth mode.
 func (c *Contain) PageWithStealth(url string) *rod.Page {
 	page := stealth.MustPage(c.Browser)
 	if url != "" {
@@ -127,64 +364,72 @@ func (c *Contain) PageWithStealth(url string) *rod.Page {
 	return page
 }
 
-// createBrowserForPool 创建新浏览器并放入池中（仅在池未满时）
-// createBrowserForPool creates a new browser and puts it into the pool (only if pool is not full)
-func createBrowserForPool(path string, headless bool) {
-	// 检查池是否需要补充
+func createBrowserForPool(path, userDataDir string, headless bool, leakless bool) {
 	currentSize := atomic.LoadInt32(&poolSize)
 	if currentSize >= maxPoolSize {
-		// 池已满，不需要创建新浏览器
 		return
 	}
 
-	// 尝试增加计数器（乐观锁）
 	newSize := atomic.AddInt32(&poolSize, 1)
 	if newSize > maxPoolSize {
-		// 如果超过最大大小，回退计数器并返回
 		atomic.AddInt32(&poolSize, -1)
 		return
 	}
 
-	// 创建新浏览器
-	l := launcher.NewUserMode()
-	launch := l.NoSandbox(true).Headless(headless).
+	var l *launcher.Launcher
+	if userDataDir != "" {
+		l = launcher.NewUserMode()
+		l.Set("user-data-dir", userDataDir)
+	} else {
+		l = launcher.New()
+	}
+	launch := l.NoSandbox(true).Headless(headless).Leakless(leakless).
 		Set("disable-setuid-sandbox").
 		Set("disable-dev-shm-usage").
 		Set("disable-accelerated-2d-canvas").
 		Set("no-first-run").
 		Set("no-zygote").
 		Set("disable-gpu").
+		Set("disable-web-security").
+		Set("disable-infobars").
 		Set("user-data-dir", os.TempDir()).
-		// 注意：你提供的列表中没有 web-security 和 infobars，所以我去掉了它们，
-		// 如果你需要保留原有的这两个设置，请取消下面两行的注释：
-		// Set("--disable-web-security").
-		// Set("--disable-infobars").
 		Bin(path).
 		MustLaunch()
 	browser := rod.New().ControlURL(launch).MustConnect()
-
-	// 放入池中（rod.Pool 会自动处理容量限制）
 	browserPool.Put(browser)
 }
 
-// Close 关闭浏览器实例
-// 如果使用全局池：kill后创建新浏览器放入池中
-// 如果不使用全局池：直接kill浏览器，不创建新的
-// Close closes the browser instance
-// If using global pool: kills it, then creates a new browser and puts it into the pool
-// If not using global pool: directly kills the browser without creating a new one
+func createBrowserForPoolWithOptions(path string, opts *ContainOptions) {
+	if opts == nil {
+		opts = DefaultContainOptions().WithGlobalPool(true)
+	}
+	currentSize := atomic.LoadInt32(&poolSize)
+	if currentSize >= maxPoolSize {
+		return
+	}
+	newSize := atomic.AddInt32(&poolSize, 1)
+	if newSize > maxPoolSize {
+		atomic.AddInt32(&poolSize, -1)
+		return
+	}
+	launch := newLauncherWithOptions(opts).Bin(path).MustLaunch()
+	browser := rod.New().ControlURL(launch).MustConnect()
+	browserPool.Put(browser)
+}
+
+// Close closes the browser instance.
 func (c *Contain) Close() {
 	lock.Synchronized(WebReaderSysLock, func() {
 		if c == nil {
 			return
 		}
 
-		// 保存配置信息
 		path := c.Path
 		headless := c.Headless
+		leakless := c.LakeLess
 		useGlobalPool := c.useGlobalPool
+		opts := cloneContainOptions(c.Options)
 
-		// 关闭所有页面
 		if c.Browser != nil {
 			pages, err := c.Browser.Pages()
 			if err == nil {
@@ -194,45 +439,170 @@ func (c *Contain) Close() {
 			}
 		}
 
-		// Kill 当前浏览器和启动器
+		if c.CustomPool != nil {
+			if c.Browser != nil {
+				c.CustomPool.Put(c.Browser)
+			}
+			return
+		}
+
 		if c.Launcher != nil {
 			c.Launcher.Cleanup()
 			c.Launcher.Kill()
 		}
 
-		// 如果使用全局池，创建新浏览器并放入池中（异步执行，避免阻塞）
-		// 如果不使用全局池，直接结束，不创建新浏览器
+		if c.IsRemote {
+			if useGlobalPool && c.Browser != nil {
+				browserPool.Put(c.Browser)
+			}
+			return
+		}
+
 		if useGlobalPool {
 			go func() {
-				createBrowserForPool(path, headless)
+				if opts != nil {
+					opts.WithGlobalPool(true)
+					createBrowserForPoolWithOptions(path, opts)
+					return
+				}
+				createBrowserForPool(path, c.UserDataDir, headless, leakless)
 			}()
 		}
 	})
 }
 
-// ReStart 重启浏览器
-// ReStart restarts the browser
+// ReStart restarts the browser.
 func (c *Contain) ReStart() {
 	lock.Synchronized(WebReaderSysLock, func() {
 		if c == nil {
 			return
 		}
 
-		// 保存配置信息
 		path := c.Path
 		headless := c.Headless
 		useGlobalPool := c.useGlobalPool
-
-		// 关闭当前实例
+		leakless := c.LakeLess
+		opts := cloneContainOptions(c.Options)
 		c.Close()
 
-		// 根据配置创建新实例并复制到当前对象
+		if c.CustomPool != nil {
+			if c.IsRemote && c.RemoteURL != "" {
+				elem, err := c.CustomPool.Get(func() (*rod.Browser, error) {
+					connect := rod.New().ControlURL(c.RemoteURL).MustConnect()
+					return connect, nil
+				})
+				if err != nil {
+					c.Browser = rod.New().ControlURL(c.RemoteURL).MustConnect()
+				} else {
+					c.Browser = elem
+				}
+				return
+			}
+
+			var newC *Contain
+			if opts != nil {
+				opts.WithGlobalPool(false)
+				opts.WithHeadless(headless)
+				opts.WithLeakless(leakless)
+				newC = NewContainWithOptionsAndPool(path, opts, c.CustomPool)
+			} else {
+				newC = NewContainWithCustomPool(path, c.UserDataDir, headless, leakless, c.CustomPool)
+			}
+			*c = *newC
+			return
+		}
+
+		if c.IsRemote && c.RemoteURL != "" {
+			if useGlobalPool {
+				elem, err := browserPool.Get(func() (*rod.Browser, error) {
+					connect := rod.New().ControlURL(c.RemoteURL).MustConnect()
+					return connect, nil
+				})
+				if err != nil {
+					c.Browser = rod.New().ControlURL(c.RemoteURL).MustConnect()
+				} else {
+					atomic.AddInt32(&poolSize, -1)
+					c.Browser = elem
+				}
+			} else {
+				c.Browser = rod.New().ControlURL(c.RemoteURL).MustConnect()
+			}
+			return
+		}
+
 		var newC *Contain
-		if useGlobalPool {
-			newC = NewCotain(path, headless)
+		if opts != nil {
+			opts.WithGlobalPool(useGlobalPool)
+			opts.WithHeadless(headless)
+			opts.WithLeakless(leakless)
+			newC = NewContainWithOptions(path, opts)
+		} else if useGlobalPool {
+			newC = NewContain(path, c.UserDataDir, headless, leakless)
 		} else {
-			newC = NewContainWithoutPool(path, headless)
+			newC = NewContainWithoutPool(path, c.UserDataDir, headless, leakless)
 		}
 		*c = *newC
 	})
+}
+
+func newLauncherWithOptions(opts *ContainOptions) *launcher.Launcher {
+	if opts == nil {
+		opts = DefaultContainOptions()
+	}
+	var l *launcher.Launcher
+	if opts.UseUserMode {
+		l = launcher.NewUserMode()
+	} else {
+		l = launcher.New()
+	}
+	l = l.NoSandbox(true).
+		Leakless(opts.Leakless).
+		Headless(opts.Headless)
+
+	if opts.UseDefaultArgs {
+		l = l.Set("disable-setuid-sandbox").
+			Set("disable-dev-shm-usage").
+			Set("disable-accelerated-2d-canvas").
+			Set("no-first-run").
+			Set("no-zygote").
+			Set("disable-gpu").
+			Set("disable-web-security").
+			Set("disable-infobars")
+	}
+	if opts.UserDataDir != "" {
+		l = l.Set("user-data-dir", opts.UserDataDir)
+	}
+	if opts.UserAgent != "" {
+		l = l.Set("user-agent", opts.UserAgent)
+	}
+	for _, flag := range opts.Flags {
+		if flag == "" {
+			continue
+		}
+		l = l.Set(flags.Flag(flag))
+	}
+	for k, v := range opts.Args {
+		if k == "" {
+			continue
+		}
+		l = l.Set(flags.Flag(k), v)
+	}
+	return l
+}
+
+func cloneContainOptions(src *ContainOptions) *ContainOptions {
+	if src == nil {
+		return nil
+	}
+	dst := *src
+	if src.Flags != nil {
+		dst.Flags = append([]string{}, src.Flags...)
+	}
+	if src.Args != nil {
+		dst.Args = make(map[string]string, len(src.Args))
+		for k, v := range src.Args {
+			dst.Args[k] = v
+		}
+	}
+	return &dst
 }

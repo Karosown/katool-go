@@ -4,6 +4,7 @@ import (
 	"codeberg.org/readeck/go-readability"
 	"errors"
 	"fmt"
+	"github.com/karosown/katool-go/lock"
 	"net/http"
 	nurl "net/url"
 	"strings"
@@ -151,7 +152,27 @@ func (c *Client) execFun(url, js string, rendorFunc func(*rod.Page)) (*proto.Run
 		return nil, fmt.Errorf("chrome not initialized")
 	}
 	mustPage := chrome.PageWithStealth(url)
-	defer mustPage.Close()
+	defer func() {
+		if c.ClosePageLimit == 0 {
+			mustPage.Close()
+		} else if c.ClosePageLimit != -1 {
+			pages := chrome.MustPages()
+			if len(pages) >= c.ClosePageLimit {
+				lock.Synchronized(c.lock, func() {
+					pages = chrome.MustPages()
+					if len(pages) >= c.ClosePageLimit {
+						for _, page := range pages {
+							if len(pages) >= c.ClosePageLimit {
+								page.Close()
+							} else {
+								break
+							}
+						}
+					}
+				})
+			}
+		}
+	}()
 	// Wait for the page loading...
 	if rendorFunc != nil {
 		rendorFunc(mustPage)

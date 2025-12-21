@@ -24,6 +24,20 @@
             </set>
           </value>
         </entry>
+        <entry key="AnchorArticle">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/article_list.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="AnchorArticleValue">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/article_list.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="AntiBotConfig">
           <value>
             <set>
@@ -314,7 +328,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/worker.go" />
             </set>
           </value>
         </entry>
@@ -326,6 +339,13 @@
           </value>
         </entry>
         <entry key="Contain">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/core/contain.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ContainOptions">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/core/contain.go" />
@@ -759,13 +779,6 @@
             </set>
           </value>
         </entry>
-        <entry key="OrderDetail">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/mq/cmq/example/main.go" />
-            </set>
-          </value>
-        </entry>
         <entry key="PageWaitOptions">
           <value>
             <set>
@@ -990,13 +1003,6 @@
             </set>
           </value>
         </entry>
-        <entry key="SimpleWorker">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/simple.go" />
-            </set>
-          </value>
-        </entry>
         <entry key="Sort">
           <value>
             <set>
@@ -1176,13 +1182,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/web_reader.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="WorkerLoader">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/worker.go" />
             </set>
           </value>
         </entry>
@@ -1708,7 +1707,7 @@
         <entry key="file://$PROJECT_DIR$/ai/examples/ollama/ollama_with_tools.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766234201853" />
+              <option name="lastModified" value="1766258925621" />
             </ScannedPath>
           </value>
         </entry>
@@ -1961,7 +1960,7 @@
         <entry key="file://$PROJECT_DIR$/container/stream/other.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765648560891" />
+              <option name="lastModified" value="1766260260126" />
               <option name="schema">
                 <list>
                   <option value="MapEnhancer" />
@@ -2354,18 +2353,6 @@
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/mq/cmq/example/main.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1766157994015" />
-              <option name="schema">
-                <list>
-                  <option value="OrderDetail" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
         <entry key="file://$PROJECT_DIR$/mq/cmq/pub.go">
           <value>
             <ScannedPath>
@@ -2464,7 +2451,7 @@
         <entry key="file://$PROJECT_DIR$/mq/rdmq/util.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766158779849" />
+              <option name="lastModified" value="1766333480287" />
             </ScannedPath>
           </value>
         </entry>
@@ -2966,18 +2953,20 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/article.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765371952661" />
+              <option name="lastModified" value="1766254561212" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/web_crawler/article_list.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766167924476" />
+              <option name="lastModified" value="1766260182489" />
               <option name="schema">
                 <list>
                   <option value="ArticleLink" />
                   <option value="ArticleLinkValue" />
+                  <option value="AnchorArticle" />
+                  <option value="AnchorArticleValue" />
                   <option value="LinkExtractOptions" />
                 </list>
               </option>
@@ -2999,7 +2988,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765430111090" />
+              <option name="lastModified" value="1766263360694" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -3026,10 +3015,11 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/core/contain.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766238998169" />
+              <option name="lastModified" value="1766323173568" />
               <option name="schema">
                 <list>
                   <option value="Contain" />
+                  <option value="ContainOptions" />
                 </list>
               </option>
             </ScannedPath>
@@ -3100,7 +3090,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/robots/robots_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765431483498" />
+              <option name="lastModified" value="1766333537827" />
             </ScannedPath>
           </value>
         </entry>
@@ -3179,21 +3169,21 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/test/example/main.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766239044770" />
+              <option name="lastModified" value="1766333330012" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/web_crawler/test/web_reader_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766235620287" />
+              <option name="lastModified" value="1766333420397" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/web_crawler/web_reader.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766219060007" />
+              <option name="lastModified" value="1766263459381" />
               <option name="schema">
                 <list>
                   <option value="WebReaderError" />
@@ -3303,31 +3293,6 @@
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/cron/simple.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1766217312632" />
-              <option name="schema">
-                <list>
-                  <option value="SimpleWorker" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/cron/worker.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1766165636846" />
-              <option name="schema">
-                <list>
-                  <option value="Config" />
-                  <option value="WorkerLoader" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
       </map>
     </option>
     <option name="tableStructMapping">
@@ -3335,6 +3300,8 @@
         <entry key="agent" value="Agent" />
         <entry key="agent_config" value="AgentConfig" />
         <entry key="ai_client_manager" value="AIClientManager" />
+        <entry key="anchor_article" value="AnchorArticle" />
+        <entry key="anchor_article_value" value="AnchorArticleValue" />
         <entry key="anti_bot_config" value="AntiBotConfig" />
         <entry key="anti_bot_transport" value="AntiBotTransport" />
         <entry key="article" value="Article" />
@@ -3379,6 +3346,7 @@
         <entry key="config_manager" value="ConfigManager" />
         <entry key="consumer_group" value="consumerGroup" />
         <entry key="contain" value="Contain" />
+        <entry key="contain_options" value="ContainOptions" />
         <entry key="conversation_manager" value="ConversationManager" />
         <entry key="csv_en_decode_format" value="CSVEnDecodeFormat" />
         <entry key="csv_serializer" value="CSVSerializer" />
@@ -3457,7 +3425,6 @@
         <entry key="opt_switch" value="OptSwitch" />
         <entry key="option" value="Option" />
         <entry key="optional" value="Optional" />
-        <entry key="order_detail" value="OrderDetail" />
         <entry key="os_file_wrapper" value="osFileWrapper" />
         <entry key="page_wait_options" value="PageWaitOptions" />
         <entry key="pager" value="Pager" />
@@ -3490,7 +3457,6 @@
         <entry key="segment" value="Segment" />
         <entry key="simple_ai_client" value="SimpleAIClient" />
         <entry key="simple_mcp_client" value="SimpleMCPClient" />
-        <entry key="simple_worker" value="SimpleWorker" />
         <entry key="sms_adapter" value="SMSAdapter" />
         <entry key="sort" value="Sort" />
         <entry key="sorted_map" value="SortedMap" />
@@ -3526,12 +3492,11 @@
         <entry key="viant_mcp_adapter" value="ViantMCPAdapter" />
         <entry key="viant_mcp_client_impl" value="viantMCPClientImpl" />
         <entry key="web_reader_error" value="WebReaderError" />
-        <entry key="worker_loader" value="WorkerLoader" />
         <entry key="wrapper" value="Wrapper" />
         <entry key="xml_en_de_code_format" value="XMLEnDeCodeFormat" />
         <entry key="zip_info" value="ZipInfo" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1766157944271" />
+    <option name="lastTimeChecked" value="1766249643145" />
   </component>
 </project>

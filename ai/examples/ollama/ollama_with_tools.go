@@ -104,7 +104,7 @@ func registerTools(client aiconfig.AIProvider) *aiclient.Function {
 	if err != nil {
 		log.Printf("注册时间工具失败: %v", err)
 	}
-	web_crawler.WebChrome = core.NewCotain("C:\\Program Files\\Google\\Chrome\\Application\\Google Chrome.exe", true)
+	web_crawler.WebChrome = core.NewContain("C:\\Program Files\\Google\\Chrome\\Application\\Chrome.exe", "", true, false)
 
 	// 注册搜索工具
 	err = functionClient.RegisterFunction("36kr_rss", "36kr的rss，返回的是36kr的近期内容，返回的是一个页面的源代码，你需要读取里面的新闻链接来获取URL，通过访问页面获取工具", func(KeyWords string) map[string]interface{} {
