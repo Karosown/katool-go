@@ -2,6 +2,7 @@ package robots
 
 import (
 	"fmt"
+	"github.com/karosown/katool-go/web_crawler/core"
 	"strings"
 	"testing"
 	"time"
@@ -212,7 +213,7 @@ func ExampleFetchFromClient() {
 	// 创建客户端
 	// Create client
 	client := web_crawler.NewClient(nil, 10)
-
+	core.NewContainRemoteWithPool()
 	// 获取 robots.txt
 	// Fetch robots.txt
 	robots, err := FetchFromClient(client, "https://example.com", 10*time.Second)

@@ -4,7 +4,6 @@ import (
 	"github.com/go-rod/rod/lib/launcher/flags"
 	"os"
 	"sync"
-	"sync/atomic"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
@@ -115,14 +114,10 @@ var WebReaderSysLock *sync.RWMutex = &sync.RWMutex{}
 // browserPool is a global browser pool.
 var browserPool rod.Pool[rod.Browser]
 
-// poolSize is a counter for the number of browsers in the pool.
-var poolSize int32
-
-// maxPoolSize is the maximum size of the pool.
-var maxPoolSize int32 = 10
+const defaultPoolSize = 10
 
 func init() {
-	browserPool = rod.NewBrowserPool(int(maxPoolSize))
+	browserPool = rod.NewBrowserPool(defaultPoolSize)
 }
 
 // SetBrowserPool replaces the global browser pool.
@@ -131,8 +126,6 @@ func SetBrowserPool(pool rod.Pool[rod.Browser]) {
 		return
 	}
 	browserPool = pool
-	atomic.StoreInt32(&poolSize, 0)
-	maxPoolSize = int32(cap(pool))
 }
 
 // SetBrowserPoolSize resets the global pool size.
@@ -141,8 +134,6 @@ func SetBrowserPoolSize(size int) {
 		return
 	}
 	browserPool = rod.NewBrowserPool(size)
-	atomic.StoreInt32(&poolSize, 0)
-	maxPoolSize = int32(size)
 }
 
 // NewCotain creates a new Contain instance using default options.
@@ -210,36 +201,11 @@ func NewContainWithOptions(path string, options *ContainOptions) *Contain {
 	if opts == nil {
 		opts = DefaultContainOptions()
 	}
-	l := newLauncherWithOptions(opts)
-	launch := l.Bin(path).MustLaunch()
-
-	var browser *rod.Browser
+	pool := rod.Pool[rod.Browser](nil)
 	if opts.UseGlobalPool {
-		elem, err := browserPool.Get(func() (*rod.Browser, error) {
-			connect := rod.New().ControlURL(launch).MustConnect()
-			return connect, nil
-		})
-		if err != nil {
-			browser = rod.New().MustIncognito().ControlURL(launch).MustConnect()
-		} else {
-			atomic.AddInt32(&poolSize, -1)
-			browser = elem
-		}
-	} else {
-		browser = rod.New().MustIncognito().ControlURL(launch).MustConnect()
+		pool = browserPool
 	}
-
-	return &Contain{
-		Path:          path,
-		UserDataDir:   opts.UserDataDir,
-		Headless:      opts.Headless,
-		LakeLess:      opts.Leakless,
-		URL:           launch,
-		useGlobalPool: opts.UseGlobalPool,
-		Launcher:      l,
-		Browser:       browser,
-		Options:       cloneContainOptions(opts),
-	}
+	return newContainWithPool(path, opts, pool, opts.UseGlobalPool, nil)
 }
 
 // NewContainWithCustomPool creates a new Contain instance using a custom pool.
@@ -262,36 +228,7 @@ func NewContainWithOptionsAndPool(path string, options *ContainOptions, pool rod
 	if opts == nil {
 		opts = DefaultContainOptions()
 	}
-	l := newLauncherWithOptions(opts)
-	launch := l.Bin(path).MustLaunch()
-
-	var browser *rod.Browser
-	if pool != nil {
-		elem, err := pool.Get(func() (*rod.Browser, error) {
-			connect := rod.New().ControlURL(launch).MustConnect()
-			return connect, nil
-		})
-		if err != nil {
-			browser = rod.New().MustIncognito().ControlURL(launch).MustConnect()
-		} else {
-			browser = elem
-		}
-	} else {
-		browser = rod.New().MustIncognito().ControlURL(launch).MustConnect()
-	}
-
-	return &Contain{
-		Path:          path,
-		UserDataDir:   opts.UserDataDir,
-		Headless:      opts.Headless,
-		LakeLess:      opts.Leakless,
-		URL:           launch,
-		useGlobalPool: false,
-		Launcher:      l,
-		Browser:       browser,
-		Options:       cloneContainOptions(opts),
-		CustomPool:    pool,
-	}
+	return newContainWithPool(path, opts, pool, false, pool)
 }
 
 // NewContainRemote connects to a remote Chrome instance.
@@ -301,53 +238,16 @@ func NewContainRemote(remoteURL string) *Contain {
 
 // NewContainRemoteWithPool connects to remote Chrome with optional global pool usage.
 func NewContainRemoteWithPool(remoteURL string, useGlobalPool bool) *Contain {
-	var browser *rod.Browser
+	pool := rod.Pool[rod.Browser](nil)
 	if useGlobalPool {
-		elem, err := browserPool.Get(func() (*rod.Browser, error) {
-			connect := rod.New().ControlURL(remoteURL).MustConnect()
-			return connect, nil
-		})
-		if err != nil {
-			browser = rod.New().ControlURL(remoteURL).MustConnect()
-		} else {
-			atomic.AddInt32(&poolSize, -1)
-			browser = elem
-		}
-	} else {
-		browser = rod.New().ControlURL(remoteURL).MustConnect()
+		pool = browserPool
 	}
-	return &Contain{
-		URL:           remoteURL,
-		RemoteURL:     remoteURL,
-		IsRemote:      true,
-		useGlobalPool: useGlobalPool,
-		Browser:       browser,
-	}
+	return newRemoteContain(remoteURL, pool, useGlobalPool, nil)
 }
 
 // NewContainRemoteWithCustomPool connects to remote Chrome using a custom pool.
 func NewContainRemoteWithCustomPool(remoteURL string, pool rod.Pool[rod.Browser]) *Contain {
-	var browser *rod.Browser
-	if pool != nil {
-		elem, err := pool.Get(func() (*rod.Browser, error) {
-			connect := rod.New().ControlURL(remoteURL).MustConnect()
-			return connect, nil
-		})
-		if err != nil {
-			browser = rod.New().ControlURL(remoteURL).MustConnect()
-		} else {
-			browser = elem
-		}
-	} else {
-		browser = rod.New().ControlURL(remoteURL).MustConnect()
-	}
-	return &Contain{
-		URL:        remoteURL,
-		RemoteURL:  remoteURL,
-		IsRemote:   true,
-		Browser:    browser,
-		CustomPool: pool,
-	}
+	return newRemoteContain(remoteURL, pool, false, pool)
 }
 
 // GetContainer gets the browser instance.
@@ -364,71 +264,12 @@ func (c *Contain) PageWithStealth(url string) *rod.Page {
 	return page
 }
 
-func createBrowserForPool(path, userDataDir string, headless bool, leakless bool) {
-	currentSize := atomic.LoadInt32(&poolSize)
-	if currentSize >= maxPoolSize {
-		return
-	}
-
-	newSize := atomic.AddInt32(&poolSize, 1)
-	if newSize > maxPoolSize {
-		atomic.AddInt32(&poolSize, -1)
-		return
-	}
-
-	var l *launcher.Launcher
-	if userDataDir != "" {
-		l = launcher.NewUserMode()
-		l.Set("user-data-dir", userDataDir)
-	} else {
-		l = launcher.New()
-	}
-	launch := l.NoSandbox(true).Headless(headless).Leakless(leakless).
-		Set("disable-setuid-sandbox").
-		Set("disable-dev-shm-usage").
-		Set("disable-accelerated-2d-canvas").
-		Set("no-first-run").
-		Set("no-zygote").
-		Set("disable-gpu").
-		Set("disable-web-security").
-		Set("disable-infobars").
-		Set("user-data-dir", os.TempDir()).
-		Bin(path).
-		MustLaunch()
-	browser := rod.New().ControlURL(launch).MustConnect()
-	browserPool.Put(browser)
-}
-
-func createBrowserForPoolWithOptions(path string, opts *ContainOptions) {
-	if opts == nil {
-		opts = DefaultContainOptions().WithGlobalPool(true)
-	}
-	currentSize := atomic.LoadInt32(&poolSize)
-	if currentSize >= maxPoolSize {
-		return
-	}
-	newSize := atomic.AddInt32(&poolSize, 1)
-	if newSize > maxPoolSize {
-		atomic.AddInt32(&poolSize, -1)
-		return
-	}
-	launch := newLauncherWithOptions(opts).Bin(path).MustLaunch()
-	browser := rod.New().ControlURL(launch).MustConnect()
-	browserPool.Put(browser)
-}
-
-// Close closes the browser instance.
+// Close closes the browser instance or releases it back to the pool.
 func (c *Contain) Close() {
 	lock.Synchronized(WebReaderSysLock, func() {
 		if c == nil {
 			return
 		}
-
-		path := c.Path
-		headless := c.Headless
-		leakless := c.LakeLess
-		useGlobalPool := c.useGlobalPool
-		opts := cloneContainOptions(c.Options)
 
 		if c.Browser != nil {
 			pages, err := c.Browser.Pages()
@@ -442,6 +283,15 @@ func (c *Contain) Close() {
 		if c.CustomPool != nil {
 			if c.Browser != nil {
 				c.CustomPool.Put(c.Browser)
+				c.Browser = nil
+			}
+			return
+		}
+
+		if c.useGlobalPool {
+			if c.Browser != nil {
+				browserPool.Put(c.Browser)
+				c.Browser = nil
 			}
 			return
 		}
@@ -449,24 +299,6 @@ func (c *Contain) Close() {
 		if c.Launcher != nil {
 			c.Launcher.Cleanup()
 			c.Launcher.Kill()
-		}
-
-		if c.IsRemote {
-			if useGlobalPool && c.Browser != nil {
-				browserPool.Put(c.Browser)
-			}
-			return
-		}
-
-		if useGlobalPool {
-			go func() {
-				if opts != nil {
-					opts.WithGlobalPool(true)
-					createBrowserForPoolWithOptions(path, opts)
-					return
-				}
-				createBrowserForPool(path, c.UserDataDir, headless, leakless)
-			}()
 		}
 	})
 }
@@ -480,70 +312,132 @@ func (c *Contain) ReStart() {
 
 		path := c.Path
 		headless := c.Headless
-		useGlobalPool := c.useGlobalPool
 		leakless := c.LakeLess
 		opts := cloneContainOptions(c.Options)
+		remoteURL := c.RemoteURL
+		isRemote := c.IsRemote
+
 		c.Close()
 
 		if c.CustomPool != nil {
-			if c.IsRemote && c.RemoteURL != "" {
-				elem, err := c.CustomPool.Get(func() (*rod.Browser, error) {
-					connect := rod.New().ControlURL(c.RemoteURL).MustConnect()
-					return connect, nil
-				})
-				if err != nil {
-					c.Browser = rod.New().ControlURL(c.RemoteURL).MustConnect()
-				} else {
-					c.Browser = elem
-				}
+			if isRemote && remoteURL != "" {
+				newC := newRemoteContain(remoteURL, c.CustomPool, false, c.CustomPool)
+				*c = *newC
 				return
 			}
-
-			var newC *Contain
 			if opts != nil {
 				opts.WithGlobalPool(false)
 				opts.WithHeadless(headless)
 				opts.WithLeakless(leakless)
-				newC = NewContainWithOptionsAndPool(path, opts, c.CustomPool)
-			} else {
-				newC = NewContainWithCustomPool(path, c.UserDataDir, headless, leakless, c.CustomPool)
+				newC := NewContainWithOptionsAndPool(path, opts, c.CustomPool)
+				*c = *newC
+				return
 			}
+			newC := NewContainWithCustomPool(path, c.UserDataDir, headless, leakless, c.CustomPool)
 			*c = *newC
 			return
 		}
 
-		if c.IsRemote && c.RemoteURL != "" {
-			if useGlobalPool {
-				elem, err := browserPool.Get(func() (*rod.Browser, error) {
-					connect := rod.New().ControlURL(c.RemoteURL).MustConnect()
-					return connect, nil
-				})
-				if err != nil {
-					c.Browser = rod.New().ControlURL(c.RemoteURL).MustConnect()
-				} else {
-					atomic.AddInt32(&poolSize, -1)
-					c.Browser = elem
-				}
-			} else {
-				c.Browser = rod.New().ControlURL(c.RemoteURL).MustConnect()
+		if c.useGlobalPool {
+			if isRemote && remoteURL != "" {
+				newC := newRemoteContain(remoteURL, browserPool, true, nil)
+				*c = *newC
+				return
 			}
+			if opts != nil {
+				opts.WithGlobalPool(true)
+				opts.WithHeadless(headless)
+				opts.WithLeakless(leakless)
+				newC := NewContainWithOptions(path, opts)
+				*c = *newC
+				return
+			}
+			newC := NewContain(path, c.UserDataDir, headless, leakless)
+			*c = *newC
 			return
 		}
 
-		var newC *Contain
+		if isRemote && remoteURL != "" {
+			newC := newRemoteContain(remoteURL, nil, false, nil)
+			*c = *newC
+			return
+		}
+
 		if opts != nil {
-			opts.WithGlobalPool(useGlobalPool)
+			opts.WithGlobalPool(false)
 			opts.WithHeadless(headless)
 			opts.WithLeakless(leakless)
-			newC = NewContainWithOptions(path, opts)
-		} else if useGlobalPool {
-			newC = NewContain(path, c.UserDataDir, headless, leakless)
-		} else {
-			newC = NewContainWithoutPool(path, c.UserDataDir, headless, leakless)
+			newC := NewContainWithOptions(path, opts)
+			*c = *newC
+			return
 		}
+
+		newC := NewContainWithoutPool(path, c.UserDataDir, headless, leakless)
 		*c = *newC
 	})
 }
+
+func newContainWithPool(path string, opts *ContainOptions, pool rod.Pool[rod.Browser], useGlobalPool bool, customPool rod.Pool[rod.Browser]) *Contain {
+	browser, launcherInst := getBrowserFromPool(pool, func() (*rod.Browser, *launcher.Launcher) {
+		return createLocalBrowser(path, opts)
+	})
+	launchURL := ""
+	if launcherInst != nil {
+		launchURL = launcherInst.MustLaunch()
+	}
+
+	return &Contain{
+		Path:          path,
+		UserDataDir:   opts.UserDataDir,
+		Headless:      opts.Headless,
+		LakeLess:      opts.Leakless,
+		URL:           launchURL,
+		useGlobalPool: useGlobalPool,
+		Launcher:      launcherInst,
+		Browser:       browser,
+		Options:       cloneContainOptions(opts),
+		CustomPool:    customPool,
+	}
+}
+
+func newRemoteContain(remoteURL string, pool rod.Pool[rod.Browser], useGlobalPool bool, customPool rod.Pool[rod.Browser]) *Contain {
+	browser, _ := getBrowserFromPool(pool, func() (*rod.Browser, *launcher.Launcher) {
+		return rod.New().ControlURL(remoteURL).MustConnect(), nil
+	})
+
+	return &Contain{
+		URL:           remoteURL,
+		RemoteURL:     remoteURL,
+		IsRemote:      true,
+		useGlobalPool: useGlobalPool,
+		Browser:       browser,
+		CustomPool:    customPool,
+	}
+}
+
+func getBrowserFromPool(pool rod.Pool[rod.Browser], create func() (*rod.Browser, *launcher.Launcher)) (*rod.Browser, *launcher.Launcher) {
+	if pool == nil {
+		return create()
+	}
+	var createdLauncher *launcher.Launcher
+	elem, err := pool.Get(func() (*rod.Browser, error) {
+		browser, l := create()
+		createdLauncher = l
+		return browser, nil
+	})
+	if err != nil {
+		return create()
+	}
+	return elem, createdLauncher
+}
+
+func createLocalBrowser(path string, opts *ContainOptions) (*rod.Browser, *launcher.Launcher) {
+	l := newLauncherWithOptions(opts)
+	launch := l.Bin(path).MustLaunch()
+	browser := rod.New().MustIncognito().ControlURL(launch).MustConnect()
+	return browser, l
+}
+
 
 func newLauncherWithOptions(opts *ContainOptions) *launcher.Launcher {
 	if opts == nil {

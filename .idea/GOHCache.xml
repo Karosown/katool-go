@@ -3015,7 +3015,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/core/contain.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766323173568" />
+              <option name="lastModified" value="1766411438189" />
               <option name="schema">
                 <list>
                   <option value="Contain" />
@@ -3090,7 +3090,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/robots/robots_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766333537827" />
+              <option name="lastModified" value="1766363528552" />
             </ScannedPath>
           </value>
         </entry>
