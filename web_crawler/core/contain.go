@@ -280,19 +280,37 @@ func (c *Contain) Close() {
 			}
 		}
 
-		if c.CustomPool != nil {
-			if c.Browser != nil {
-				c.CustomPool.Put(c.Browser)
-				c.Browser = nil
+		if c.CustomPool != nil || c.useGlobalPool {
+			pool := c.CustomPool
+			if pool == nil {
+				pool = browserPool
 			}
-			return
-		}
-
-		if c.useGlobalPool {
 			if c.Browser != nil {
-				browserPool.Put(c.Browser)
-				c.Browser = nil
+				_ = c.Browser.Close()
 			}
+			if c.Launcher != nil {
+				c.Launcher.Cleanup()
+				c.Launcher.Kill()
+			}
+			var newBrowser *rod.Browser
+			if c.IsRemote && c.RemoteURL != "" {
+				newBrowser = rod.New().ControlURL(c.RemoteURL).MustConnect()
+			} else {
+				opts := cloneContainOptions(c.Options)
+				if opts == nil {
+					opts = DefaultContainOptions()
+				}
+				opts.WithHeadless(c.Headless)
+				opts.WithLeakless(c.LakeLess)
+				if c.UserDataDir != "" {
+					opts.WithUserDataDir(c.UserDataDir).WithUserMode(true)
+				} else {
+					opts.WithUserDataDir("").WithUserMode(false)
+				}
+				newBrowser, _ = createLocalBrowser(c.Path, opts)
+			}
+			pool.Put(newBrowser)
+			c.Browser = nil
 			return
 		}
 
@@ -437,7 +455,6 @@ func createLocalBrowser(path string, opts *ContainOptions) (*rod.Browser, *launc
 	browser := rod.New().MustIncognito().ControlURL(launch).MustConnect()
 	return browser, l
 }
-
 
 func newLauncherWithOptions(opts *ContainOptions) *launcher.Launcher {
 	if opts == nil {
