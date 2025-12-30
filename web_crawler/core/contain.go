@@ -31,16 +31,33 @@ type Contain struct {
 	AutoReturnToPool bool
 	// BeforeRestart is an optional hook executed right before ReStart begins.
 	// Return AutoReturnToPool override via HookResult.AutoReturn; nil keeps current value.
-	BeforeRestart func(*Contain) HookResult
+	// The current browser instance is passed for diagnostics.
+	BeforeRestart func(*Contain, *rod.Browser, BrowserMeta) HookResult
 	// AfterRestart is an optional hook executed after ReStart finishes.
 	// Return AutoReturnToPool override via HookResult.AutoReturn; nil keeps current value.
-	AfterRestart func(*Contain) HookResult
+	// The restarted browser instance is passed for diagnostics.
+	AfterRestart func(*Contain, *rod.Browser, BrowserMeta) HookResult
 }
 
 // HookResult carries optional AutoReturn override and an error.
 type HookResult struct {
 	AutoReturn *bool
 	Err        error
+}
+
+// BrowserMeta provides lightweight context about the actual browser instance for hooks.
+type BrowserMeta struct {
+	Browser         *rod.Browser
+	ControlURL      string
+	Path            string
+	RemoteURL       string
+	IsRemote        bool
+	UserDataDir     string
+	Headless        bool
+	Leakless        bool
+	UseGlobalPool   bool
+	UsingCustomPool bool
+	AutoReturn      bool
 }
 
 // ContainOptions provides customization for launching Chrome.
@@ -328,8 +345,10 @@ func (c *Contain) ReStart() error {
 		}
 
 		autoReturn := c.AutoReturnToPool
+		beforeBrowser := c.Browser
+		beforeMeta := buildBrowserMeta(c)
 		if c.BeforeRestart != nil {
-			res := c.BeforeRestart(c)
+			res := c.BeforeRestart(c, beforeBrowser, beforeMeta)
 			if res.Err != nil {
 				errs = append(errs, res.Err)
 			}
@@ -346,7 +365,7 @@ func (c *Contain) ReStart() error {
 			c.AutoReturnToPool = autoReturn
 			c.BeforeRestart = before
 			if after != nil {
-				res := after(c)
+				res := after(c, c.Browser, buildBrowserMeta(c))
 				if res.Err != nil {
 					errs = append(errs, res.Err)
 				}
@@ -481,6 +500,30 @@ func getBrowserFromPool(pool rod.Pool[rod.Browser], create func() (*rod.Browser,
 		return create()
 	}
 	return elem, createdLauncher
+}
+
+// buildBrowserMeta collects meta info for hook diagnostics.
+func buildBrowserMeta(c *Contain) BrowserMeta {
+	if c == nil {
+		return BrowserMeta{}
+	}
+	controlURL := c.URL
+	if c.RemoteURL != "" {
+		controlURL = c.RemoteURL
+	}
+	return BrowserMeta{
+		Browser:         c.Browser,
+		ControlURL:      controlURL,
+		Path:            c.Path,
+		RemoteURL:       c.RemoteURL,
+		IsRemote:        c.IsRemote,
+		UserDataDir:     c.UserDataDir,
+		Headless:        c.Headless,
+		Leakless:        c.LakeLess,
+		UseGlobalPool:   c.useGlobalPool,
+		UsingCustomPool: c.CustomPool != nil,
+		AutoReturn:      c.AutoReturnToPool,
+	}
 }
 
 // ReturnToPool manually recycles the browser back into its pool (if any).
