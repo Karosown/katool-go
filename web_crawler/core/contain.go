@@ -1,12 +1,13 @@
 package core
 
 import (
-	"github.com/go-rod/rod/lib/launcher/flags"
+	"errors"
 	"os"
 	"sync"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
+	"github.com/go-rod/rod/lib/launcher/flags"
 	"github.com/go-rod/stealth"
 	"github.com/karosown/katool-go/lock"
 )
@@ -25,6 +26,13 @@ type Contain struct {
 	IsRemote   bool
 	Options    *ContainOptions
 	CustomPool rod.Pool[rod.Browser]
+	// AutoReturnToPool controls whether Close automatically returns a browser to the pool.
+	// When false, caller should use ReturnToPool() manually.
+	AutoReturnToPool bool
+	// BeforeRestart is an optional hook executed right before ReStart begins.
+	BeforeRestart func(*Contain) error
+	// AfterRestart is an optional hook executed after ReStart finishes.
+	AfterRestart func(*Contain) error
 }
 
 // ContainOptions provides customization for launching Chrome.
@@ -281,36 +289,18 @@ func (c *Contain) Close() {
 		}
 
 		if c.CustomPool != nil || c.useGlobalPool {
-			pool := c.CustomPool
-			if pool == nil {
-				pool = browserPool
-			}
-			if c.Browser != nil {
-				_ = c.Browser.Close()
-			}
-			if c.Launcher != nil {
-				c.Launcher.Cleanup()
-				c.Launcher.Kill()
-			}
-			var newBrowser *rod.Browser
-			if c.IsRemote && c.RemoteURL != "" {
-				newBrowser = rod.New().ControlURL(c.RemoteURL).MustConnect()
+			if c.AutoReturnToPool {
+				c.returnToPool()
 			} else {
-				opts := cloneContainOptions(c.Options)
-				if opts == nil {
-					opts = DefaultContainOptions()
+				if c.Browser != nil {
+					_ = c.Browser.Close()
+					c.Browser = nil
 				}
-				opts.WithHeadless(c.Headless)
-				opts.WithLeakless(c.LakeLess)
-				if c.UserDataDir != "" {
-					opts.WithUserDataDir(c.UserDataDir).WithUserMode(true)
-				} else {
-					opts.WithUserDataDir("").WithUserMode(false)
+				if c.Launcher != nil {
+					c.Launcher.Cleanup()
+					c.Launcher.Kill()
 				}
-				newBrowser, _ = createLocalBrowser(c.Path, opts)
 			}
-			pool.Put(newBrowser)
-			c.Browser = nil
 			return
 		}
 
@@ -322,10 +312,32 @@ func (c *Contain) Close() {
 }
 
 // ReStart restarts the browser.
-func (c *Contain) ReStart() {
+func (c *Contain) ReStart() error {
+	var errs []error
 	lock.Synchronized(WebReaderSysLock, func() {
 		if c == nil {
 			return
+		}
+
+		if c.BeforeRestart != nil {
+			if err := c.BeforeRestart(c); err != nil {
+				errs = append(errs, err)
+			}
+		}
+
+		after := c.AfterRestart
+		before := c.BeforeRestart
+		autoReturn := c.AutoReturnToPool
+		applyRestart := func(newC *Contain) {
+			*c = *newC
+			c.AfterRestart = after
+			c.AutoReturnToPool = autoReturn
+			c.BeforeRestart = before
+			if after != nil {
+				if err := after(c); err != nil {
+					errs = append(errs, err)
+				}
+			}
 		}
 
 		path := c.Path
@@ -340,7 +352,7 @@ func (c *Contain) ReStart() {
 		if c.CustomPool != nil {
 			if isRemote && remoteURL != "" {
 				newC := newRemoteContain(remoteURL, c.CustomPool, false, c.CustomPool)
-				*c = *newC
+				applyRestart(newC)
 				return
 			}
 			if opts != nil {
@@ -348,18 +360,18 @@ func (c *Contain) ReStart() {
 				opts.WithHeadless(headless)
 				opts.WithLeakless(leakless)
 				newC := NewContainWithOptionsAndPool(path, opts, c.CustomPool)
-				*c = *newC
+				applyRestart(newC)
 				return
 			}
 			newC := NewContainWithCustomPool(path, c.UserDataDir, headless, leakless, c.CustomPool)
-			*c = *newC
+			applyRestart(newC)
 			return
 		}
 
 		if c.useGlobalPool {
 			if isRemote && remoteURL != "" {
 				newC := newRemoteContain(remoteURL, browserPool, true, nil)
-				*c = *newC
+				applyRestart(newC)
 				return
 			}
 			if opts != nil {
@@ -367,17 +379,17 @@ func (c *Contain) ReStart() {
 				opts.WithHeadless(headless)
 				opts.WithLeakless(leakless)
 				newC := NewContainWithOptions(path, opts)
-				*c = *newC
+				applyRestart(newC)
 				return
 			}
 			newC := NewContain(path, c.UserDataDir, headless, leakless)
-			*c = *newC
+			applyRestart(newC)
 			return
 		}
 
 		if isRemote && remoteURL != "" {
 			newC := newRemoteContain(remoteURL, nil, false, nil)
-			*c = *newC
+			applyRestart(newC)
 			return
 		}
 
@@ -386,13 +398,17 @@ func (c *Contain) ReStart() {
 			opts.WithHeadless(headless)
 			opts.WithLeakless(leakless)
 			newC := NewContainWithOptions(path, opts)
-			*c = *newC
+			applyRestart(newC)
 			return
 		}
 
 		newC := NewContainWithoutPool(path, c.UserDataDir, headless, leakless)
-		*c = *newC
+		applyRestart(newC)
 	})
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+	return nil
 }
 
 func newContainWithPool(path string, opts *ContainOptions, pool rod.Pool[rod.Browser], useGlobalPool bool, customPool rod.Pool[rod.Browser]) *Contain {
@@ -405,16 +421,17 @@ func newContainWithPool(path string, opts *ContainOptions, pool rod.Pool[rod.Bro
 	}
 
 	return &Contain{
-		Path:          path,
-		UserDataDir:   opts.UserDataDir,
-		Headless:      opts.Headless,
-		LakeLess:      opts.Leakless,
-		URL:           launchURL,
-		useGlobalPool: useGlobalPool,
-		Launcher:      launcherInst,
-		Browser:       browser,
-		Options:       cloneContainOptions(opts),
-		CustomPool:    customPool,
+		Path:             path,
+		UserDataDir:      opts.UserDataDir,
+		Headless:         opts.Headless,
+		LakeLess:         opts.Leakless,
+		URL:              launchURL,
+		useGlobalPool:    useGlobalPool,
+		Launcher:         launcherInst,
+		Browser:          browser,
+		Options:          cloneContainOptions(opts),
+		CustomPool:       customPool,
+		AutoReturnToPool: true,
 	}
 }
 
@@ -424,12 +441,13 @@ func newRemoteContain(remoteURL string, pool rod.Pool[rod.Browser], useGlobalPoo
 	})
 
 	return &Contain{
-		URL:           remoteURL,
-		RemoteURL:     remoteURL,
-		IsRemote:      true,
-		useGlobalPool: useGlobalPool,
-		Browser:       browser,
-		CustomPool:    customPool,
+		URL:              remoteURL,
+		RemoteURL:        remoteURL,
+		IsRemote:         true,
+		useGlobalPool:    useGlobalPool,
+		Browser:          browser,
+		CustomPool:       customPool,
+		AutoReturnToPool: true,
 	}
 }
 
@@ -447,6 +465,53 @@ func getBrowserFromPool(pool rod.Pool[rod.Browser], create func() (*rod.Browser,
 		return create()
 	}
 	return elem, createdLauncher
+}
+
+// ReturnToPool manually recycles the browser back into its pool (if any).
+func (c *Contain) ReturnToPool() {
+	lock.Synchronized(WebReaderSysLock, func() {
+		if c == nil {
+			return
+		}
+		if c.CustomPool == nil && !c.useGlobalPool {
+			return
+		}
+		c.returnToPool()
+	})
+}
+
+// returnToPool handles the shared logic for recycling a browser into its pool.
+func (c *Contain) returnToPool() {
+	pool := c.CustomPool
+	if pool == nil {
+		pool = browserPool
+	}
+	if c.Browser != nil {
+		_ = c.Browser.Close()
+	}
+	if c.Launcher != nil {
+		c.Launcher.Cleanup()
+		c.Launcher.Kill()
+	}
+	var newBrowser *rod.Browser
+	if c.IsRemote && c.RemoteURL != "" {
+		newBrowser = rod.New().ControlURL(c.RemoteURL).MustConnect()
+	} else {
+		opts := cloneContainOptions(c.Options)
+		if opts == nil {
+			opts = DefaultContainOptions()
+		}
+		opts.WithHeadless(c.Headless)
+		opts.WithLeakless(c.LakeLess)
+		if c.UserDataDir != "" {
+			opts.WithUserDataDir(c.UserDataDir).WithUserMode(true)
+		} else {
+			opts.WithUserDataDir("").WithUserMode(false)
+		}
+		newBrowser, _ = createLocalBrowser(c.Path, opts)
+	}
+	pool.Put(newBrowser)
+	c.Browser = nil
 }
 
 func createLocalBrowser(path string, opts *ContainOptions) (*rod.Browser, *launcher.Launcher) {

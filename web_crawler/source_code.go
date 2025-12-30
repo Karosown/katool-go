@@ -81,8 +81,8 @@ func (c *Client) ReadSourceCode(url, execJsFunc string, rendorFunc func(*rod.Pag
 			if tryNum != 0 {
 				tryNum--
 				if tryNum == 0 {
-					if c.getChrome() != nil {
-						c.getChrome().ReStart()
+					if chrome := c.getChrome(); chrome != nil {
+						_ = chrome.ReStart()
 					}
 				} else {
 					time.Sleep(time.Duration(7-tryNum+1) * time.Second)

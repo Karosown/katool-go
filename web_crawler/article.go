@@ -33,8 +33,8 @@ func GetArticleWithChrome(url string, rendorFunc func(*rod.Page), restartConditi
 func (c *Client) GetArticleWithChrome(url string, rendorFunc func(*rod.Page), restartCondition func(Article) bool, i ...int) Article {
 	code := GetArticleWithSourceCode(c.ReadSourceCode(url, "", rendorFunc), url)
 	if i != nil && i[0] <= 5 && restartCondition != nil && restartCondition(code) {
-		if c.getChrome() != nil {
-			c.getChrome().ReStart()
+		if chrome := c.getChrome(); chrome != nil {
+			_ = chrome.ReStart()
 		}
 		return c.GetArticleWithChrome(url, rendorFunc, restartCondition, i[0]+1)
 	}

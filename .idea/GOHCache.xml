@@ -1704,13 +1704,6 @@
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/ollama/ollama_with_tools.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1766258925621" />
-            </ScannedPath>
-          </value>
-        </entry>
         <entry key="file://$PROJECT_DIR$/ai/format.go">
           <value>
             <ScannedPath>
@@ -2953,7 +2946,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/article.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766254561212" />
+              <option name="lastModified" value="1767034094723" />
             </ScannedPath>
           </value>
         </entry>
@@ -2970,6 +2963,13 @@
                   <option value="LinkExtractOptions" />
                 </list>
               </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/article_list_curl.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766258553991" />
             </ScannedPath>
           </value>
         </entry>
@@ -3015,13 +3015,20 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/core/contain.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766411438189" />
+              <option name="lastModified" value="1767034079040" />
               <option name="schema">
                 <list>
                   <option value="Contain" />
                   <option value="ContainOptions" />
                 </list>
               </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/web_crawler/curl_helpers.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1766258553995" />
             </ScannedPath>
           </value>
         </entry>
@@ -3044,7 +3051,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/obj_value.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765383603346" />
+              <option name="lastModified" value="1767034108188" />
               <option name="schema">
                 <list>
                   <option value="AttrValue" />
@@ -3097,7 +3104,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/rod_paste.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1766226240261" />
+              <option name="lastModified" value="1766258553996" />
               <option name="schema">
                 <list>
                   <option value="RodPasteOptions" />
@@ -3157,26 +3164,12 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/source_code.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765325220231" />
+              <option name="lastModified" value="1767034121903" />
               <option name="schema">
                 <list>
                   <option value="SourceCode" />
                 </list>
               </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_crawler/test/example/main.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1766333330012" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/web_crawler/test/web_reader_test.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1766333420397" />
             </ScannedPath>
           </value>
         </entry>
@@ -3497,6 +3490,6 @@
         <entry key="zip_info" value="ZipInfo" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1766249643145" />
+    <option name="lastTimeChecked" value="1767100479060" />
   </component>
 </project>

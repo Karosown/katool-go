@@ -34,8 +34,8 @@ func (c *Client) ReadArray(url, js string, renderFunc func(*rod.Page)) AttrValue
 			if tryNum != 0 {
 				tryNum--
 				if tryNum == 0 {
-					if c.getChrome() != nil {
-						c.getChrome().ReStart()
+					if chrome := c.getChrome(); chrome != nil {
+						_ = chrome.ReStart()
 					}
 				} else {
 					time.Sleep(time.Duration(7-tryNum+1) * time.Second)
@@ -99,8 +99,8 @@ func (c *Client) ReadToJson(url string, obj any, js string, renderFunc func(*rod
 			if tryNum != 0 {
 				tryNum--
 				if tryNum == 0 {
-					if c.getChrome() != nil {
-						c.getChrome().ReStart()
+					if chrome := c.getChrome(); chrome != nil {
+						_ = chrome.ReStart()
 					}
 				} else {
 					time.Sleep(time.Duration(7-tryNum+1) * time.Second)
