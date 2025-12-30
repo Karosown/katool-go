@@ -30,9 +30,17 @@ type Contain struct {
 	// When false, caller should use ReturnToPool() manually.
 	AutoReturnToPool bool
 	// BeforeRestart is an optional hook executed right before ReStart begins.
-	BeforeRestart func(*Contain) error
+	// Return AutoReturnToPool override via HookResult.AutoReturn; nil keeps current value.
+	BeforeRestart func(*Contain) HookResult
 	// AfterRestart is an optional hook executed after ReStart finishes.
-	AfterRestart func(*Contain) error
+	// Return AutoReturnToPool override via HookResult.AutoReturn; nil keeps current value.
+	AfterRestart func(*Contain) HookResult
+}
+
+// HookResult carries optional AutoReturn override and an error.
+type HookResult struct {
+	AutoReturn *bool
+	Err        error
 }
 
 // ContainOptions provides customization for launching Chrome.
@@ -319,23 +327,31 @@ func (c *Contain) ReStart() error {
 			return
 		}
 
+		autoReturn := c.AutoReturnToPool
 		if c.BeforeRestart != nil {
-			if err := c.BeforeRestart(c); err != nil {
-				errs = append(errs, err)
+			res := c.BeforeRestart(c)
+			if res.Err != nil {
+				errs = append(errs, res.Err)
+			}
+			if res.AutoReturn != nil {
+				autoReturn = *res.AutoReturn
 			}
 		}
 
 		after := c.AfterRestart
 		before := c.BeforeRestart
-		autoReturn := c.AutoReturnToPool
 		applyRestart := func(newC *Contain) {
 			*c = *newC
 			c.AfterRestart = after
 			c.AutoReturnToPool = autoReturn
 			c.BeforeRestart = before
 			if after != nil {
-				if err := after(c); err != nil {
-					errs = append(errs, err)
+				res := after(c)
+				if res.Err != nil {
+					errs = append(errs, res.Err)
+				}
+				if res.AutoReturn != nil {
+					c.AutoReturnToPool = *res.AutoReturn
 				}
 			}
 		}
