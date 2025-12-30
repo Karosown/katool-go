@@ -101,8 +101,8 @@ func (m Map[K, V]) Clear() {
 // Reset 重置map为新的空实例
 // Reset resets the map to a new empty instance
 func (m Map[K, V]) Reset() Map[K, V] {
-	m = NewMap[K, V]()
-	return m
+	m.Clear()
+	return NewMap[K, V]()
 }
 
 // ForEach 遍历map中的每个键值对
