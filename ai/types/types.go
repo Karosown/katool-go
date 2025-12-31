@@ -1,6 +1,8 @@
 package types
 
 import (
+	"reflect"
+
 	"github.com/karosown/katool-go/container/cutil"
 )
 
@@ -66,7 +68,7 @@ func (s *ChatResponse) IsError() bool {
 }
 
 func (s *ChatResponse) IsComplete() bool {
-	return s == nil || cutil.IsBlank(s)
+	return s == nil || cutil.IsBlank(s) || reflect.ValueOf(*s).IsZero()
 }
 
 // Choice 选择项
