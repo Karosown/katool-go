@@ -6,7 +6,7 @@ import (
 
 // Message 表示聊天消息
 type Message struct {
-	Role       string     `json:"role"`                   // user, assistant, system, tool
+	Role       Role       `json:"role"`                   // user, assistant, system, tool
 	Content    string     `json:"content,omitempty"`      // 消息内容
 	ToolCalls  []ToolCall `json:"tool_calls,omitempty"`   // 工具调用列表
 	ToolCallID string     `json:"tool_call_id,omitempty"` // 工具调用ID（tool角色消息使用）
