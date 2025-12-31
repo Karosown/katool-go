@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 )
 
 func TestConfig(t *testing.T) {
@@ -40,9 +41,9 @@ func TestConfig(t *testing.T) {
 }
 
 func TestChatRequest(t *testing.T) {
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "test-model",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "Hello"},
 		},
 		Temperature:      0.7,
@@ -83,22 +84,22 @@ func TestChatRequest(t *testing.T) {
 }
 
 func TestChatResponse(t *testing.T) {
-	response := &ai.ChatResponse{
+	response := &types.ChatResponse{
 		ID:      "test-id",
 		Object:  "chat.completion",
 		Created: 1234567890,
 		Model:   "test-model",
-		Choices: []ai.Choice{
+		Choices: []types.Choice{
 			{
 				Index: 0,
-				Message: ai.Message{
+				Message: types.Message{
 					Role:    "assistant",
 					Content: "Hello! How can I help you?",
 				},
 				FinishReason: "stop",
 			},
 		},
-		Usage: &ai.Usage{
+		Usage: &types.Usage{
 			PromptTokens:     10,
 			CompletionTokens: 20,
 			TotalTokens:      30,
@@ -179,7 +180,7 @@ func TestProviderType(t *testing.T) {
 }
 
 func TestModelInfo(t *testing.T) {
-	modelInfo := &ai.ModelInfo{
+	modelInfo := &types.ModelInfo{
 		ID:          "gpt-3.5-turbo",
 		Name:        "GPT-3.5 Turbo",
 		Provider:    "openai",
@@ -221,7 +222,7 @@ func TestModelInfo(t *testing.T) {
 }
 
 func TestStreamEvent(t *testing.T) {
-	event := &ai.StreamEvent{
+	event := &types.StreamEvent{
 		Data:  "Hello, world!",
 		Event: "message",
 		ID:    "event-123",
@@ -246,7 +247,7 @@ func TestStreamEvent(t *testing.T) {
 }
 
 func TestErrorResponse(t *testing.T) {
-	errorResp := &ai.ErrorResponse{
+	errorResp := &types.ErrorResponse{
 		Error: struct {
 			Message string `json:"message"`
 			Type    string `json:"type"`
@@ -274,9 +275,9 @@ func TestErrorResponse(t *testing.T) {
 // 基准测试
 func BenchmarkChatRequestCreation(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = &ai.ChatRequest{
+		_ = &types.ChatRequest{
 			Model: "test-model",
-			Messages: []ai.Message{
+			Messages: []types.Message{
 				{Role: "user", Content: "Hello"},
 			},
 			Temperature: 0.7,
@@ -287,22 +288,22 @@ func BenchmarkChatRequestCreation(b *testing.B) {
 
 func BenchmarkChatResponseCreation(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = &ai.ChatResponse{
+		_ = &types.ChatResponse{
 			ID:      "test-id",
 			Object:  "chat.completion",
 			Created: 1234567890,
 			Model:   "test-model",
-			Choices: []ai.Choice{
+			Choices: []types.Choice{
 				{
 					Index: 0,
-					Message: ai.Message{
+					Message: types.Message{
 						Role:    "assistant",
 						Content: "Hello! How can I help you?",
 					},
 					FinishReason: "stop",
 				},
 			},
-			Usage: &ai.Usage{
+			Usage: &types.Usage{
 				PromptTokens:     10,
 				CompletionTokens: 20,
 				TotalTokens:      30,

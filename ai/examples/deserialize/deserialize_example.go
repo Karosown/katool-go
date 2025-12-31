@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 )
 
 // Person 示例结构体
@@ -43,9 +44,9 @@ func ExampleChatWithDeserialize() {
 		"required": []string{"name", "age", "email"},
 	}
 
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "gpt-4",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{
 				Role:    "user",
 				Content: "请提取以下文本中的个人信息：张三，25岁，邮箱是zhangsan@example.com",
@@ -88,9 +89,9 @@ func ExampleChatStreamWithDeserialize() {
 		"required": []string{"name", "age"},
 	}
 
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "gpt-4",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{
 				Role:    "user",
 				Content: "提取：李四，30岁",
@@ -138,9 +139,9 @@ func ExampleSimpleDeserialize() {
 		log.Fatal(err)
 	}
 
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "gpt-4",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{
 				Role:    "user",
 				Content: "请返回一个 JSON 对象，包含 name 和 age 字段",
@@ -180,9 +181,9 @@ func ExampleArrayDeserialize() {
 		},
 	}
 
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "gpt-4",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{
 				Role:    "user",
 				Content: "请返回一个包含3个人的数组，每个人有 name 和 age",

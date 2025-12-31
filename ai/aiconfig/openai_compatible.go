@@ -5,7 +5,8 @@ import (
 	"fmt"
 
 	"github.com/Tangerg/lynx/pkg/sync"
-	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/providers"
+	"github.com/karosown/katool-go/ai/types"
 
 	"os"
 	"time"
@@ -19,15 +20,15 @@ import (
 // OpenAICompatibleProvider OpenAI兼容提供者
 // 支持所有兼容OpenAI接口的AI服务
 type OpenAICompatibleProvider struct {
-	config       *ai.Config
+	config       *Config
 	logger       xlog.Logger
-	providerType ai.ProviderType
+	providerType providers.ProviderType
 }
 
 // NewOpenAICompatibleProvider 创建OpenAI兼容提供者
-func NewOpenAICompatibleProvider(providerType ai.ProviderType, config *ai.Config) *OpenAICompatibleProvider {
+func NewOpenAICompatibleProvider(providerType providers.ProviderType, config *Config) *OpenAICompatibleProvider {
 	if config == nil {
-		config = &ai.Config{}
+		config = &Config{}
 	}
 
 	// 设置默认值
@@ -40,26 +41,26 @@ func NewOpenAICompatibleProvider(providerType ai.ProviderType, config *ai.Config
 
 	// 根据提供者类型设置默认配置
 	switch providerType {
-	case ai.ProviderOpenAI:
+	case providers.ProviderOpenAI:
 		if config.BaseURL == "" {
 			config.BaseURL = "https://api.openai.com/v1"
 		}
 		if config.APIKey == "" {
 			config.APIKey = os.Getenv("OPENAI_API_KEY")
 		}
-	case ai.ProviderDeepSeek:
+	case providers.ProviderDeepSeek:
 		if config.BaseURL == "" {
 			config.BaseURL = "https://api.deepseek.com/v1"
 		}
 		if config.APIKey == "" {
 			config.APIKey = os.Getenv("DEEPSEEK_API_KEY")
 		}
-	case ai.ProviderOllama:
+	case providers.ProviderOllama:
 		if config.BaseURL == "" {
 			config.BaseURL = "http://localhost:11434/v1"
 		}
 		// Ollama通常不需要API密钥
-	case ai.ProviderLocalAI:
+	case providers.ProviderLocalAI:
 		if config.BaseURL == "" {
 			config.BaseURL = "http://localhost:8080/v1"
 		}
@@ -83,7 +84,7 @@ func (p *OpenAICompatibleProvider) GetName() string {
 // GetModels 获取支持的模型列表
 func (p *OpenAICompatibleProvider) GetModels() []string {
 	switch p.providerType {
-	case ai.ProviderOpenAI:
+	case providers.ProviderOpenAI:
 		return []string{
 			"gpt-4o",
 			"gpt-4o-mini",
@@ -92,13 +93,13 @@ func (p *OpenAICompatibleProvider) GetModels() []string {
 			"gpt-3.5-turbo",
 			"gpt-3.5-turbo-16k",
 		}
-	case ai.ProviderDeepSeek:
+	case providers.ProviderDeepSeek:
 		return []string{
 			"deepseek-chat",
 			"deepseek-coder",
 			"deepseek-reasoner",
 		}
-	case ai.ProviderOllama:
+	case providers.ProviderOllama:
 		return []string{
 			"llama2",
 			"llama3",
@@ -108,7 +109,7 @@ func (p *OpenAICompatibleProvider) GetModels() []string {
 			"starling-lm",
 			"vicuna",
 		}
-	case ai.ProviderLocalAI:
+	case providers.ProviderLocalAI:
 		return []string{
 			"gpt-3.5-turbo",
 			"gpt-4",
@@ -127,7 +128,7 @@ func (p *OpenAICompatibleProvider) ValidateConfig() error {
 	}
 
 	// 某些提供者需要API密钥
-	if p.providerType == ai.ProviderOpenAI || p.providerType == ai.ProviderDeepSeek {
+	if p.providerType == providers.ProviderOpenAI || p.providerType == providers.ProviderDeepSeek {
 		if p.config.APIKey == "" {
 			return fmt.Errorf("%s API key is required", p.providerType)
 		}
@@ -137,7 +138,7 @@ func (p *OpenAICompatibleProvider) ValidateConfig() error {
 }
 
 // Chat 发送聊天请求
-func (p *OpenAICompatibleProvider) Chat(req *ai.ChatRequest) (*ai.ChatResponse, error) {
+func (p *OpenAICompatibleProvider) Chat(req *types.ChatRequest) (*types.ChatResponse, error) {
 	if err := p.ValidateConfig(); err != nil {
 		return nil, err
 	}
@@ -203,7 +204,7 @@ func (p *OpenAICompatibleProvider) Chat(req *ai.ChatRequest) (*ai.ChatResponse, 
 	}
 
 	// 创建响应结构
-	var response ai.ChatResponse
+	var response types.ChatResponse
 
 	// 发送请求
 	_, err := remote.NewReq().
@@ -223,7 +224,7 @@ func (p *OpenAICompatibleProvider) Chat(req *ai.ChatRequest) (*ai.ChatResponse, 
 }
 
 // ChatStream 发送流式聊天请求
-func (p *OpenAICompatibleProvider) ChatStream(req *ai.ChatRequest) (<-chan *ai.ChatResponse, error) {
+func (p *OpenAICompatibleProvider) ChatStream(req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	if err := p.ValidateConfig(); err != nil {
 		return nil, err
 	}
@@ -292,10 +293,10 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ai.ChatRequest) (<-chan *ai.C
 	}
 
 	// 创建响应通道
-	responseChan := make(ai.StreamChatResponse, 100)
+	responseChan := make(types.StreamChatResponse, 100)
 
 	// 创建SSE请求
-	sseReq := remote.NewSSEReq[ai.StreamEvent]().
+	sseReq := remote.NewSSEReq[types.StreamEvent]().
 		Url(p.config.BaseURL + "/chat/completions").
 		Method("POST").
 		Headers(headers).
@@ -303,9 +304,9 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ai.ChatRequest) (<-chan *ai.C
 		SetLogger(p.logger)
 
 	// 设置事件处理
-	sseReq.BeforeEvent(func(event remote.SSEEvent[ai.StreamEvent]) (*ai.StreamEvent, error) {
+	sseReq.BeforeEvent(func(event remote.SSEEvent[types.StreamEvent]) (*types.StreamEvent, error) {
 		// 直接返回SSE事件数据
-		return &ai.StreamEvent{
+		return &types.StreamEvent{
 			Data:  event.Data,
 			Event: event.Event,
 			ID:    event.ID,
@@ -313,7 +314,7 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ai.ChatRequest) (<-chan *ai.C
 		}, nil
 	})
 
-	sseReq.OnEvent(func(streamEvent ai.StreamEvent) error {
+	sseReq.OnEvent(func(streamEvent types.StreamEvent) error {
 		// 处理流式数据
 		if streamEvent.Data == "[DONE]" {
 			responseChan.Close(nil)
@@ -321,7 +322,7 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ai.ChatRequest) (<-chan *ai.C
 		}
 
 		// 解析响应
-		var response ai.ChatResponse
+		var response types.ChatResponse
 		if err := json.Unmarshal([]byte(jsonhp.FixJson(streamEvent.Data)), &response); err != nil {
 			responseChan.Close(err)
 			return nil
@@ -358,7 +359,7 @@ func (p *OpenAICompatibleProvider) ChatStream(req *ai.ChatRequest) (<-chan *ai.C
 }
 
 // ChatWithTools 发送带工具调用的聊天请求
-func (p *OpenAICompatibleProvider) ChatWithTools(req *ai.ChatRequest, tools []ai.Tool) (*ai.ChatResponse, error) {
+func (p *OpenAICompatibleProvider) ChatWithTools(req *types.ChatRequest, tools []types.Tool) (*types.ChatResponse, error) {
 	// 设置工具
 	req.Tools = tools
 	// 调用普通的Chat方法
@@ -371,16 +372,16 @@ func (p *OpenAICompatibleProvider) SetLogger(logger xlog.Logger) {
 }
 
 // GetConfig 获取配置
-func (p *OpenAICompatibleProvider) GetConfig() *ai.Config {
+func (p *OpenAICompatibleProvider) GetConfig() *Config {
 	return p.config
 }
 
 // SetConfig 设置配置
-func (p *OpenAICompatibleProvider) SetConfig(config *ai.Config) {
+func (p *OpenAICompatibleProvider) SetConfig(config *Config) {
 	p.config = config
 }
 
 // GetProviderType 获取提供者类型
-func (p *OpenAICompatibleProvider) GetProviderType() ai.ProviderType {
+func (p *OpenAICompatibleProvider) GetProviderType() providers.ProviderType {
 	return p.providerType
 }

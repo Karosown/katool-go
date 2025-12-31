@@ -1,8 +1,12 @@
 package ai
 
+import (
+	"github.com/karosown/katool-go/ai/types"
+)
+
 // SetFormat 为请求设置结构化输出格式（JSON Schema）
 // format 可以是 map[string]interface{} 或其他可以序列化为 JSON Schema 的类型
-func SetFormat(req *ChatRequest, format interface{}) *ChatRequest {
+func SetFormat(req *types.ChatRequest, format interface{}) *types.ChatRequest {
 	if req == nil {
 		return nil
 	}
@@ -11,17 +15,17 @@ func SetFormat(req *ChatRequest, format interface{}) *ChatRequest {
 }
 
 // WithFormat 创建一个带格式设置的请求构建器（链式调用）
-func WithFormat(req *ChatRequest) *FormatBuilder {
+func WithFormat(req *types.ChatRequest) *FormatBuilder {
 	return &FormatBuilder{req: req}
 }
 
 // FormatBuilder 格式构建器
 type FormatBuilder struct {
-	req *ChatRequest
+	req *types.ChatRequest
 }
 
 // Set 设置格式
-func (b *FormatBuilder) Set(format interface{}) *ChatRequest {
+func (b *FormatBuilder) Set(format interface{}) *types.ChatRequest {
 	return SetFormat(b.req, format)
 }
 

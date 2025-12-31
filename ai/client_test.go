@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/karosown/katool-go/ai/types"
 	"github.com/karosown/katool-go/container/optional"
 	"github.com/karosown/katool-go/helper/jsonhp"
 
@@ -20,26 +21,26 @@ type mockProvider struct {
 	config *Config
 }
 
-func (m *mockProvider) Chat(req *ChatRequest) (*ChatResponse, error) {
-	return &ChatResponse{
+func (m *mockProvider) Chat(req *types.ChatRequest) (*types.ChatResponse, error) {
+	return &types.ChatResponse{
 		ID:      "test-id",
 		Model:   req.Model,
-		Choices: []Choice{{Message: Message{Role: "assistant", Content: "Hello from mock"}}},
+		Choices: []types.Choice{{Message: types.Message{Role: "assistant", Content: "Hello from mock"}}},
 	}, nil
 }
 
-func (m *mockProvider) ChatStream(req *ChatRequest) (<-chan *ChatResponse, error) {
-	ch := make(StreamChatResponse, 1)
-	ch <- &ChatResponse{
+func (m *mockProvider) ChatStream(req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
+	ch := make(types.StreamChatResponse, 1)
+	ch <- &types.ChatResponse{
 		ID:      "test-id",
 		Model:   req.Model,
-		Choices: []Choice{{Delta: Message{Role: "assistant", Content: "Hello"}}},
+		Choices: []types.Choice{{Delta: types.Message{Role: "assistant", Content: "Hello"}}},
 	}
 	ch.Close(nil)
 	return ch, nil
 }
 
-func (m *mockProvider) ChatWithTools(req *ChatRequest, tools []Tool) (*ChatResponse, error) {
+func (m *mockProvider) ChatWithTools(req *types.ChatRequest, tools []types.Tool) (*types.ChatResponse, error) {
 	return m.Chat(req)
 }
 
@@ -290,9 +291,9 @@ func TestChat(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req := &ChatRequest{
+	req := &types.ChatRequest{
 		Model: "llama2",
-		Messages: []Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "Hello"},
 		},
 	}
@@ -320,10 +321,10 @@ func TestChatRes(t *testing.T) {
 
 	// Ollama 的 format 参数只接受 "json" 字符串，不接受 JSON Schema 对象
 	// 需要在 prompt 中描述期望的 JSON 结构
-	req := &ChatRequest{
+	req := &types.ChatRequest{
 		//Model: "llama3.1",
 		Model: "Qwen2",
-		Messages: []Message{
+		Messages: []types.Message{
 			NewMessage(RoleSystem, `你是一个智能的研究人员。我给你一个关键词，请你返回给我可能找到结果的网址。注意一定要高相关性！可以是二级域名返回给我，格式如下
 `+jsonhp.ToJSON([]struct {
 				Link string `json:"Link" description:"Link"`
@@ -366,9 +367,9 @@ func TestChatWithProvider(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req := &ChatRequest{
+	req := &types.ChatRequest{
 		Model: "llama2",
-		Messages: []Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "Hello"},
 		},
 	}
@@ -402,9 +403,9 @@ func TestChatWithFallback(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req := &ChatRequest{
+	req := &types.ChatRequest{
 		Model: "Qwen2",
-		Messages: []Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "Hello"},
 		},
 	}
@@ -560,9 +561,9 @@ func BenchmarkRegisterFunction(b *testing.B) {
 
 // TestSetFormat 测试设置格式
 func TestSetFormat(t *testing.T) {
-	req := &ChatRequest{
+	req := &types.ChatRequest{
 		Model: "llama3.1",
-		Messages: []Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "Test"},
 		},
 	}
@@ -735,9 +736,9 @@ func TestSetFormatFromStruct(t *testing.T) {
 		Age  int    `json:"age"`
 	}
 
-	req := &ChatRequest{
+	req := &types.ChatRequest{
 		Model: "test",
-		Messages: []Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "test"},
 		},
 	}

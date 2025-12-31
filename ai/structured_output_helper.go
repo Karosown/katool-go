@@ -3,11 +3,13 @@ package ai
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/karosown/katool-go/ai/types"
 )
 
 // ChatWithStructuredOutputHelper 结构化输出的辅助函数
 // 通过创建虚拟的function/tool实现，schema作为function的parameters
-func ChatWithStructuredOutputHelper(client *Client, req *ChatRequest, schema map[string]interface{}, functionName string) (*ChatResponse, error) {
+func ChatWithStructuredOutputHelper(client *Client, req *types.ChatRequest, schema map[string]interface{}, functionName string) (*types.ChatResponse, error) {
 	if schema == nil {
 		return nil, fmt.Errorf("schema cannot be nil")
 	}
@@ -23,9 +25,9 @@ func ChatWithStructuredOutputHelper(client *Client, req *ChatRequest, schema map
 	originalFormat := req.Format
 
 	// 将schema包装为function的parameters（这就是把format放进function call）
-	tool := Tool{
+	tool := types.Tool{
 		Type: "function",
-		Function: ToolFunction{
+		Function: types.ToolFunction{
 			Name:        functionName,
 			Description: "Extract and return structured data according to the schema",
 			Parameters:  schema, // schema作为function的参数定义
@@ -33,7 +35,7 @@ func ChatWithStructuredOutputHelper(client *Client, req *ChatRequest, schema map
 	}
 
 	// 添加到请求中
-	req.Tools = []Tool{tool}
+	req.Tools = []types.Tool{tool}
 
 	// 强制调用这个函数（OpenAI格式）
 	req.ToolChoice = map[string]interface{}{
@@ -85,7 +87,7 @@ func ChatWithStructuredOutputHelper(client *Client, req *ChatRequest, schema map
 
 // ExtractStructuredData 从响应中提取结构化数据
 // functionName: 函数名（默认为"extract_data"）
-func ExtractStructuredData(response *ChatResponse, functionName string) (map[string]interface{}, error) {
+func ExtractStructuredData(response *types.ChatResponse, functionName string) (map[string]interface{}, error) {
 	if functionName == "" {
 		functionName = "extract_data"
 	}
@@ -113,7 +115,7 @@ func ExtractStructuredData(response *ChatResponse, functionName string) (map[str
 }
 
 // UnmarshalStructuredData 将结构化数据解析到目标结构体
-func UnmarshalStructuredData(response *ChatResponse, v interface{}, functionName string) error {
+func UnmarshalStructuredData(response *types.ChatResponse, v interface{}, functionName string) error {
 	data, err := ExtractStructuredData(response, functionName)
 	if err != nil {
 		return err
@@ -133,7 +135,7 @@ func UnmarshalStructuredData(response *ChatResponse, v interface{}, functionName
 }
 
 // GetStructuredDataJSON 获取结构化数据的JSON字符串
-func GetStructuredDataJSON(response *ChatResponse, functionName string) (string, error) {
+func GetStructuredDataJSON(response *types.ChatResponse, functionName string) (string, error) {
 	if functionName == "" {
 		functionName = "extract_data"
 	}

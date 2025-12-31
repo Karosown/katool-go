@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 )
 
 // TestRealSSEData 测试真实的SSE数据
@@ -13,12 +13,12 @@ func TestRealSSEData(t *testing.T) {
 	realSSEData := `{"id":"chatcmpl-672","object":"chat.completion.chunk","created":1757587768,"model":"deepseek-r1","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":","},"finish_reason":null}]}`
 
 	// 创建StreamEvent
-	event := &ai.StreamEvent{
+	event := &types.StreamEvent{
 		Data: realSSEData,
 	}
 
 	// 解析ChatResponse
-	var chatResponse ai.ChatResponse
+	var chatResponse types.ChatResponse
 	if err := json.Unmarshal([]byte(event.Data), &chatResponse); err != nil {
 		t.Fatalf("Failed to parse real SSE data: %v", err)
 	}
@@ -71,12 +71,12 @@ func TestRealSSEDataWithSystemFingerprint(t *testing.T) {
 	sseData := `{"id":"chatcmpl-672","object":"chat.completion.chunk","created":1757587768,"model":"deepseek-r1","system_fingerprint":"fp_ollama","choices":[{"index":0,"delta":{"role":"assistant","content":","},"finish_reason":null}]}`
 
 	// 创建StreamEvent
-	event := &ai.StreamEvent{
+	event := &types.StreamEvent{
 		Data: sseData,
 	}
 
 	// 解析ChatResponse
-	var chatResponse ai.ChatResponse
+	var chatResponse types.ChatResponse
 	if err := json.Unmarshal([]byte(event.Data), &chatResponse); err != nil {
 		t.Fatalf("Failed to parse SSE data with system_fingerprint: %v", err)
 	}
@@ -129,12 +129,12 @@ func TestRealSSEDataStreamProcessing(t *testing.T) {
 		}
 
 		// 创建StreamEvent
-		event := &ai.StreamEvent{
+		event := &types.StreamEvent{
 			Data: eventData,
 		}
 
 		// 解析ChatResponse
-		var chatResponse ai.ChatResponse
+		var chatResponse types.ChatResponse
 		if err := json.Unmarshal([]byte(event.Data), &chatResponse); err != nil {
 			t.Fatalf("Failed to parse stream data at index %d: %v", i, err)
 		}
@@ -183,11 +183,11 @@ func TestRealSSEDataErrorHandling(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			event := &ai.StreamEvent{
+			event := &types.StreamEvent{
 				Data: tc.data,
 			}
 
-			var chatResponse ai.ChatResponse
+			var chatResponse types.ChatResponse
 			if err := json.Unmarshal([]byte(event.Data), &chatResponse); err == nil {
 				t.Errorf("Expected error for %s, but got success", tc.name)
 			}
@@ -201,11 +201,11 @@ func BenchmarkRealSSEDataParsing(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		event := &ai.StreamEvent{
+		event := &types.StreamEvent{
 			Data: sseData,
 		}
 
-		var chatResponse ai.ChatResponse
+		var chatResponse types.ChatResponse
 		json.Unmarshal([]byte(event.Data), &chatResponse)
 	}
 }

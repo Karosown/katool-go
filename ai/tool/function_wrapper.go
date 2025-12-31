@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 )
 
 // FunctionWrapper 函数调用封装器
@@ -159,13 +159,13 @@ func (r *FunctionRegistry) generateParameterDefinition(paramType reflect.Type) (
 }
 
 // GetTools 获取所有注册的工具
-func (r *FunctionRegistry) GetTools() []ai.Tool {
-	tools := make([]ai.Tool, 0, len(r.functions))
+func (r *FunctionRegistry) GetTools() []types.Tool {
+	tools := make([]types.Tool, 0, len(r.functions))
 
 	for _, wrapper := range r.functions {
-		tools = append(tools, ai.Tool{
+		tools = append(tools, types.Tool{
 			Type: "function",
-			Function: ai.ToolFunction{
+			Function: types.ToolFunction{
 				Name:        wrapper.Name,
 				Description: wrapper.Description,
 				Parameters:  wrapper.Parameters,

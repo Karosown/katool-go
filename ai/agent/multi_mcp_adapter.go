@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 	"github.com/karosown/katool-go/xlog"
 )
 
@@ -15,8 +15,8 @@ type MultiMCPAdapter struct {
 	adapters []*MCPAdapter
 
 	// 工具缓存（合并后的）
-	toolsCache []ai.Tool
-	toolsMap   map[string]*ai.Tool
+	toolsCache []types.Tool
+	toolsMap   map[string]*types.Tool
 	toolSource map[string]int // 工具名称 -> 适配器索引
 
 	// 日志记录器
@@ -30,8 +30,8 @@ type MultiMCPAdapter struct {
 func NewMultiMCPAdapter(logger xlog.Logger) *MultiMCPAdapter {
 	return &MultiMCPAdapter{
 		adapters:   make([]*MCPAdapter, 0),
-		toolsCache: make([]ai.Tool, 0),
-		toolsMap:   make(map[string]*ai.Tool),
+		toolsCache: make([]types.Tool, 0),
+		toolsMap:   make(map[string]*types.Tool),
 		toolSource: make(map[string]int),
 		logger:     logger,
 	}
@@ -88,8 +88,8 @@ func (m *MultiMCPAdapter) RemoveAdapter(index int) error {
 	}
 
 	// 重建工具列表
-	newToolsCache := make([]ai.Tool, 0)
-	newToolsMap := make(map[string]*ai.Tool)
+	newToolsCache := make([]types.Tool, 0)
+	newToolsMap := make(map[string]*types.Tool)
 	newToolSource := make(map[string]int)
 
 	for i, tool := range m.toolsCache {
@@ -135,11 +135,11 @@ func (m *MultiMCPAdapter) GetAdapterCount() int {
 }
 
 // GetTools 获取所有工具（合并后的）
-func (m *MultiMCPAdapter) GetTools() []ai.Tool {
+func (m *MultiMCPAdapter) GetTools() []types.Tool {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	tools := make([]ai.Tool, len(m.toolsCache))
+	tools := make([]types.Tool, len(m.toolsCache))
 	copy(tools, m.toolsCache)
 	return tools
 }
@@ -192,8 +192,8 @@ func (m *MultiMCPAdapter) RefreshTools(ctx context.Context) error {
 	defer m.mu.Unlock()
 
 	// 清空缓存
-	m.toolsCache = make([]ai.Tool, 0)
-	m.toolsMap = make(map[string]*ai.Tool)
+	m.toolsCache = make([]types.Tool, 0)
+	m.toolsMap = make(map[string]*types.Tool)
 	m.toolSource = make(map[string]int)
 
 	// 重新合并所有适配器的工具

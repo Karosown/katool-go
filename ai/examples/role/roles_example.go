@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 )
 
 func main() {
@@ -35,9 +36,9 @@ func main() {
 
 	fmt.Println("=== 示例3: 为现有请求添加角色 ===")
 	// 创建普通请求
-	req2 := &ai.ChatRequest{
+	req2 := &types.ChatRequest{
 		Model: "gpt-3.5-turbo",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "帮我写一首关于春天的诗"},
 		},
 	}
@@ -73,9 +74,9 @@ func main() {
 
 	fmt.Println("\n=== 示例6: 使用自定义角色提示词 ===")
 	// 使用自定义系统消息
-	req3 := &ai.ChatRequest{
+	req3 := &types.ChatRequest{
 		Model: "gpt-3.5-turbo",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{
 				Role:    "system",
 				Content: "你是一位专业的金融顾问，擅长分析市场趋势和投资建议。",

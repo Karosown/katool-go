@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 	"github.com/karosown/katool-go/xlog"
 )
 
@@ -82,14 +83,14 @@ func (c *Client) RegisterFunction(name, description string, fn interface{}) erro
 }
 
 // GetLocalTools 获取所有本地注册的工具
-func (c *Client) GetLocalTools() []ai.Tool {
+func (c *Client) GetLocalTools() []types.Tool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.aiClient.GetTools()
 }
 
 // GetMCPTools 获取所有MCP工具
-func (c *Client) GetMCPTools() []ai.Tool {
+func (c *Client) GetMCPTools() []types.Tool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -103,15 +104,15 @@ func (c *Client) GetMCPTools() []ai.Tool {
 		return c.mcpAdapter.GetTools()
 	}
 
-	return []ai.Tool{}
+	return []types.Tool{}
 }
 
 // GetAllTools 获取所有工具（本地+MCP）
-func (c *Client) GetAllTools() []ai.Tool {
+func (c *Client) GetAllTools() []types.Tool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	tools := make([]ai.Tool, 0)
+	tools := make([]types.Tool, 0)
 
 	// 添加本地工具
 	localTools := c.aiClient.GetTools()
@@ -197,7 +198,7 @@ func (c *Client) CallToolWithParams(ctx context.Context, name string, params map
 // ============================================================================
 
 // Chat 发送聊天请求（不自动处理工具调用）
-func (c *Client) Chat(ctx context.Context, req *ai.ChatRequest) (*ai.ChatResponse, error) {
+func (c *Client) Chat(ctx context.Context, req *types.ChatRequest) (*types.ChatResponse, error) {
 	// 如果没有指定工具，自动添加所有可用工具
 	if len(req.Tools) == 0 {
 		req.Tools = c.GetAllTools()
@@ -207,7 +208,7 @@ func (c *Client) Chat(ctx context.Context, req *ai.ChatRequest) (*ai.ChatRespons
 }
 
 // ChatStream 发送流式聊天请求
-func (c *Client) ChatStream(ctx context.Context, req *ai.ChatRequest) (<-chan *ai.ChatResponse, error) {
+func (c *Client) ChatStream(ctx context.Context, req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	// 如果没有指定工具，自动添加所有可用工具
 	if len(req.Tools) == 0 {
 		req.Tools = c.GetAllTools()
@@ -221,8 +222,8 @@ func (c *Client) ChatStream(ctx context.Context, req *ai.ChatRequest) (<-chan *a
 // ============================================================================
 
 // ExecuteToolCalls 执行工具调用列表，返回工具结果消息
-func (c *Client) ExecuteToolCalls(ctx context.Context, toolCalls []ai.ToolCall) ([]ai.Message, error) {
-	toolResults := make([]ai.Message, 0, len(toolCalls))
+func (c *Client) ExecuteToolCalls(ctx context.Context, toolCalls []types.ToolCall) ([]types.Message, error) {
+	toolResults := make([]types.Message, 0, len(toolCalls))
 
 	for _, toolCall := range toolCalls {
 		result, err := c.CallTool(ctx, toolCall.Function.Name, toolCall.Function.Arguments)
@@ -233,7 +234,7 @@ func (c *Client) ExecuteToolCalls(ctx context.Context, toolCalls []ai.ToolCall) 
 				"error": err.Error(),
 			}
 			resultJSON, _ := json.Marshal(errorResult)
-			toolResults = append(toolResults, ai.Message{
+			toolResults = append(toolResults, types.Message{
 				Role:       "tool",
 				Content:    string(resultJSON),
 				ToolCallID: toolCall.ID,
@@ -248,7 +249,7 @@ func (c *Client) ExecuteToolCalls(ctx context.Context, toolCalls []ai.ToolCall) 
 		}
 
 		// 创建工具结果消息
-		toolResults = append(toolResults, ai.Message{
+		toolResults = append(toolResults, types.Message{
 			Role:       "tool",
 			Content:    string(resultJSON),
 			ToolCallID: toolCall.ID,

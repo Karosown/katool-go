@@ -1,11 +1,11 @@
 package providers
 
 import (
-	"github.com/karosown/katool-go/ai"
 	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/ai/types"
 )
 
 // NewLocalAIProvider 创建LocalAI提供者
-func NewLocalAIProvider(config *ai.Config) ai.AIProvider {
-	return aiconfig.NewOpenAICompatibleProvider(ai.ProviderLocalAI, config)
+func NewLocalAIProvider(config *aiconfig.Config) types.AIProvider {
+	return aiconfig.NewOpenAICompatibleProvider(ProviderLocalAI, config)
 }

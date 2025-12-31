@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 )
 
 func main() {
@@ -48,9 +49,9 @@ func example1(client *ai.Client) {
 	fmt.Println(string(schemaJSON))
 
 	// 使用 schema
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "gpt-4o-mini",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "生成一个用户信息"},
 		},
 		Format: schema,
@@ -99,9 +100,9 @@ func example2(client *ai.Client) {
 	schemaJSON, _ := json.MarshalIndent(schema, "", "  ")
 	fmt.Println(string(schemaJSON))
 
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "gpt-4o-mini",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "生成一个包含用户和地址的信息"},
 		},
 		Format: schema,
@@ -139,9 +140,9 @@ func example3(client *ai.Client) {
 	schemaJSON, _ := json.MarshalIndent(schema, "", "  ")
 	fmt.Println(string(schemaJSON))
 
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "gpt-4o-mini",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "生成一个产品信息，包含多个变体"},
 		},
 		Format: schema,

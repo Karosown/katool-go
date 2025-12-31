@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 	"github.com/karosown/katool-go/xlog"
 )
 
@@ -16,7 +16,7 @@ type Agent struct {
 	client *Client
 
 	// 对话历史
-	conversationHistory []ai.Message
+	conversationHistory []types.Message
 
 	// 系统提示词
 	systemPrompt string
@@ -68,7 +68,7 @@ func NewAgent(client *Client, opts ...AgentOption) (*Agent, error) {
 
 	agent := &Agent{
 		client:              client,
-		conversationHistory: make([]ai.Message, 0),
+		conversationHistory: make([]types.Message, 0),
 		config:              DefaultAgentConfig(),
 		logger:              client.GetLogger(),
 	}
@@ -105,14 +105,14 @@ func (a *Agent) Execute(ctx context.Context, task string) (*ExecutionResult, err
 
 	// 添加系统提示词（如果存在且对话历史为空）
 	if a.systemPrompt != "" && len(a.conversationHistory) == 0 {
-		a.conversationHistory = append(a.conversationHistory, ai.Message{
+		a.conversationHistory = append(a.conversationHistory, types.Message{
 			Role:    "system",
 			Content: a.systemPrompt,
 		})
 	}
 
 	// 添加用户任务
-	a.conversationHistory = append(a.conversationHistory, ai.Message{
+	a.conversationHistory = append(a.conversationHistory, types.Message{
 		Role:    "user",
 		Content: task,
 	})
@@ -130,13 +130,13 @@ func (a *Agent) Execute(ctx context.Context, task string) (*ExecutionResult, err
 }
 
 // executeWithTools 执行带工具调用的对话
-func (a *Agent) executeWithTools(ctx context.Context, tools []ai.Tool) (*ExecutionResult, error) {
+func (a *Agent) executeWithTools(ctx context.Context, tools []types.Tool) (*ExecutionResult, error) {
 	rounds := 0
-	var finalResponse *ai.ChatResponse
+	var finalResponse *types.ChatResponse
 
 	for rounds < a.config.MaxToolCallRounds {
 		// 创建请求
-		req := &ai.ChatRequest{
+		req := &types.ChatRequest{
 			Model:       a.config.Model,
 			Messages:    a.conversationHistory,
 			Tools:       tools,
@@ -154,7 +154,7 @@ func (a *Agent) executeWithTools(ctx context.Context, tools []ai.Tool) (*Executi
 			}
 
 			// 收集流式响应
-			var lastResponse *ai.ChatResponse
+			var lastResponse *types.ChatResponse
 			for response := range stream {
 				if response.IsError() {
 					return nil, response.Error()
@@ -218,15 +218,15 @@ func (a *Agent) executeWithTools(ctx context.Context, tools []ai.Tool) (*Executi
 func (a *Agent) ClearHistory() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	a.conversationHistory = make([]ai.Message, 0)
+	a.conversationHistory = make([]types.Message, 0)
 }
 
 // GetHistory 获取对话历史
-func (a *Agent) GetHistory() []ai.Message {
+func (a *Agent) GetHistory() []types.Message {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
-	history := make([]ai.Message, len(a.conversationHistory))
+	history := make([]types.Message, len(a.conversationHistory))
 	copy(history, a.conversationHistory)
 	return history
 }
@@ -245,10 +245,10 @@ func (a *Agent) getConversationID() string {
 
 // ExecutionResult 执行结果
 type ExecutionResult struct {
-	Response       string        `json:"response"`          // 最终响应
-	ToolCalls      []ai.ToolCall `json:"tool_calls"`        // 工具调用列表
-	Rounds         int           `json:"rounds"`            // 执行轮数
-	Usage          *ai.Usage     `json:"usage"`             // Token使用情况
-	ConversationID string        `json:"conversation_id"`   // 对话ID
-	Warning        string        `json:"warning,omitempty"` // 警告信息
+	Response       string           `json:"response"`          // 最终响应
+	ToolCalls      []types.ToolCall `json:"tool_calls"`        // 工具调用列表
+	Rounds         int              `json:"rounds"`            // 执行轮数
+	Usage          *types.Usage     `json:"usage"`             // Token使用情况
+	ConversationID string           `json:"conversation_id"`   // 对话ID
+	Warning        string           `json:"warning,omitempty"` // 警告信息
 }

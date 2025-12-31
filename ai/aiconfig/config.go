@@ -7,13 +7,22 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/providers"
 )
+
+// Config AI提供者配置
+type Config struct {
+	APIKey     string            `json:"api_key"`     // API密钥
+	BaseURL    string            `json:"base_url"`    // 基础URL
+	Timeout    time.Duration     `json:"timeout"`     // 超时时间
+	Headers    map[string]string `json:"headers"`     // 额外请求头
+	MaxRetries int               `json:"max_retries"` // 最大重试次数
+}
 
 // ConfigManager 配置管理器
 type ConfigManager struct {
 	configPath string
-	configs    map[ai.ProviderType]*ai.Config
+	configs    map[providers.ProviderType]*Config
 }
 
 // NewConfigManager 创建配置管理器
@@ -24,7 +33,7 @@ func NewConfigManager(configPath string) *ConfigManager {
 
 	return &ConfigManager{
 		configPath: configPath,
-		configs:    make(map[ai.ProviderType]*ai.Config),
+		configs:    make(map[providers.ProviderType]*Config),
 	}
 }
 
@@ -44,15 +53,15 @@ func (cm *ConfigManager) LoadConfig() error {
 	}
 
 	// 解析配置文件
-	var configData map[string]*ai.Config
+	var configData map[string]*Config
 	if err := json.Unmarshal(data, &configData); err != nil {
 		return fmt.Errorf("failed to parse config file: %v", err)
 	}
 
 	// 转换为内部格式
-	cm.configs = make(map[ai.ProviderType]*ai.Config)
+	cm.configs = make(map[providers.ProviderType]*Config)
 	for providerStr, config := range configData {
-		providerType := ai.ProviderType(providerStr)
+		providerType := providers.ProviderType(providerStr)
 		cm.configs[providerType] = config
 	}
 
@@ -62,7 +71,7 @@ func (cm *ConfigManager) LoadConfig() error {
 // SaveConfig 保存配置
 func (cm *ConfigManager) SaveConfig() error {
 	// 转换为JSON格式
-	configData := make(map[string]*ai.Config)
+	configData := make(map[string]*Config)
 	for providerType, config := range cm.configs {
 		configData[string(providerType)] = config
 	}
@@ -88,7 +97,7 @@ func (cm *ConfigManager) SaveConfig() error {
 }
 
 // GetConfig 获取指定提供者的配置
-func (cm *ConfigManager) GetConfig(providerType ai.ProviderType) *ai.Config {
+func (cm *ConfigManager) GetConfig(providerType providers.ProviderType) *Config {
 	config, exists := cm.configs[providerType]
 	if !exists {
 		// 返回默认配置
@@ -98,7 +107,7 @@ func (cm *ConfigManager) GetConfig(providerType ai.ProviderType) *ai.Config {
 }
 
 // SetConfig 设置指定提供者的配置
-func (cm *ConfigManager) SetConfig(providerType ai.ProviderType, config *ai.Config) {
+func (cm *ConfigManager) SetConfig(providerType providers.ProviderType, config *Config) {
 	cm.configs[providerType] = config
 }
 
@@ -106,7 +115,7 @@ func (cm *ConfigManager) SetConfig(providerType ai.ProviderType, config *ai.Conf
 func (cm *ConfigManager) LoadFromEnv() {
 	// OpenAI配置
 	if apiKey := os.Getenv("OPENAI_API_KEY"); apiKey != "" {
-		cm.SetConfig(ai.ProviderOpenAI, &ai.Config{
+		cm.SetConfig(providers.ProviderOpenAI, &Config{
 			APIKey:     apiKey,
 			BaseURL:    getEnvOrDefault("OPENAI_BASE_URL", "https://api.openai.com/v1"),
 			Timeout:    getEnvDurationOrDefault("OPENAI_TIMEOUT", 30*time.Second),
@@ -116,7 +125,7 @@ func (cm *ConfigManager) LoadFromEnv() {
 
 	// DeepSeek配置
 	if apiKey := os.Getenv("DEEPSEEK_API_KEY"); apiKey != "" {
-		cm.SetConfig(ai.ProviderDeepSeek, &ai.Config{
+		cm.SetConfig(providers.ProviderDeepSeek, &Config{
 			APIKey:     apiKey,
 			BaseURL:    getEnvOrDefault("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
 			Timeout:    getEnvDurationOrDefault("DEEPSEEK_TIMEOUT", 30*time.Second),
@@ -126,7 +135,7 @@ func (cm *ConfigManager) LoadFromEnv() {
 
 	// Claude配置
 	if apiKey := os.Getenv("CLAUDE_API_KEY"); apiKey != "" {
-		cm.SetConfig(ai.ProviderClaude, &ai.Config{
+		cm.SetConfig(providers.ProviderClaude, &Config{
 			APIKey:     apiKey,
 			BaseURL:    getEnvOrDefault("CLAUDE_BASE_URL", "https://api.anthropic.com/v1"),
 			Timeout:    getEnvDurationOrDefault("CLAUDE_TIMEOUT", 30*time.Second),
@@ -136,7 +145,7 @@ func (cm *ConfigManager) LoadFromEnv() {
 
 	// Ollama配置
 	if baseURL := os.Getenv("OLLAMA_BASE_URL"); baseURL != "" {
-		cm.SetConfig(ai.ProviderOllama, &ai.Config{
+		cm.SetConfig(providers.ProviderOllama, &Config{
 			APIKey:     "", // Ollama通常不需要API密钥
 			BaseURL:    baseURL,
 			Timeout:    getEnvDurationOrDefault("OLLAMA_TIMEOUT", 30*time.Second),
@@ -146,7 +155,7 @@ func (cm *ConfigManager) LoadFromEnv() {
 
 	// LocalAI配置
 	if baseURL := os.Getenv("LOCALAI_BASE_URL"); baseURL != "" {
-		cm.SetConfig(ai.ProviderLocalAI, &ai.Config{
+		cm.SetConfig(providers.ProviderLocalAI, &Config{
 			APIKey:     os.Getenv("LOCALAI_API_KEY"), // 可选
 			BaseURL:    baseURL,
 			Timeout:    getEnvDurationOrDefault("LOCALAI_TIMEOUT", 30*time.Second),
@@ -157,50 +166,50 @@ func (cm *ConfigManager) LoadFromEnv() {
 
 // setDefaultConfigs 设置默认配置
 func (cm *ConfigManager) setDefaultConfigs() {
-	cm.configs[ai.ProviderOpenAI] = cm.getDefaultConfig(ai.ProviderOpenAI)
-	cm.configs[ai.ProviderDeepSeek] = cm.getDefaultConfig(ai.ProviderDeepSeek)
-	cm.configs[ai.ProviderClaude] = cm.getDefaultConfig(ai.ProviderClaude)
-	cm.configs[ai.ProviderOllama] = cm.getDefaultConfig(ai.ProviderOllama)
-	cm.configs[ai.ProviderLocalAI] = cm.getDefaultConfig(ai.ProviderLocalAI)
+	cm.configs[providers.ProviderOpenAI] = cm.getDefaultConfig(providers.ProviderOpenAI)
+	cm.configs[providers.ProviderDeepSeek] = cm.getDefaultConfig(providers.ProviderDeepSeek)
+	cm.configs[providers.ProviderClaude] = cm.getDefaultConfig(providers.ProviderClaude)
+	cm.configs[providers.ProviderOllama] = cm.getDefaultConfig(providers.ProviderOllama)
+	cm.configs[providers.ProviderLocalAI] = cm.getDefaultConfig(providers.ProviderLocalAI)
 }
 
 // getDefaultConfig 获取默认配置
-func (cm *ConfigManager) getDefaultConfig(providerType ai.ProviderType) *ai.Config {
+func (cm *ConfigManager) getDefaultConfig(providerType providers.ProviderType) *Config {
 	switch providerType {
-	case ai.ProviderOpenAI:
-		return &ai.Config{
+	case providers.ProviderOpenAI:
+		return &Config{
 			APIKey:     os.Getenv("OPENAI_API_KEY"),
 			BaseURL:    "https://api.openai.com/v1",
 			Timeout:    30 * time.Second,
 			MaxRetries: 3,
 			Headers:    make(map[string]string),
 		}
-	case ai.ProviderDeepSeek:
-		return &ai.Config{
+	case providers.ProviderDeepSeek:
+		return &Config{
 			APIKey:     os.Getenv("DEEPSEEK_API_KEY"),
 			BaseURL:    "https://api.deepseek.com/v1",
 			Timeout:    30 * time.Second,
 			MaxRetries: 3,
 			Headers:    make(map[string]string),
 		}
-	case ai.ProviderClaude:
-		return &ai.Config{
+	case providers.ProviderClaude:
+		return &Config{
 			APIKey:     os.Getenv("CLAUDE_API_KEY"),
 			BaseURL:    "https://api.anthropic.com/v1",
 			Timeout:    30 * time.Second,
 			MaxRetries: 3,
 			Headers:    make(map[string]string),
 		}
-	case ai.ProviderOllama:
-		return &ai.Config{
+	case providers.ProviderOllama:
+		return &Config{
 			APIKey:     "",
 			BaseURL:    "http://localhost:11434/v1",
 			Timeout:    30 * time.Second,
 			MaxRetries: 3,
 			Headers:    make(map[string]string),
 		}
-	case ai.ProviderLocalAI:
-		return &ai.Config{
+	case providers.ProviderLocalAI:
+		return &Config{
 			APIKey:     os.Getenv("LOCALAI_API_KEY"),
 			BaseURL:    "http://localhost:8080/v1",
 			Timeout:    30 * time.Second,
@@ -208,7 +217,7 @@ func (cm *ConfigManager) getDefaultConfig(providerType ai.ProviderType) *ai.Conf
 			Headers:    make(map[string]string),
 		}
 	default:
-		return &ai.Config{
+		return &Config{
 			Timeout:    30 * time.Second,
 			MaxRetries: 3,
 			Headers:    make(map[string]string),
@@ -257,11 +266,11 @@ func SaveGlobalConfig() error {
 }
 
 // GetGlobalConfig 获取全局配置
-func GetGlobalConfig(providerType ai.ProviderType) *ai.Config {
+func GetGlobalConfig(providerType providers.ProviderType) *Config {
 	return GlobalConfigManager.GetConfig(providerType)
 }
 
 // SetGlobalConfig 设置全局配置
-func SetGlobalConfig(providerType ai.ProviderType, config *ai.Config) {
+func SetGlobalConfig(providerType providers.ProviderType, config *Config) {
 	GlobalConfigManager.SetConfig(providerType, config)
 }

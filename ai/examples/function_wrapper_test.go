@@ -5,6 +5,7 @@ import (
 
 	"github.com/karosown/katool-go/ai"
 	"github.com/karosown/katool-go/ai/providers"
+	"github.com/karosown/katool-go/ai/types"
 )
 
 // TestFunctionRegistry 测试函数注册表
@@ -283,9 +284,9 @@ func TestFunctionClientWithChat(t *testing.T) {
 	}
 
 	// 创建聊天请求
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "llama3.1",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{
 				Role:    "user",
 				Content: "北京天气怎么样？",

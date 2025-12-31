@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 )
 
 func main() {
@@ -18,9 +19,9 @@ func main() {
 	}
 
 	// 发送消息
-	response, err := client.Chat(&ai.ChatRequest{
+	response, err := client.Chat(&types.ChatRequest{
 		Model: "gpt-3.5-turbo",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "你好，请用一句话介绍自己"},
 		},
 	})
@@ -52,9 +53,9 @@ func main() {
 	// 流式响应
 	// ========================================
 	fmt.Println("\n=== 示例3: 流式响应 ===")
-	stream, err := client.ChatStream(&ai.ChatRequest{
+	stream, err := client.ChatStream(&types.ChatRequest{
 		Model: "gpt-3.5-turbo",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "请写一首关于春天的短诗"},
 		},
 	})
@@ -81,9 +82,9 @@ func main() {
 		ai.ProviderOllama,
 	}
 
-	response, err = client.ChatWithFallback(providers, &ai.ChatRequest{
+	response, err = client.ChatWithFallback(providers, &types.ChatRequest{
 		Model: "gpt-3.5-turbo",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "1+1等于几？"},
 		},
 	})
@@ -108,9 +109,9 @@ func main() {
 		log.Printf("注册函数失败: %v", err)
 	} else {
 		// 使用工具调用
-		response, err = client.ChatWithTools(&ai.ChatRequest{
+		response, err = client.ChatWithTools(&types.ChatRequest{
 			Model: "gpt-3.5-turbo",
-			Messages: []ai.Message{
+			Messages: []types.Message{
 				{Role: "user", Content: "北京今天天气怎么样？"},
 			},
 		})

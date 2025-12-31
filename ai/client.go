@@ -6,24 +6,26 @@ import (
 	"sync"
 	"time"
 
+	"github.com/karosown/katool-go/ai/aiconfig"
 	"github.com/karosown/katool-go/ai/providers"
 	"github.com/karosown/katool-go/ai/tool"
+	"github.com/karosown/katool-go/ai/types"
 	"github.com/karosown/katool-go/xlog"
 )
 
 // Client 统一的AI客户端，整合所有功能
 type Client struct {
 	// 当前使用的提供者类型
-	currentProvider ProviderType
+	currentProvider providers.ProviderType
 
 	// 所有可用的提供者
-	providers map[ProviderType]AIProvider
+	providers map[providers.ProviderType]types.AIProvider
 
 	// 函数调用客户端
 	functionClient *tool.Function
 
 	// 配置
-	config *Config
+	config *aiconfig.Config
 
 	// 日志记录器
 	logger xlog.Logger
@@ -36,7 +38,7 @@ type Client struct {
 // 会自动尝试加载所有可用的提供者
 func NewClient() (*Client, error) {
 	client := &Client{
-		providers: make(map[ProviderType]AIProvider),
+		providers: make(map[providers.ProviderType]types.AIProvider),
 		logger:    &xlog.LogrusAdapter{},
 	}
 
@@ -48,8 +50,8 @@ func NewClient() (*Client, error) {
 	}
 
 	// 设置默认提供者（优先使用OpenAI，否则使用第一个可用的）
-	if client.HasProvider(ProviderOpenAI) {
-		client.currentProvider = ProviderOpenAI
+	if client.HasProvider(providers.ProviderOpenAI) {
+		client.currentProvider = providers.ProviderOpenAI
 	} else {
 		for providerType := range client.providers {
 			client.currentProvider = providerType
@@ -64,15 +66,15 @@ func NewClient() (*Client, error) {
 }
 
 // NewClientWithProvider 创建指定提供者的AI客户端
-func NewClientWithProvider(providerType ProviderType, config *Config) (*Client, error) {
+func NewClientWithProvider(providerType providers.ProviderType, config *aiconfig.Config) (*Client, error) {
 	client := &Client{
-		providers:       make(map[ProviderType]AIProvider),
+		providers:       make(map[providers.ProviderType]types.AIProvider),
 		currentProvider: providerType,
 		logger:          &xlog.LogrusAdapter{},
 	}
 
 	if config == nil {
-		config = &Config{
+		config = &aiconfig.Config{
 			Timeout:    30 * time.Second,
 			MaxRetries: 3,
 			Headers:    make(map[string]string),
@@ -93,19 +95,19 @@ func NewClientWithProvider(providerType ProviderType, config *Config) (*Client, 
 }
 
 // NewClientFromEnv 从环境变量创建指定提供者的客户端
-func NewClientFromEnv(providerType ProviderType) (*Client, error) {
+func NewClientFromEnv(providerType providers.ProviderType) (*Client, error) {
 	config := getConfigFromEnv(providerType)
 	return NewClientWithProvider(providerType, config)
 }
 
 // loadProvidersFromEnv 从环境变量加载所有可用的提供者
 func (c *Client) loadProvidersFromEnv() {
-	providerTypes := []ProviderType{
-		ProviderOpenAI,
-		ProviderDeepSeek,
-		ProviderClaude,
-		ProviderOllama,
-		ProviderLocalAI,
+	providerTypes := []providers.ProviderType{
+		providers.ProviderOpenAI,
+		providers.ProviderDeepSeek,
+		providers.ProviderClaude,
+		providers.ProviderOllama,
+		providers.ProviderLocalAI,
 	}
 
 	for _, providerType := range providerTypes {
@@ -115,7 +117,7 @@ func (c *Client) loadProvidersFromEnv() {
 		}
 
 		// 验证必要的配置
-		if providerType != ProviderOllama && config.APIKey == "" {
+		if providerType != providers.ProviderOllama && config.APIKey == "" {
 			continue
 		}
 
@@ -136,17 +138,17 @@ func (c *Client) loadProvidersFromEnv() {
 }
 
 // createProvider 创建提供者实例
-func createProvider(providerType ProviderType, config *Config) (AIProvider, error) {
+func createProvider(providerType providers.ProviderType, config *aiconfig.Config) (types.AIProvider, error) {
 	switch providerType {
-	case ProviderOpenAI:
+	case providers.ProviderOpenAI:
 		return providers.NewOpenAIProvider(config), nil
-	case ProviderDeepSeek:
+	case providers.ProviderDeepSeek:
 		return providers.NewDeepSeekProvider(config), nil
-	case ProviderClaude:
+	case providers.ProviderClaude:
 		return providers.NewClaudeProvider(config), nil
-	case ProviderOllama:
+	case providers.ProviderOllama:
 		return providers.NewOllamaProvider(config), nil
-	case ProviderLocalAI:
+	case providers.ProviderLocalAI:
 		return providers.NewLocalAIProvider(config), nil
 	default:
 		return nil, fmt.Errorf("unsupported provider type: %s", providerType)
@@ -154,40 +156,40 @@ func createProvider(providerType ProviderType, config *Config) (AIProvider, erro
 }
 
 // getConfigFromEnv 从环境变量获取配置
-func getConfigFromEnv(providerType ProviderType) *Config {
-	config := &Config{
+func getConfigFromEnv(providerType providers.ProviderType) *aiconfig.Config {
+	config := &aiconfig.Config{
 		Timeout:    30 * time.Second,
 		MaxRetries: 3,
 		Headers:    make(map[string]string),
 	}
 
 	switch providerType {
-	case ProviderOpenAI:
+	case providers.ProviderOpenAI:
 		if apiKey := os.Getenv("OPENAI_API_KEY"); apiKey != "" {
 			config.APIKey = apiKey
 			config.BaseURL = getEnvOrDefault("OPENAI_BASE_URL", "https://api.openai.com/v1")
 			return config
 		}
-	case ProviderDeepSeek:
+	case providers.ProviderDeepSeek:
 		if apiKey := os.Getenv("DEEPSEEK_API_KEY"); apiKey != "" {
 			config.APIKey = apiKey
 			config.BaseURL = getEnvOrDefault("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
 			return config
 		}
-	case ProviderClaude:
+	case providers.ProviderClaude:
 		if apiKey := os.Getenv("CLAUDE_API_KEY"); apiKey != "" {
 			config.APIKey = apiKey
 			config.BaseURL = getEnvOrDefault("CLAUDE_BASE_URL", "https://api.anthropic.com/v1")
 			return config
 		}
-	case ProviderOllama:
+	case providers.ProviderOllama:
 		if baseURL := os.Getenv("OLLAMA_BASE_URL"); baseURL != "" {
 			config.BaseURL = baseURL
 		} else {
 			config.BaseURL = "http://localhost:11434/v1"
 		}
 		return config
-	case ProviderLocalAI:
+	case providers.ProviderLocalAI:
 		if baseURL := os.Getenv("LOCALAI_BASE_URL"); baseURL != "" {
 			config.BaseURL = baseURL
 			config.APIKey = os.Getenv("LOCALAI_API_KEY") // 可选
@@ -206,7 +208,7 @@ func getEnvOrDefault(key, defaultValue string) string {
 }
 
 // SetProvider 切换当前使用的提供者
-func (c *Client) SetProvider(providerType ProviderType) error {
+func (c *Client) SetProvider(providerType providers.ProviderType) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -221,14 +223,14 @@ func (c *Client) SetProvider(providerType ProviderType) error {
 }
 
 // GetProvider 获取当前提供者类型
-func (c *Client) GetProvider() ProviderType {
+func (c *Client) GetProvider() providers.ProviderType {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.currentProvider
 }
 
 // HasProvider 检查是否有指定的提供者
-func (c *Client) HasProvider(providerType ProviderType) bool {
+func (c *Client) HasProvider(providerType providers.ProviderType) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.providers[providerType]
@@ -236,11 +238,11 @@ func (c *Client) HasProvider(providerType ProviderType) bool {
 }
 
 // ListProviders 列出所有可用的提供者
-func (c *Client) ListProviders() []ProviderType {
+func (c *Client) ListProviders() []providers.ProviderType {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	providers := make([]ProviderType, 0, len(c.providers))
+	providers := make([]providers.ProviderType, 0, len(c.providers))
 	for providerType := range c.providers {
 		providers = append(providers, providerType)
 	}
@@ -249,7 +251,7 @@ func (c *Client) ListProviders() []ProviderType {
 
 // Chat 发送聊天请求（使用当前提供者）
 // 如果 req.Format 是对象（map），会自动转换为 function call
-func (c *Client) Chat(req *ChatRequest) (*ChatResponse, error) {
+func (c *Client) Chat(req *types.ChatRequest) (*types.ChatResponse, error) {
 	c.mu.RLock()
 	provider := c.providers[c.currentProvider]
 	c.mu.RUnlock()
@@ -264,7 +266,7 @@ func (c *Client) Chat(req *ChatRequest) (*ChatResponse, error) {
 
 // ChatStream 发送流式聊天请求（使用当前提供者）
 // 如果 req.Format 是对象（map），会自动转换为 function call
-func (c *Client) ChatStream(req *ChatRequest) (<-chan *ChatResponse, error) {
+func (c *Client) ChatStream(req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	c.mu.RLock()
 	provider := c.providers[c.currentProvider]
 	c.mu.RUnlock()
@@ -278,7 +280,7 @@ func (c *Client) ChatStream(req *ChatRequest) (<-chan *ChatResponse, error) {
 }
 
 // ChatWithProvider 使用指定提供者发送聊天请求
-func (c *Client) ChatWithProvider(providerType ProviderType, req *ChatRequest) (*ChatResponse, error) {
+func (c *Client) ChatWithProvider(providerType providers.ProviderType, req *types.ChatRequest) (*types.ChatResponse, error) {
 	c.mu.RLock()
 	provider, exists := c.providers[providerType]
 	c.mu.RUnlock()
@@ -291,7 +293,7 @@ func (c *Client) ChatWithProvider(providerType ProviderType, req *ChatRequest) (
 }
 
 // ChatWithFallback 使用多个提供者发送聊天请求（带自动降级）
-func (c *Client) ChatWithFallback(providerTypes []ProviderType, req *ChatRequest) (*ChatResponse, error) {
+func (c *Client) ChatWithFallback(providerTypes []providers.ProviderType, req *types.ChatRequest) (*types.ChatResponse, error) {
 	var lastErr error
 
 	for _, providerType := range providerTypes {
@@ -322,7 +324,7 @@ func (c *Client) RegisterFunction(name, description string, fn interface{}) erro
 }
 
 // ChatWithTools 使用工具调用发送聊天请求（自动处理工具调用和后续对话）
-func (c *Client) ChatWithTools(req *ChatRequest) (*ChatResponse, error) {
+func (c *Client) ChatWithTools(req *types.ChatRequest) (*types.ChatResponse, error) {
 	c.mu.RLock()
 	c.functionClient.SetProvider(c.providers[c.currentProvider])
 	c.mu.RUnlock()
@@ -331,7 +333,7 @@ func (c *Client) ChatWithTools(req *ChatRequest) (*ChatResponse, error) {
 }
 
 // ChatWithToolsStream 使用工具调用发送流式聊天请求
-func (c *Client) ChatWithToolsStream(req *ChatRequest) (<-chan *ChatResponse, error) {
+func (c *Client) ChatWithToolsStream(req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	c.mu.RLock()
 	c.functionClient.SetProvider(c.providers[c.currentProvider])
 	c.mu.RUnlock()
@@ -355,7 +357,7 @@ func (c *Client) CallFunctionDirectly(name string, arguments string) (interface{
 }
 
 // GetTools 获取所有已注册的工具定义
-func (c *Client) GetTools() []Tool {
+func (c *Client) GetTools() []types.Tool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.functionClient.GetTools()
@@ -376,13 +378,13 @@ func (c *Client) GetLogger() xlog.Logger {
 }
 
 // ChatWithRole 使用指定角色发送聊天请求
-func (c *Client) ChatWithRole(model string, role Role, userMessage string) (*ChatResponse, error) {
+func (c *Client) ChatWithRole(model string, role Role, userMessage string) (*types.ChatResponse, error) {
 	req := NewChatRequestWithRole(model, role, userMessage)
 	return c.Chat(req)
 }
 
 // ChatStreamWithRole 使用指定角色发送流式聊天请求
-func (c *Client) ChatStreamWithRole(model string, role Role, userMessage string) (<-chan *ChatResponse, error) {
+func (c *Client) ChatStreamWithRole(model string, role Role, userMessage string) (<-chan *types.ChatResponse, error) {
 	req := NewChatRequestWithRole(model, role, userMessage)
 	return c.ChatStream(req)
 }
@@ -409,7 +411,7 @@ func needsFormatConversion(format interface{}) bool {
 }
 
 // chatWithFormatAsFunction 将 Format 对象转换为 function call
-func chatWithFormatAsFunction(provider AIProvider, req *ChatRequest) (*ChatResponse, error) {
+func chatWithFormatAsFunction(provider types.AIProvider, req *types.ChatRequest) (*types.ChatResponse, error) {
 	schema, ok := req.Format.(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("format must be a map[string]interface{}")
@@ -421,9 +423,9 @@ func chatWithFormatAsFunction(provider AIProvider, req *ChatRequest) (*ChatRespo
 	originalFormat := req.Format
 
 	// 创建 function，schema 作为 parameters
-	tool := Tool{
+	tool := types.Tool{
 		Type: "function",
-		Function: ToolFunction{
+		Function: types.ToolFunction{
 			Name:        "extract_structured_data",
 			Description: "Extract and return data in the specified format",
 			Parameters:  schema, // Format 对象放入 function parameters
@@ -431,7 +433,7 @@ func chatWithFormatAsFunction(provider AIProvider, req *ChatRequest) (*ChatRespo
 	}
 
 	// 设置请求
-	req.Tools = []Tool{tool}
+	req.Tools = []types.Tool{tool}
 	req.ToolChoice = map[string]interface{}{
 		"type": "function",
 		"function": map[string]interface{}{
@@ -452,7 +454,7 @@ func chatWithFormatAsFunction(provider AIProvider, req *ChatRequest) (*ChatRespo
 }
 
 // chatStreamWithFormatAsFunction 流式版本
-func chatStreamWithFormatAsFunction(provider AIProvider, req *ChatRequest) (<-chan *ChatResponse, error) {
+func chatStreamWithFormatAsFunction(provider types.AIProvider, req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	schema, ok := req.Format.(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("format must be a map[string]interface{}")
@@ -464,16 +466,16 @@ func chatStreamWithFormatAsFunction(provider AIProvider, req *ChatRequest) (<-ch
 	originalFormat := req.Format
 
 	// 创建 function
-	tool := Tool{
+	tool := types.Tool{
 		Type: "function",
-		Function: ToolFunction{
+		Function: types.ToolFunction{
 			Name:        "extract_structured_data",
 			Description: "Extract and return data in the specified format",
 			Parameters:  schema,
 		},
 	}
 
-	req.Tools = []Tool{tool}
+	req.Tools = []types.Tool{tool}
 	req.ToolChoice = map[string]interface{}{
 		"type": "function",
 		"function": map[string]interface{}{
@@ -493,9 +495,9 @@ func chatStreamWithFormatAsFunction(provider AIProvider, req *ChatRequest) (<-ch
 	return stream, err
 }
 
-func NewMessage[R ~string](role R, msg string) Message {
-	return Message{
-		Role:    string(role),
+func NewMessage[R ~string](role R, msg string) types.Message {
+	return types.Message{
+		Role:    Role(role),
 		Content: msg,
 	}
 }

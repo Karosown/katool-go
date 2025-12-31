@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 )
 
 type User struct {
@@ -46,9 +47,9 @@ func autoExample1(client *ai.Client) {
 	schema, _ := ai.FormatFromType[User]()
 
 	// 直接在 req.Format 中设置对象
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "gpt-4o-mini",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "生成一个用户信息"},
 		},
 		Format: schema, // ← 直接设置对象，会自动转换为 function call
@@ -76,9 +77,9 @@ func autoExample1(client *ai.Client) {
 
 // 示例2: Format 为字符串 - 保持原样（Ollama方式）
 func autoExample2(client *ai.Client) {
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "llama3.1",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{
 				Role: "system",
 				Content: `请以JSON格式返回，包含name、age、email字段。
@@ -105,9 +106,9 @@ func autoExample3(client *ai.Client) {
 	// 生成数组 schema
 	schema, _ := ai.FormatArrayOfType[QAItem]()
 
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "gpt-4o-mini",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "给我3个关于五险一金的问答"},
 		},
 		Format: schema, // ← 数组 schema，自动转为 function call

@@ -8,6 +8,7 @@ import (
 
 	"github.com/karosown/katool-go/ai"
 	"github.com/karosown/katool-go/ai/agent"
+	"github.com/karosown/katool-go/ai/types"
 	"github.com/karosown/katool-go/xlog"
 )
 
@@ -45,7 +46,7 @@ func ExampleBasic() {
 
 	// 业务层控制流程
 	ctx := context.Background()
-	messages := []ai.Message{
+	messages := []types.Message{
 		{Role: "user", Content: "请查询北京的天气"},
 	}
 
@@ -53,7 +54,7 @@ func ExampleBasic() {
 	tools := client.GetAllTools()
 
 	// 发送请求
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model:    "Qwen2",
 		Messages: messages,
 		Tools:    tools,
@@ -107,7 +108,7 @@ func exampleMultiRound() {
 	})
 
 	ctx := context.Background()
-	messages := []ai.Message{
+	messages := []types.Message{
 		{Role: "user", Content: "计算 2 + 2"},
 	}
 	tools := client.GetAllTools()
@@ -115,7 +116,7 @@ func exampleMultiRound() {
 
 	for round := 0; round < maxRounds; round++ {
 		// 发送请求
-		resp, _ := client.Chat(ctx, &ai.ChatRequest{
+		resp, _ := client.Chat(ctx, &types.ChatRequest{
 			Model:    "Qwen2",
 			Messages: messages,
 			Tools:    tools,
@@ -173,9 +174,9 @@ func exampleStreaming() {
 	client, _ := agent.NewClient(aiClient)
 
 	ctx := context.Background()
-	req := &ai.ChatRequest{
+	req := &types.ChatRequest{
 		Model: "Qwen2",
-		Messages: []ai.Message{
+		Messages: []types.Message{
 			{Role: "user", Content: "介绍一下Go语言"},
 		},
 		Stream: true,
@@ -240,11 +241,11 @@ func exampleWithMCP() {
 
 	// 使用
 	ctx := context.Background()
-	messages := []ai.Message{
+	messages := []types.Message{
 		{Role: "user", Content: "计算 15 * 23"},
 	}
 
-	resp, _ := client.Chat(ctx, &ai.ChatRequest{
+	resp, _ := client.Chat(ctx, &types.ChatRequest{
 		Model:    "Qwen2",
 		Messages: messages,
 		Tools:    client.GetAllTools(),

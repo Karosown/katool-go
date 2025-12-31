@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/ai/types"
 	"github.com/karosown/katool-go/net/format/baseformat"
 	remote "github.com/karosown/katool-go/net/http"
 	"github.com/karosown/katool-go/xlog"
@@ -14,14 +16,14 @@ import (
 
 // ClaudeProvider Claude提供者实现
 type ClaudeProvider struct {
-	config *ai.Config
+	config *aiconfig.Config
 	logger xlog.Logger
 }
 
 // NewClaudeProvider 创建Claude提供者
-func NewClaudeProvider(config *ai.Config) *ClaudeProvider {
+func NewClaudeProvider(config *aiconfig.Config) *ClaudeProvider {
 	if config == nil {
-		config = &ai.Config{}
+		config = &aiconfig.Config{}
 	}
 
 	// 设置默认值
@@ -74,7 +76,7 @@ func (p *ClaudeProvider) ValidateConfig() error {
 }
 
 // Chat 发送聊天请求
-func (p *ClaudeProvider) Chat(req *ai.ChatRequest) (*ai.ChatResponse, error) {
+func (p *ClaudeProvider) Chat(req *types.ChatRequest) (*types.ChatResponse, error) {
 	if err := p.ValidateConfig(); err != nil {
 		return nil, err
 	}
@@ -122,7 +124,7 @@ func (p *ClaudeProvider) Chat(req *ai.ChatRequest) (*ai.ChatResponse, error) {
 }
 
 // ChatStream 发送流式聊天请求
-func (p *ClaudeProvider) ChatStream(req *ai.ChatRequest) (<-chan *ai.ChatResponse, error) {
+func (p *ClaudeProvider) ChatStream(req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	if err := p.ValidateConfig(); err != nil {
 		return nil, err
 	}
@@ -151,10 +153,10 @@ func (p *ClaudeProvider) ChatStream(req *ai.ChatRequest) (<-chan *ai.ChatRespons
 	}
 
 	// 创建响应通道
-	responseChan := make(ai.StreamChatResponse, 100)
+	responseChan := make(types.StreamChatResponse, 100)
 
 	// 创建SSE请求
-	sseReq := remote.NewSSEReq[ai.StreamEvent]().
+	sseReq := remote.NewSSEReq[types.StreamEvent]().
 		Url(p.config.BaseURL + "/messages").
 		Method("POST").
 		Headers(headers).
@@ -162,9 +164,9 @@ func (p *ClaudeProvider) ChatStream(req *ai.ChatRequest) (<-chan *ai.ChatRespons
 		SetLogger(p.logger)
 
 	// 设置事件处理
-	sseReq.BeforeEvent(func(event remote.SSEEvent[ai.StreamEvent]) (*ai.StreamEvent, error) {
+	sseReq.BeforeEvent(func(event remote.SSEEvent[types.StreamEvent]) (*types.StreamEvent, error) {
 		// 直接返回SSE事件数据
-		return &ai.StreamEvent{
+		return &types.StreamEvent{
 			Data:  event.Data,
 			Event: event.Event,
 			ID:    event.ID,
@@ -172,7 +174,7 @@ func (p *ClaudeProvider) ChatStream(req *ai.ChatRequest) (<-chan *ai.ChatRespons
 		}, nil
 	})
 
-	sseReq.OnEvent(func(streamEvent ai.StreamEvent) error {
+	sseReq.OnEvent(func(streamEvent types.StreamEvent) error {
 		// 处理流式数据
 		if streamEvent.Data == "[DONE]" {
 			responseChan.Close(nil)
@@ -237,8 +239,8 @@ type ClaudeRequest struct {
 
 // ClaudeMessage Claude消息格式
 type ClaudeMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role    ai.Role `json:"role"`
+	Content string  `json:"content"`
 }
 
 // ClaudeResponse Claude API响应格式
@@ -275,7 +277,7 @@ type ClaudeStreamResponse struct {
 }
 
 // convertToClaudeFormat 转换为Claude API格式
-func (p *ClaudeProvider) convertToClaudeFormat(req *ai.ChatRequest) *ClaudeRequest {
+func (p *ClaudeProvider) convertToClaudeFormat(req *types.ChatRequest) *ClaudeRequest {
 	claudeMessages := make([]ClaudeMessage, len(req.Messages))
 	for i, msg := range req.Messages {
 		claudeMessages[i] = ClaudeMessage{
@@ -301,7 +303,7 @@ func (p *ClaudeProvider) convertToClaudeFormat(req *ai.ChatRequest) *ClaudeReque
 }
 
 // convertFromClaudeFormat 从Claude格式转换为通用格式
-func (p *ClaudeProvider) convertFromClaudeFormat(claudeResp *ClaudeResponse, model string) *ai.ChatResponse {
+func (p *ClaudeProvider) convertFromClaudeFormat(claudeResp *ClaudeResponse, model string) *types.ChatResponse {
 	// 提取文本内容
 	var content string
 	for _, c := range claudeResp.Content {
@@ -310,22 +312,22 @@ func (p *ClaudeProvider) convertFromClaudeFormat(claudeResp *ClaudeResponse, mod
 		}
 	}
 
-	return &ai.ChatResponse{
+	return &types.ChatResponse{
 		ID:      claudeResp.ID,
 		Object:  "chat.completion",
 		Created: time.Now().Unix(),
 		Model:   model,
-		Choices: []ai.Choice{
+		Choices: []types.Choice{
 			{
 				Index: 0,
-				Message: ai.Message{
+				Message: types.Message{
 					Role:    "assistant",
 					Content: content,
 				},
 				FinishReason: claudeResp.StopReason,
 			},
 		},
-		Usage: &ai.Usage{
+		Usage: &types.Usage{
 			PromptTokens:     claudeResp.Usage.InputTokens,
 			CompletionTokens: claudeResp.Usage.OutputTokens,
 			TotalTokens:      claudeResp.Usage.InputTokens + claudeResp.Usage.OutputTokens,
@@ -334,16 +336,16 @@ func (p *ClaudeProvider) convertFromClaudeFormat(claudeResp *ClaudeResponse, mod
 }
 
 // convertFromClaudeStreamFormat 从Claude流式格式转换为通用格式
-func (p *ClaudeProvider) convertFromClaudeStreamFormat(claudeResp *ClaudeStreamResponse, model string) *ai.ChatResponse {
-	return &ai.ChatResponse{
+func (p *ClaudeProvider) convertFromClaudeStreamFormat(claudeResp *ClaudeStreamResponse, model string) *types.ChatResponse {
+	return &types.ChatResponse{
 		ID:      "",
 		Object:  "chat.completion.chunk",
 		Created: time.Now().Unix(),
 		Model:   model,
-		Choices: []ai.Choice{
+		Choices: []types.Choice{
 			{
 				Index: claudeResp.Index,
-				Delta: ai.Message{
+				Delta: types.Message{
 					Role:    "assistant",
 					Content: claudeResp.Delta.Text,
 				},
@@ -359,17 +361,17 @@ func (p *ClaudeProvider) SetLogger(logger xlog.Logger) {
 }
 
 // GetConfig 获取配置
-func (p *ClaudeProvider) GetConfig() *ai.Config {
+func (p *ClaudeProvider) GetConfig() *aiconfig.Config {
 	return p.config
 }
 
 // SetConfig 设置配置
-func (p *ClaudeProvider) SetConfig(config *ai.Config) {
+func (p *ClaudeProvider) SetConfig(config *aiconfig.Config) {
 	p.config = config
 }
 
 // ChatWithTools 发送带工具调用的聊天请求
-func (p *ClaudeProvider) ChatWithTools(req *ai.ChatRequest, tools []ai.Tool) (*ai.ChatResponse, error) {
+func (p *ClaudeProvider) ChatWithTools(req *types.ChatRequest, tools []types.Tool) (*types.ChatResponse, error) {
 	// 设置工具
 	req.Tools = tools
 	// 调用普通的Chat方法

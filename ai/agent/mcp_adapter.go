@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/types"
 	"github.com/karosown/katool-go/xlog"
 )
 
@@ -16,8 +16,8 @@ type MCPAdapter struct {
 	mcpClient MCPClient
 
 	// 工具缓存
-	toolsCache []ai.Tool
-	toolsMap   map[string]*ai.Tool
+	toolsCache []types.Tool
+	toolsMap   map[string]*types.Tool
 
 	// 日志记录器
 	logger xlog.Logger
@@ -50,8 +50,8 @@ func NewMCPAdapter(client MCPClient, logger xlog.Logger) (*MCPAdapter, error) {
 
 	adapter := &MCPAdapter{
 		mcpClient:  client,
-		toolsCache: make([]ai.Tool, 0),
-		toolsMap:   make(map[string]*ai.Tool),
+		toolsCache: make([]types.Tool, 0),
+		toolsMap:   make(map[string]*types.Tool),
 		logger:     logger,
 	}
 
@@ -74,14 +74,14 @@ func (a *MCPAdapter) refreshTools(ctx context.Context) error {
 	defer a.mu.Unlock()
 
 	// 清空缓存
-	a.toolsCache = make([]ai.Tool, 0, len(tools))
-	a.toolsMap = make(map[string]*ai.Tool)
+	a.toolsCache = make([]types.Tool, 0, len(tools))
+	a.toolsMap = make(map[string]*types.Tool)
 
 	// 转换MCP工具为AI工具格式
 	for _, mcpTool := range tools {
-		tool := ai.Tool{
+		tool := types.Tool{
 			Type: "function",
-			Function: ai.ToolFunction{
+			Function: types.ToolFunction{
 				Name:        mcpTool.Name,
 				Description: mcpTool.Description,
 				Parameters:  mcpTool.Parameters,
@@ -97,11 +97,11 @@ func (a *MCPAdapter) refreshTools(ctx context.Context) error {
 }
 
 // GetTools 获取所有工具
-func (a *MCPAdapter) GetTools() []ai.Tool {
+func (a *MCPAdapter) GetTools() []types.Tool {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
-	tools := make([]ai.Tool, len(a.toolsCache))
+	tools := make([]types.Tool, len(a.toolsCache))
 	copy(tools, a.toolsCache)
 	return tools
 }

@@ -1,12 +1,12 @@
-package ai
+package types
 
 import (
-	"time"
+	"github.com/karosown/katool-go/ai"
 )
 
 // Message 表示聊天消息
 type Message struct {
-	Role       Role       `json:"role"`                   // user, assistant, system, tool
+	Role       ai.Role    `json:"role"`                   // user, assistant, system, tool
 	Content    string     `json:"content,omitempty"`      // 消息内容
 	ToolCalls  []ToolCall `json:"tool_calls,omitempty"`   // 工具调用列表
 	ToolCallID string     `json:"tool_call_id,omitempty"` // 工具调用ID（tool角色消息使用）
@@ -110,15 +110,6 @@ type ToolCallFunction struct {
 	Arguments string `json:"arguments"` // 函数参数（JSON字符串）
 }
 
-// Config AI提供者配置
-type Config struct {
-	APIKey     string            `json:"api_key"`     // API密钥
-	BaseURL    string            `json:"base_url"`    // 基础URL
-	Timeout    time.Duration     `json:"timeout"`     // 超时时间
-	Headers    map[string]string `json:"headers"`     // 额外请求头
-	MaxRetries int               `json:"max_retries"` // 最大重试次数
-}
-
 // AIProvider AI提供者接口
 type AIProvider interface {
 	// Chat 发送聊天请求
@@ -164,19 +155,6 @@ type ErrorResponse struct {
 		Code    string `json:"code,omitempty"`
 	} `json:"error"`
 }
-
-// ProviderType 提供者类型
-type ProviderType string
-
-const (
-	ProviderOpenAI   ProviderType = "openai"
-	ProviderDeepSeek ProviderType = "deepseek"
-	ProviderClaude   ProviderType = "claude"
-	ProviderQwen     ProviderType = "qwen"
-	ProviderERNIE    ProviderType = "ernie"
-	ProviderOllama   ProviderType = "ollama"
-	ProviderLocalAI  ProviderType = "localai"
-)
 
 // ModelInfo 模型信息
 type ModelInfo struct {
