@@ -323,6 +323,11 @@ func (c *Client) RegisterFunction(name, description string, fn interface{}) erro
 	return c.functionClient.RegisterFunction(name, description, fn)
 }
 
+// RegisterFunctionWith 注册函数（自定义参数 schema 与参数名顺序）
+func (c *Client) RegisterFunctionWith(name, description string, parameters map[string]interface{}, paramOrder []string, fn interface{}) error {
+	return c.functionClient.RegisterFunctionWith(name, description, parameters, paramOrder, fn)
+}
+
 // ChatWithTools 使用工具调用发送聊天请求（自动处理工具调用和后续对话）
 func (c *Client) ChatWithTools(req *types.ChatRequest) (*types.ChatResponse, error) {
 	c.mu.RLock()

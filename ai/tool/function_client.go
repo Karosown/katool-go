@@ -32,6 +32,11 @@ func (c *Function) RegisterFunction(name, description string, fn interface{}) er
 	return c.registry.RegisterFunction(name, description, fn)
 }
 
+// RegisterFunctionWith 注册函数（自定义参数 schema 与参数名）
+func (c *Function) RegisterFunctionWith(name, description string, parameters map[string]interface{}, paramOrder []string, fn interface{}) error {
+	return c.registry.RegisterFunctionWith(name, description, parameters, paramOrder, fn)
+}
+
 // ChatWithFunctions 使用函数进行聊天
 func (c *Function) ChatWithFunctions(req *types.ChatRequest) (*types.ChatResponse, error) {
 	// 获取注册的工具

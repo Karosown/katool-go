@@ -82,6 +82,11 @@ func (c *Client) RegisterFunction(name, description string, fn interface{}) erro
 	return c.aiClient.RegisterFunction(name, description, fn)
 }
 
+// RegisterFunctionWith 注册本地函数（自定义参数 schema 与参数名顺序）
+func (c *Client) RegisterFunctionWith(name, description string, parameters map[string]interface{}, paramOrder []string, fn interface{}) error {
+	return c.aiClient.RegisterFunctionWith(name, description, parameters, paramOrder, fn)
+}
+
 // GetLocalTools 获取所有本地注册的工具
 func (c *Client) GetLocalTools() []types.Tool {
 	c.mu.RLock()
@@ -221,7 +226,6 @@ func (c *Client) ChatWithTools(ctx context.Context, req *types.ChatRequest) (*ty
 	if len(req.Tools) == 0 {
 		req.Tools = c.GetAllTools()
 	}
-
 	return c.aiClient.ChatWithTools(req)
 }
 
