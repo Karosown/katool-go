@@ -207,7 +207,7 @@ func (c *Client) Chat(ctx context.Context, req *types.ChatRequest) (*types.ChatR
 	return c.aiClient.Chat(req)
 }
 
-// ChatStream 发送流式聊天请求
+// ChatStream 发送流式聊天请求（不自动处理工具调用）
 func (c *Client) ChatStream(ctx context.Context, req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	// 如果没有指定工具，自动添加所有可用工具
 	if len(req.Tools) == 0 {
@@ -215,6 +215,24 @@ func (c *Client) ChatStream(ctx context.Context, req *types.ChatRequest) (<-chan
 	}
 
 	return c.aiClient.ChatStream(req)
+}
+func (c *Client) ChatWithTools(ctx context.Context, req *types.ChatRequest) (*types.ChatResponse, error) {
+	// 如果没有指定工具，自动添加所有可用工具
+	if len(req.Tools) == 0 {
+		req.Tools = c.GetAllTools()
+	}
+
+	return c.aiClient.ChatWithTools(req)
+}
+
+// ChatStream 发送流式聊天请求
+func (c *Client) ChatWithToolsStream(ctx context.Context, req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
+	// 如果没有指定工具，自动添加所有可用工具
+	if len(req.Tools) == 0 {
+		req.Tools = c.GetAllTools()
+	}
+
+	return c.aiClient.ChatWithToolsStream(req)
 }
 
 // ============================================================================

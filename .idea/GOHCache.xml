@@ -59,6 +59,13 @@
             </set>
           </value>
         </entry>
+        <entry key="ArticleCollectWorker">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/article_collect.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="ArticleLink">
           <value>
             <set>
@@ -279,6 +286,7 @@
         <entry key="Client">
           <value>
             <set>
+              <option value="file://$USER_HOME$/go/pkg/mod/github.com/karosown/katool-go@v0.0.0-20251231100756-ac020e3652b2/ai/agent/client.go" />
               <option value="file://$PROJECT_DIR$/ai/agent/client.go" />
               <option value="file://$PROJECT_DIR$/ai/client.go" />
               <option value="file://$PROJECT_DIR$/db/xmongo/options/client.go" />
@@ -328,6 +336,7 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/worker.go" />
             </set>
           </value>
         </entry>
@@ -940,6 +949,15 @@
             </set>
           </value>
         </entry>
+        <entry key="Runner">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/article_collect.go" />
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/simple.go" />
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/source_collect.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="SMSAdapter">
           <value>
             <set>
@@ -1003,6 +1021,14 @@
             </set>
           </value>
         </entry>
+        <entry key="SimpleWorker">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/simple.go" />
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/source_collect.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="Sort">
           <value>
             <set>
@@ -1021,6 +1047,13 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/source_code.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="SourceWorker">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/source_collect.go" />
             </set>
           </value>
         </entry>
@@ -1182,6 +1215,13 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/web_reader.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="WorkerLoader">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../template/internal/cron/worker.go" />
             </set>
           </value>
         </entry>
@@ -1406,6 +1446,25 @@
     </option>
     <option name="scannedPathMapping">
       <map>
+        <entry key="file://$USER_HOME$/GolandProjects/awesomeProject5/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767186474359" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$USER_HOME$/go/pkg/mod/github.com/karosown/katool-go@v0.0.0-20251231100756-ac020e3652b2/ai/agent/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767186749671" />
+              <option name="schema">
+                <list>
+                  <option value="Client" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_adapter.go">
           <value>
             <ScannedPath>
@@ -1500,7 +1559,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765727345288" />
+              <option name="lastModified" value="1767186975908" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -3289,7 +3348,58 @@
         <entry key="file://$PROJECT_DIR$/../template/internal/clients/logic.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767111735648" />
+              <option name="lastModified" value="1767117363354" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../template/internal/cron/article_collect.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767117628767" />
+              <option name="schema">
+                <list>
+                  <option value="ArticleCollectWorker" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../template/internal/cron/simple.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767117490769" />
+              <option name="schema">
+                <list>
+                  <option value="SimpleWorker" />
+                  <option value="Runner" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../template/internal/cron/source_collect.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767117894018" />
+              <option name="schema">
+                <list>
+                  <option value="SourceWorker" />
+                  <option value="Runner" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../template/internal/cron/worker.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767117796846" />
+              <option name="schema">
+                <list>
+                  <option value="Config" />
+                  <option value="WorkerLoader" />
+                </list>
+              </option>
             </ScannedPath>
           </value>
         </entry>
@@ -3305,6 +3415,7 @@
         <entry key="anti_bot_config" value="AntiBotConfig" />
         <entry key="anti_bot_transport" value="AntiBotTransport" />
         <entry key="article" value="Article" />
+        <entry key="article_collect_worker" value="ArticleCollectWorker" />
         <entry key="article_link" value="ArticleLink" />
         <entry key="article_link_value" value="ArticleLinkValue" />
         <entry key="atom_author" value="AtomAuthor" />
@@ -3452,15 +3563,18 @@
         <entry key="rule_tree" value="RuleTree" />
         <entry key="run_back_err_worker" value="RunBackErrWorker" />
         <entry key="run_worker" value="RunWorker" />
+        <entry key="runner" value="Runner" />
         <entry key="safe_heap" value="SafeHeap" />
         <entry key="safe_map" value="SafeMap" />
         <entry key="segment" value="Segment" />
         <entry key="simple_ai_client" value="SimpleAIClient" />
         <entry key="simple_mcp_client" value="SimpleMCPClient" />
+        <entry key="simple_worker" value="SimpleWorker" />
         <entry key="sms_adapter" value="SMSAdapter" />
         <entry key="sort" value="Sort" />
         <entry key="sorted_map" value="SortedMap" />
         <entry key="source_code" value="SourceCode" />
+        <entry key="source_worker" value="SourceWorker" />
         <entry key="spec_num_util" value="SpecNumUtil" />
         <entry key="spec_time_util" value="SpecTimeUtil" />
         <entry key="split_dump_task" value="SplitDumpTask" />
@@ -3492,6 +3606,7 @@
         <entry key="viant_mcp_adapter" value="ViantMCPAdapter" />
         <entry key="viant_mcp_client_impl" value="viantMCPClientImpl" />
         <entry key="web_reader_error" value="WebReaderError" />
+        <entry key="worker_loader" value="WorkerLoader" />
         <entry key="wrapper" value="Wrapper" />
         <entry key="xml_en_de_code_format" value="XMLEnDeCodeFormat" />
         <entry key="zip_info" value="ZipInfo" />
