@@ -23,6 +23,9 @@ type Client struct {
 	// 多MCP适配器（可选，多个）
 	multiMCPAdapter *MultiMCPAdapter
 
+	// 已注入的MCP工具（注册为本地代理函数）
+	mcpProxyRegistered map[string]bool
+
 	// 日志记录器
 	logger xlog.Logger
 
@@ -37,8 +40,9 @@ func NewClient(aiClient *ai.Client, opts ...ClientOption) (*Client, error) {
 	}
 
 	client := &Client{
-		aiClient: aiClient,
-		logger:   &xlog.LogrusAdapter{},
+		aiClient:           aiClient,
+		logger:             &xlog.LogrusAdapter{},
+		mcpProxyRegistered: make(map[string]bool),
 	}
 
 	// 应用选项
@@ -56,6 +60,7 @@ type ClientOption func(*Client)
 func WithMCPAdapter(adapter *MCPAdapter) ClientOption {
 	return func(c *Client) {
 		c.mcpAdapter = adapter
+		c.injectMCPToolsLocked()
 	}
 }
 
@@ -63,6 +68,7 @@ func WithMCPAdapter(adapter *MCPAdapter) ClientOption {
 func WithMultiMCPAdapter(adapter *MultiMCPAdapter) ClientOption {
 	return func(c *Client) {
 		c.multiMCPAdapter = adapter
+		c.injectMCPToolsLocked()
 	}
 }
 
@@ -126,10 +132,20 @@ func (c *Client) GetAllTools() []types.Tool {
 	// 添加MCP工具（优先使用多MCP适配器）
 	if c.multiMCPAdapter != nil {
 		mcpTools := c.multiMCPAdapter.GetTools()
-		tools = append(tools, mcpTools...)
+		for _, t := range mcpTools {
+			if c.mcpProxyRegistered[t.Function.Name] {
+				continue
+			}
+			tools = append(tools, t)
+		}
 	} else if c.mcpAdapter != nil {
 		mcpTools := c.mcpAdapter.GetTools()
-		tools = append(tools, mcpTools...)
+		for _, t := range mcpTools {
+			if c.mcpProxyRegistered[t.Function.Name] {
+				continue
+			}
+			tools = append(tools, t)
+		}
 	}
 
 	return tools
@@ -304,6 +320,7 @@ func (c *Client) SetMCPAdapter(adapter *MCPAdapter) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.mcpAdapter = adapter
+	c.injectMCPToolsLocked()
 }
 
 // GetMultiMCPAdapter 获取多MCP适配器
@@ -318,6 +335,7 @@ func (c *Client) SetMultiMCPAdapter(adapter *MultiMCPAdapter) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.multiMCPAdapter = adapter
+	c.injectMCPToolsLocked()
 }
 
 // GetLogger 获取日志记录器
@@ -325,4 +343,61 @@ func (c *Client) GetLogger() xlog.Logger {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.logger
+}
+
+// InjectMCPTools 将当前 MCP 工具注入为本地函数代理（可显式调用）。
+func (c *Client) InjectMCPTools() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.injectMCPToolsLocked()
+}
+
+// injectMCPToolsLocked 在持锁情况下执行注入。
+func (c *Client) injectMCPToolsLocked() {
+	if c.mcpProxyRegistered == nil {
+		c.mcpProxyRegistered = make(map[string]bool)
+	}
+
+	var tools []types.Tool
+	var caller func(context.Context, string, string) (interface{}, error)
+	switch {
+	case c.multiMCPAdapter != nil:
+		tools = c.multiMCPAdapter.GetTools()
+		caller = c.multiMCPAdapter.CallTool
+	case c.mcpAdapter != nil:
+		tools = c.mcpAdapter.GetTools()
+		caller = c.mcpAdapter.CallTool
+	default:
+		return
+	}
+
+	for _, t := range tools {
+		name := t.Function.Name
+		if c.mcpProxyRegistered[name] || c.aiClient.HasFunction(name) {
+			continue
+		}
+
+		params, ok := t.Function.Parameters.(map[string]interface{})
+		if !ok || params == nil {
+			params = map[string]interface{}{
+				"type":       "object",
+				"properties": map[string]interface{}{},
+			}
+		}
+
+		handler := func(payload map[string]interface{}) (interface{}, error) {
+			argsBytes, err := json.Marshal(payload)
+			if err != nil {
+				return nil, err
+			}
+			return caller(context.Background(), name, string(argsBytes))
+		}
+
+		if err := c.aiClient.RegisterFunctionWith(name, t.Function.Description, params, nil, handler); err != nil {
+			c.logger.Warnf("failed to inject MCP tool %s: %v", name, err)
+			continue
+		}
+
+		c.mcpProxyRegistered[name] = true
+	}
 }
