@@ -1,4 +1,4 @@
-package aiconfig
+package ai
 
 import (
 	"time"

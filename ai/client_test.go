@@ -2,13 +2,13 @@ package ai
 
 import (
 	"fmt"
-	"github.com/karosown/katool-go/container/optional"
-	"github.com/karosown/katool-go/helper/jsonhp"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/container/optional"
+	"github.com/karosown/katool-go/helper/jsonhp"
+
 	"github.com/karosown/katool-go/ai/providers"
 	"github.com/karosown/katool-go/xlog"
 )
@@ -17,29 +17,29 @@ import (
 type mockProvider struct {
 	name   string
 	models []string
-	config *aiconfig.Config
+	config *Config
 }
 
-func (m *mockProvider) Chat(req *aiconfig.ChatRequest) (*aiconfig.ChatResponse, error) {
-	return &aiconfig.ChatResponse{
+func (m *mockProvider) Chat(req *ChatRequest) (*ChatResponse, error) {
+	return &ChatResponse{
 		ID:      "test-id",
 		Model:   req.Model,
-		Choices: []aiconfig.Choice{{Message: aiconfig.Message{Role: "assistant", Content: "Hello from mock"}}},
+		Choices: []Choice{{Message: Message{Role: "assistant", Content: "Hello from mock"}}},
 	}, nil
 }
 
-func (m *mockProvider) ChatStream(req *aiconfig.ChatRequest) (<-chan *aiconfig.ChatResponse, error) {
-	ch := make(aiconfig.StreamChatResponse, 1)
-	ch <- &aiconfig.ChatResponse{
+func (m *mockProvider) ChatStream(req *ChatRequest) (<-chan *ChatResponse, error) {
+	ch := make(StreamChatResponse, 1)
+	ch <- &ChatResponse{
 		ID:      "test-id",
 		Model:   req.Model,
-		Choices: []aiconfig.Choice{{Delta: aiconfig.Message{Role: "assistant", Content: "Hello"}}},
+		Choices: []Choice{{Delta: Message{Role: "assistant", Content: "Hello"}}},
 	}
 	ch.Close(nil)
 	return ch, nil
 }
 
-func (m *mockProvider) ChatWithTools(req *aiconfig.ChatRequest, tools []aiconfig.Tool) (*aiconfig.ChatResponse, error) {
+func (m *mockProvider) ChatWithTools(req *ChatRequest, tools []Tool) (*ChatResponse, error) {
 	return m.Chat(req)
 }
 
@@ -63,7 +63,7 @@ func (m *mockProvider) ValidateConfig() error {
 
 // TestNewClientWithProvider 测试使用指定提供者创建客户端
 func TestNewClientWithProvider(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &Config{
 		APIKey:     "test-key",
 		BaseURL:    "https://api.test.com/v1",
 		Timeout:    30 * time.Second,
@@ -71,7 +71,7 @@ func TestNewClientWithProvider(t *testing.T) {
 		Headers:    make(map[string]string),
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -80,18 +80,18 @@ func TestNewClientWithProvider(t *testing.T) {
 		t.Fatal("Client is nil")
 	}
 
-	if client.GetProvider() != aiconfig.ProviderOllama {
+	if client.GetProvider() != ProviderOllama {
 		t.Errorf("Expected provider Ollama, got %s", client.GetProvider())
 	}
 
-	if !client.HasProvider(aiconfig.ProviderOllama) {
+	if !client.HasProvider(ProviderOllama) {
 		t.Error("Client should have Ollama provider")
 	}
 }
 
 // TestNewClientWithProvider_NilConfig 测试使用nil配置创建客户端
 func TestNewClientWithProvider_NilConfig(t *testing.T) {
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, nil)
+	client, err := NewClientWithProvider(ProviderOllama, nil)
 	if err != nil {
 		t.Fatalf("Failed to create client with nil config: %v", err)
 	}
@@ -103,12 +103,12 @@ func TestNewClientWithProvider_NilConfig(t *testing.T) {
 
 // TestNewClientWithProvider_InvalidProvider 测试使用无效的提供者类型
 func TestNewClientWithProvider_InvalidProvider(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &Config{
 		APIKey:  "test-key",
 		BaseURL: "https://api.test.com/v1",
 	}
 
-	_, err := NewClientWithProvider(aiconfig.ProviderType("invalid"), config)
+	_, err := NewClientWithProvider(ProviderType("invalid"), config)
 	if err == nil {
 		t.Error("Expected error for invalid provider type")
 	}
@@ -116,86 +116,86 @@ func TestNewClientWithProvider_InvalidProvider(t *testing.T) {
 
 // TestSetProvider 测试切换提供者
 func TestSetProvider(t *testing.T) {
-	config1 := &aiconfig.Config{
+	config1 := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config1)
+	client, err := NewClientWithProvider(ProviderOllama, config1)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
 	// 尝试切换到不存在的提供者
-	err = client.SetProvider(aiconfig.ProviderOpenAI)
+	err = client.SetProvider(ProviderOpenAI)
 	if err == nil {
 		t.Error("Expected error when switching to non-existent provider")
 	}
 
 	// 添加第二个提供者（通过手动创建）
-	config2 := &aiconfig.Config{
+	config2 := &Config{
 		APIKey:  "test-key",
 		BaseURL: "https://api.openai.com/v1",
 	}
 
 	// 手动添加提供者到map（用于测试）
 	provider2 := providers.NewOpenAIProvider(config2)
-	client.providers[aiconfig.ProviderOpenAI] = provider2
+	client.providers[ProviderOpenAI] = provider2
 
 	// 现在应该可以切换了
-	err = client.SetProvider(aiconfig.ProviderOpenAI)
+	err = client.SetProvider(ProviderOpenAI)
 	if err != nil {
 		t.Fatalf("Failed to switch provider: %v", err)
 	}
 
-	if client.GetProvider() != aiconfig.ProviderOpenAI {
+	if client.GetProvider() != ProviderOpenAI {
 		t.Errorf("Expected provider OpenAI, got %s", client.GetProvider())
 	}
 }
 
 // TestGetProvider 测试获取当前提供者
 func TestGetProvider(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
 	provider := client.GetProvider()
-	if provider != aiconfig.ProviderOllama {
+	if provider != ProviderOllama {
 		t.Errorf("Expected provider Ollama, got %s", provider)
 	}
 }
 
 // TestHasProvider 测试检查提供者是否存在
 func TestHasProvider(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	if !client.HasProvider(aiconfig.ProviderOllama) {
+	if !client.HasProvider(ProviderOllama) {
 		t.Error("Client should have Ollama provider")
 	}
 
-	if client.HasProvider(aiconfig.ProviderOpenAI) {
+	if client.HasProvider(ProviderOpenAI) {
 		t.Error("Client should not have OpenAI provider")
 	}
 }
 
 // TestListProviders 测试列出所有提供者
 func TestListProviders(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -205,18 +205,18 @@ func TestListProviders(t *testing.T) {
 		t.Errorf("Expected 1 provider, got %d", len(providers))
 	}
 
-	if providers[0] != aiconfig.ProviderOllama {
+	if providers[0] != ProviderOllama {
 		t.Errorf("Expected provider Ollama, got %s", providers[0])
 	}
 }
 
 // TestRegisterFunction 测试注册函数
 func TestRegisterFunction(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -242,11 +242,11 @@ func TestRegisterFunction(t *testing.T) {
 
 // TestRegisterFunction_Multiple 测试注册多个函数
 func TestRegisterFunction_Multiple(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -281,18 +281,18 @@ func TestChat(t *testing.T) {
 		t.Skip("Skipping test that requires real API")
 	}
 
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req := &aiconfig.ChatRequest{
+	req := &ChatRequest{
 		Model: "llama2",
-		Messages: []aiconfig.Message{
+		Messages: []Message{
 			{Role: "user", Content: "Hello"},
 		},
 	}
@@ -309,21 +309,21 @@ func TestChatRes(t *testing.T) {
 		t.Skip("Skipping test that requires real API")
 	}
 
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
 	// Ollama 的 format 参数只接受 "json" 字符串，不接受 JSON Schema 对象
 	// 需要在 prompt 中描述期望的 JSON 结构
-	req := &aiconfig.ChatRequest{
+	req := &ChatRequest{
 		//Model: "llama3.1",
 		Model: "Qwen2",
-		Messages: []aiconfig.Message{
+		Messages: []Message{
 			NewMessage(RoleSystem, `你是一个智能的研究人员。我给你一个关键词，请你返回给我可能找到结果的网址。注意一定要高相关性！可以是二级域名返回给我，格式如下
 `+jsonhp.ToJSON([]struct {
 				Link string `json:"Link" description:"Link"`
@@ -357,31 +357,31 @@ func TestChatRes(t *testing.T) {
 
 // TestChatWithProvider 测试使用指定提供者聊天
 func TestChatWithProvider(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req := &aiconfig.ChatRequest{
+	req := &ChatRequest{
 		Model: "llama2",
-		Messages: []aiconfig.Message{
+		Messages: []Message{
 			{Role: "user", Content: "Hello"},
 		},
 	}
 
 	// 使用当前提供者
-	_, err = client.ChatWithProvider(aiconfig.ProviderOllama, req)
+	_, err = client.ChatWithProvider(ProviderOllama, req)
 	if err != nil {
 		// 这是预期的，因为可能没有运行Ollama
 		t.Logf("Chat failed (expected if Ollama is not running): %v", err)
 	}
 
 	// 使用不存在的提供者
-	_, err = client.ChatWithProvider(aiconfig.ProviderOpenAI, req)
+	_, err = client.ChatWithProvider(ProviderOpenAI, req)
 	if err == nil {
 		t.Error("Expected error when using non-existent provider")
 	}
@@ -393,24 +393,24 @@ func TestChatWithFallback(t *testing.T) {
 		t.Skip("Skipping test that requires real API")
 	}
 
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	req := &aiconfig.ChatRequest{
+	req := &ChatRequest{
 		Model: "Qwen2",
-		Messages: []aiconfig.Message{
+		Messages: []Message{
 			{Role: "user", Content: "Hello"},
 		},
 	}
 
-	providers := []aiconfig.ProviderType{
-		aiconfig.ProviderOllama,
+	providers := []ProviderType{
+		ProviderOllama,
 	}
 
 	_, err = client.ChatWithFallback(providers, req)
@@ -422,11 +422,11 @@ func TestChatWithFallback(t *testing.T) {
 
 // TestSetLogger 测试设置日志记录器
 func TestSetLogger(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}
@@ -462,7 +462,7 @@ func TestNewClientFromEnv(t *testing.T) {
 		}
 	}()
 
-	client, err := NewClientFromEnv(aiconfig.ProviderOllama)
+	client, err := NewClientFromEnv(ProviderOllama)
 	if err != nil {
 		t.Logf("Failed to create client from env (this is expected if config is invalid): %v", err)
 		return
@@ -472,7 +472,7 @@ func TestNewClientFromEnv(t *testing.T) {
 		t.Fatal("Client is nil")
 	}
 
-	if client.GetProvider() != aiconfig.ProviderOllama {
+	if client.GetProvider() != ProviderOllama {
 		t.Errorf("Expected provider Ollama, got %s", client.GetProvider())
 	}
 }
@@ -513,7 +513,7 @@ func TestNewClient_NoProviders(t *testing.T) {
 // TestGetConfigFromEnv 测试从环境变量获取配置
 func TestGetConfigFromEnv(t *testing.T) {
 	// 测试Ollama（不需要API密钥）
-	config := getConfigFromEnv(aiconfig.ProviderOllama)
+	config := getConfigFromEnv(ProviderOllama)
 	if config == nil {
 		t.Error("Ollama config should not be nil (uses default URL)")
 	}
@@ -525,13 +525,13 @@ func TestGetConfigFromEnv(t *testing.T) {
 
 // BenchmarkClientCreation 基准测试客户端创建
 func BenchmarkClientCreation(b *testing.B) {
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+		_, err := NewClientWithProvider(ProviderOllama, config)
 		if err != nil {
 			b.Fatalf("Failed to create client: %v", err)
 		}
@@ -540,11 +540,11 @@ func BenchmarkClientCreation(b *testing.B) {
 
 // BenchmarkRegisterFunction 基准测试函数注册
 func BenchmarkRegisterFunction(b *testing.B) {
-	config := &aiconfig.Config{
+	config := &Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	client, err := NewClientWithProvider(aiconfig.ProviderOllama, config)
+	client, err := NewClientWithProvider(ProviderOllama, config)
 	if err != nil {
 		b.Fatalf("Failed to create client: %v", err)
 	}
@@ -560,9 +560,9 @@ func BenchmarkRegisterFunction(b *testing.B) {
 
 // TestSetFormat 测试设置格式
 func TestSetFormat(t *testing.T) {
-	req := &aiconfig.ChatRequest{
+	req := &ChatRequest{
 		Model: "llama3.1",
-		Messages: []aiconfig.Message{
+		Messages: []Message{
 			{Role: "user", Content: "Test"},
 		},
 	}
@@ -735,9 +735,9 @@ func TestSetFormatFromStruct(t *testing.T) {
 		Age  int    `json:"age"`
 	}
 
-	req := &aiconfig.ChatRequest{
+	req := &ChatRequest{
 		Model: "test",
-		Messages: []aiconfig.Message{
+		Messages: []Message{
 			{Role: "user", Content: "test"},
 		},
 	}

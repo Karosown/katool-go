@@ -3,7 +3,7 @@ package examples
 import (
 	"testing"
 
-	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/ai"
 	"github.com/karosown/katool-go/ai/providers"
 )
 
@@ -211,7 +211,7 @@ func TestFunctionCallWithMultipleParams(t *testing.T) {
 // TestFunctionClient 测试函数客户端
 func TestFunctionClient(t *testing.T) {
 	// 创建Ollama提供者
-	config := &aiconfig.Config{
+	config := &ai.Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
@@ -261,7 +261,7 @@ func TestFunctionClient(t *testing.T) {
 // TestFunctionClientWithChat 测试函数客户端聊天
 func TestFunctionClientWithChat(t *testing.T) {
 	// 创建Ollama提供者
-	config := &aiconfig.Config{
+	config := &ai.Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
@@ -283,9 +283,9 @@ func TestFunctionClientWithChat(t *testing.T) {
 	}
 
 	// 创建聊天请求
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model: "llama3.1",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{
 				Role:    "user",
 				Content: "北京天气怎么样？",

@@ -3,9 +3,10 @@ package tool
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/karosown/katool-go/ai/aiconfig"
 	"reflect"
 	"strings"
+
+	"github.com/karosown/katool-go/ai"
 )
 
 // FunctionWrapper 函数调用封装器
@@ -158,13 +159,13 @@ func (r *FunctionRegistry) generateParameterDefinition(paramType reflect.Type) (
 }
 
 // GetTools 获取所有注册的工具
-func (r *FunctionRegistry) GetTools() []aiconfig.Tool {
-	tools := make([]aiconfig.Tool, 0, len(r.functions))
+func (r *FunctionRegistry) GetTools() []ai.Tool {
+	tools := make([]ai.Tool, 0, len(r.functions))
 
 	for _, wrapper := range r.functions {
-		tools = append(tools, aiconfig.Tool{
+		tools = append(tools, ai.Tool{
 			Type: "function",
-			Function: aiconfig.ToolFunction{
+			Function: ai.ToolFunction{
 				Name:        wrapper.Name,
 				Description: wrapper.Description,
 				Parameters:  wrapper.Parameters,

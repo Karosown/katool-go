@@ -3,8 +3,6 @@ package ai
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 // StreamResult 流式结果
@@ -55,7 +53,7 @@ func (t *StreamResult[T]) IsComplete() bool {
 
 // ChatWithDeserialize 发送聊天请求并自动反序列化为指定类型（包级泛型函数，Go 支持）
 // ChatWithDeserialize sends chat request and automatically deserializes to specified type
-func ChatWithDeserialize[T any](c *Client, req *aiconfig.ChatRequest) (*T, error) {
+func ChatWithDeserialize[T any](c *Client, req *ChatRequest) (*T, error) {
 	response, err := c.Chat(req)
 	if err != nil {
 		return nil, err
@@ -76,7 +74,7 @@ func ChatWithDeserialize[T any](c *Client, req *aiconfig.ChatRequest) (*T, error
 
 // ChatStreamWithDeserialize 发送流式聊天请求并自动反序列化为指定类型（包级泛型函数，Go 支持）
 // ChatStreamWithDeserialize sends streaming chat request and automatically deserializes to specified type
-func ChatStreamWithDeserialize[T any](c *Client, req *aiconfig.ChatRequest) (<-chan *StreamResult[T], error) {
+func ChatStreamWithDeserialize[T any](c *Client, req *ChatRequest) (<-chan *StreamResult[T], error) {
 	c.mu.RLock()
 	provider := c.providers[c.currentProvider]
 	c.mu.RUnlock()
@@ -137,7 +135,7 @@ func ChatStreamWithDeserialize[T any](c *Client, req *aiconfig.ChatRequest) (<-c
 }
 
 // chatStreamWithDeserializeAndFormat 处理 req.Format 为 JSON Schema（map）时的流式反序列化
-func chatStreamWithDeserializeAndFormat[T any](provider aiconfig.AIProvider, req *aiconfig.ChatRequest) (<-chan *StreamResult[T], error) {
+func chatStreamWithDeserializeAndFormat[T any](provider AIProvider, req *ChatRequest) (<-chan *StreamResult[T], error) {
 	schema, ok := req.Format.(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("format must be a map[string]interface{}")
@@ -149,10 +147,10 @@ func chatStreamWithDeserializeAndFormat[T any](provider aiconfig.AIProvider, req
 	originalFormat := req.Format
 
 	// 创建 function
-	req.Tools = []aiconfig.Tool{
+	req.Tools = []Tool{
 		{
 			Type: "function",
-			Function: aiconfig.ToolFunction{
+			Function: ToolFunction{
 				Name:        "extract_structured_data",
 				Description: "Extract and return data in the specified format",
 				Parameters:  schema,
@@ -246,9 +244,9 @@ func chatStreamWithDeserializeAndFormat[T any](provider aiconfig.AIProvider, req
 	return out, nil
 }
 
-func firstChoice(resp *aiconfig.ChatResponse) (aiconfig.Choice, bool) {
+func firstChoice(resp *ChatResponse) (Choice, bool) {
 	if resp == nil || len(resp.Choices) == 0 {
-		return aiconfig.Choice{}, false
+		return Choice{}, false
 	}
 	return resp.Choices[0], true
 }
@@ -297,7 +295,7 @@ func unmarshalPossiblyWrapped[T any](b []byte) (T, error) {
 	return zero, fmt.Errorf("unmarshal failed (and items-wrapper fallback failed)")
 }
 
-func extractStructuredContentFromResponse(resp *aiconfig.ChatResponse) string {
+func extractStructuredContentFromResponse(resp *ChatResponse) string {
 	if resp == nil || len(resp.Choices) == 0 {
 		return ""
 	}
@@ -318,7 +316,7 @@ func extractStructuredContentFromResponse(resp *aiconfig.ChatResponse) string {
 
 // ChatUnmarshalInto 非泛型版本：把最终 JSON 反序列化到 out（必须是指针）
 // ChatUnmarshalInto non-generic version: unmarshals final JSON into out (must be a pointer)
-func (c *Client) ChatUnmarshalInto(req *aiconfig.ChatRequest, out any) error {
+func (c *Client) ChatUnmarshalInto(req *ChatRequest, out any) error {
 	resp, err := c.Chat(req)
 	if err != nil {
 		return err

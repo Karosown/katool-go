@@ -2,26 +2,24 @@ package ai
 
 import (
 	"testing"
-
-	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 type mockDeserializeProvider struct {
-	chatResp       *aiconfig.ChatResponse
+	chatResp       *ChatResponse
 	chatErr        error
-	streamRespChan chan *aiconfig.ChatResponse
+	streamRespChan chan *ChatResponse
 	streamErr      error
 }
 
-func (m *mockDeserializeProvider) Chat(req *aiconfig.ChatRequest) (*aiconfig.ChatResponse, error) {
+func (m *mockDeserializeProvider) Chat(req *ChatRequest) (*ChatResponse, error) {
 	return m.chatResp, m.chatErr
 }
 
-func (m *mockDeserializeProvider) ChatStream(req *aiconfig.ChatRequest) (<-chan *aiconfig.ChatResponse, error) {
+func (m *mockDeserializeProvider) ChatStream(req *ChatRequest) (<-chan *ChatResponse, error) {
 	return m.streamRespChan, m.streamErr
 }
 
-func (m *mockDeserializeProvider) ChatWithTools(req *aiconfig.ChatRequest, tools []aiconfig.Tool) (*aiconfig.ChatResponse, error) {
+func (m *mockDeserializeProvider) ChatWithTools(req *ChatRequest, tools []Tool) (*ChatResponse, error) {
 	// 简化：测试里不关心 tools，直接复用 Chat
 	return m.Chat(req)
 }
@@ -37,21 +35,21 @@ type person struct {
 
 func TestChatWithDeserialize_MessageContent(t *testing.T) {
 	p := &mockDeserializeProvider{
-		chatResp: &aiconfig.ChatResponse{
-			Choices: []aiconfig.Choice{
-				{Message: aiconfig.Message{Role: "assistant", Content: `{"name":"张三","age":25}`}},
+		chatResp: &ChatResponse{
+			Choices: []Choice{
+				{Message: Message{Role: "assistant", Content: `{"name":"张三","age":25}`}},
 			},
 		},
 	}
 
 	c := &Client{
-		providers: map[aiconfig.ProviderType]aiconfig.AIProvider{
-			aiconfig.ProviderOpenAI: p,
+		providers: map[ProviderType]AIProvider{
+			ProviderOpenAI: p,
 		},
-		currentProvider: aiconfig.ProviderOpenAI,
+		currentProvider: ProviderOpenAI,
 	}
 
-	got, err := ChatWithDeserialize[person](c, &aiconfig.ChatRequest{Model: "mock-model"})
+	got, err := ChatWithDeserialize[person](c, &ChatRequest{Model: "mock-model"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -62,16 +60,16 @@ func TestChatWithDeserialize_MessageContent(t *testing.T) {
 
 func TestChatWithDeserialize_ToolCallArguments(t *testing.T) {
 	p := &mockDeserializeProvider{
-		chatResp: &aiconfig.ChatResponse{
-			Choices: []aiconfig.Choice{
+		chatResp: &ChatResponse{
+			Choices: []Choice{
 				{
-					Message: aiconfig.Message{
+					Message: Message{
 						Role: "assistant",
-						ToolCalls: []aiconfig.ToolCall{
+						ToolCalls: []ToolCall{
 							{
 								ID:   "1",
 								Type: "function",
-								Function: aiconfig.ToolCallFunction{
+								Function: ToolCallFunction{
 									Name:      "extract_structured_data",
 									Arguments: `{"name":"李四","age":30}`,
 								},
@@ -84,13 +82,13 @@ func TestChatWithDeserialize_ToolCallArguments(t *testing.T) {
 	}
 
 	c := &Client{
-		providers: map[aiconfig.ProviderType]aiconfig.AIProvider{
-			aiconfig.ProviderOpenAI: p,
+		providers: map[ProviderType]AIProvider{
+			ProviderOpenAI: p,
 		},
-		currentProvider: aiconfig.ProviderOpenAI,
+		currentProvider: ProviderOpenAI,
 	}
 
-	got, err := ChatWithDeserialize[person](c, &aiconfig.ChatRequest{Model: "mock-model"})
+	got, err := ChatWithDeserialize[person](c, &ChatRequest{Model: "mock-model"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -100,33 +98,33 @@ func TestChatWithDeserialize_ToolCallArguments(t *testing.T) {
 }
 
 func TestChatStreamWithDeserialize_AccumulateAndFinalize(t *testing.T) {
-	ch := make(chan *aiconfig.ChatResponse, 10)
-	ch <- &aiconfig.ChatResponse{
-		Choices: []aiconfig.Choice{
-			{Delta: aiconfig.Message{Role: "assistant", Content: `{"name":"`}},
+	ch := make(chan *ChatResponse, 10)
+	ch <- &ChatResponse{
+		Choices: []Choice{
+			{Delta: Message{Role: "assistant", Content: `{"name":"`}},
 		},
 	}
-	ch <- &aiconfig.ChatResponse{
-		Choices: []aiconfig.Choice{
-			{Delta: aiconfig.Message{Content: `王五","age":`}},
+	ch <- &ChatResponse{
+		Choices: []Choice{
+			{Delta: Message{Content: `王五","age":`}},
 		},
 	}
-	ch <- &aiconfig.ChatResponse{
-		Choices: []aiconfig.Choice{
-			{Delta: aiconfig.Message{Content: `40}`}, FinishReason: "stop"},
+	ch <- &ChatResponse{
+		Choices: []Choice{
+			{Delta: Message{Content: `40}`}, FinishReason: "stop"},
 		},
 	}
 	close(ch)
 
 	p := &mockDeserializeProvider{streamRespChan: ch}
 	c := &Client{
-		providers: map[aiconfig.ProviderType]aiconfig.AIProvider{
-			aiconfig.ProviderOpenAI: p,
+		providers: map[ProviderType]AIProvider{
+			ProviderOpenAI: p,
 		},
-		currentProvider: aiconfig.ProviderOpenAI,
+		currentProvider: ProviderOpenAI,
 	}
 
-	out, err := ChatStreamWithDeserialize[person](c, &aiconfig.ChatRequest{Model: "mock-model"})
+	out, err := ChatStreamWithDeserialize[person](c, &ChatRequest{Model: "mock-model"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -150,28 +148,28 @@ func TestChatStreamWithDeserialize_AccumulateAndFinalize(t *testing.T) {
 }
 
 func TestChatStreamWithDeserialize_FinalOnlyOnce(t *testing.T) {
-	ch := make(chan *aiconfig.ChatResponse, 10)
-	ch <- &aiconfig.ChatResponse{
-		Choices: []aiconfig.Choice{
-			{Delta: aiconfig.Message{Role: "assistant", Content: `{"name":"`}},
+	ch := make(chan *ChatResponse, 10)
+	ch <- &ChatResponse{
+		Choices: []Choice{
+			{Delta: Message{Role: "assistant", Content: `{"name":"`}},
 		},
 	}
-	ch <- &aiconfig.ChatResponse{
-		Choices: []aiconfig.Choice{
-			{Delta: aiconfig.Message{Content: `王五","age":40}`}, FinishReason: "stop"},
+	ch <- &ChatResponse{
+		Choices: []Choice{
+			{Delta: Message{Content: `王五","age":40}`}, FinishReason: "stop"},
 		},
 	}
 	close(ch)
 
 	p := &mockDeserializeProvider{streamRespChan: ch}
 	c := &Client{
-		providers: map[aiconfig.ProviderType]aiconfig.AIProvider{
-			aiconfig.ProviderOpenAI: p,
+		providers: map[ProviderType]AIProvider{
+			ProviderOpenAI: p,
 		},
-		currentProvider: aiconfig.ProviderOpenAI,
+		currentProvider: ProviderOpenAI,
 	}
 
-	out, err := ChatStreamWithDeserialize[person](c, &aiconfig.ChatRequest{Model: "mock-model"})
+	out, err := ChatStreamWithDeserialize[person](c, &ChatRequest{Model: "mock-model"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -194,21 +192,21 @@ func TestChatWithDeserialize_UnwrapItemsIntoSlice(t *testing.T) {
 	}
 
 	p := &mockDeserializeProvider{
-		chatResp: &aiconfig.ChatResponse{
-			Choices: []aiconfig.Choice{
-				{Message: aiconfig.Message{Role: "assistant", Content: `{"items":[{"q":"什么是五险一金？","a":"..."}]}`}},
+		chatResp: &ChatResponse{
+			Choices: []Choice{
+				{Message: Message{Role: "assistant", Content: `{"items":[{"q":"什么是五险一金？","a":"..."}]}`}},
 			},
 		},
 	}
 
 	c := &Client{
-		providers: map[aiconfig.ProviderType]aiconfig.AIProvider{
-			aiconfig.ProviderOpenAI: p,
+		providers: map[ProviderType]AIProvider{
+			ProviderOpenAI: p,
 		},
-		currentProvider: aiconfig.ProviderOpenAI,
+		currentProvider: ProviderOpenAI,
 	}
 
-	got, err := ChatWithDeserialize[[]qa](c, &aiconfig.ChatRequest{Model: "mock-model"})
+	got, err := ChatWithDeserialize[[]qa](c, &ChatRequest{Model: "mock-model"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -219,22 +217,22 @@ func TestChatWithDeserialize_UnwrapItemsIntoSlice(t *testing.T) {
 
 func TestChatUnmarshalInto(t *testing.T) {
 	p := &mockDeserializeProvider{
-		chatResp: &aiconfig.ChatResponse{
-			Choices: []aiconfig.Choice{
-				{Message: aiconfig.Message{Role: "assistant", Content: `{"name":"赵六","age":18}`}},
+		chatResp: &ChatResponse{
+			Choices: []Choice{
+				{Message: Message{Role: "assistant", Content: `{"name":"赵六","age":18}`}},
 			},
 		},
 	}
 
 	c := &Client{
-		providers: map[aiconfig.ProviderType]aiconfig.AIProvider{
-			aiconfig.ProviderOpenAI: p,
+		providers: map[ProviderType]AIProvider{
+			ProviderOpenAI: p,
 		},
-		currentProvider: aiconfig.ProviderOpenAI,
+		currentProvider: ProviderOpenAI,
 	}
 
 	var got person
-	if err := c.ChatUnmarshalInto(&aiconfig.ChatRequest{Model: "mock-model"}, &got); err != nil {
+	if err := c.ChatUnmarshalInto(&ChatRequest{Model: "mock-model"}, &got); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if got.Name != "赵六" || got.Age != 18 {

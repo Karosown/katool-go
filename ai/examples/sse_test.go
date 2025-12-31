@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/ai"
 )
 
 // TestStreamEventStructure 测试StreamEvent结构
 func TestStreamEventStructure(t *testing.T) {
 	// 测试StreamEvent结构
-	event := &aiconfig.StreamEvent{
+	event := &ai.StreamEvent{
 		Data:  `{"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"gpt-3.5-turbo","choices":[{"index":0,"delta":{"role":"assistant","content":"Hello"},"finish_reason":null}]}`,
 		Event: "message",
 		ID:    "event-123",
@@ -49,12 +49,12 @@ func TestStreamEventJSONParsing(t *testing.T) {
 	sseData := `{"id":"chatcmpl-123","object":"chat.completion.chunk","created":1677652288,"model":"gpt-3.5-turbo","choices":[{"index":0,"delta":{"role":"assistant","content":"Hello"},"finish_reason":null}]}`
 
 	// 创建StreamEvent
-	event := &aiconfig.StreamEvent{
+	event := &ai.StreamEvent{
 		Data: sseData,
 	}
 
 	// 解析Data字段中的JSON
-	var chatResponse aiconfig.ChatResponse
+	var chatResponse ai.ChatResponse
 	if err := json.Unmarshal([]byte(event.Data), &chatResponse); err != nil {
 		t.Fatalf("Failed to parse ChatResponse from StreamEvent.Data: %v", err)
 	}
@@ -82,7 +82,7 @@ func TestStreamEventJSONParsing(t *testing.T) {
 // TestStreamEventDONE 测试StreamEvent DONE事件
 func TestStreamEventDONE(t *testing.T) {
 	// 测试DONE事件
-	doneEvent := &aiconfig.StreamEvent{
+	doneEvent := &ai.StreamEvent{
 		Data: "[DONE]",
 	}
 
@@ -102,11 +102,11 @@ func TestStreamEventDONE(t *testing.T) {
 // TestStreamEventErrorHandling 测试StreamEvent错误处理
 func TestStreamEventErrorHandling(t *testing.T) {
 	// 测试无效JSON
-	invalidEvent := &aiconfig.StreamEvent{
+	invalidEvent := &ai.StreamEvent{
 		Data: "invalid json data",
 	}
 
-	var chatResponse aiconfig.ChatResponse
+	var chatResponse ai.ChatResponse
 	if err := json.Unmarshal([]byte(invalidEvent.Data), &chatResponse); err == nil {
 		t.Error("Expected error for invalid JSON, but got success")
 	}
@@ -117,7 +117,7 @@ func TestStreamEventErrorHandling(t *testing.T) {
 // TestStreamEventEmptyData 测试StreamEvent空数据
 func TestStreamEventEmptyData(t *testing.T) {
 	// 测试空数据
-	emptyEvent := &aiconfig.StreamEvent{
+	emptyEvent := &ai.StreamEvent{
 		Data: "",
 	}
 
@@ -126,7 +126,7 @@ func TestStreamEventEmptyData(t *testing.T) {
 	}
 
 	// 空数据不应该被解析
-	var chatResponse aiconfig.ChatResponse
+	var chatResponse ai.ChatResponse
 	if err := json.Unmarshal([]byte(emptyEvent.Data), &chatResponse); err == nil {
 		t.Error("Expected error for empty data, but got success")
 	}
@@ -140,11 +140,11 @@ func BenchmarkStreamEventParsing(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		event := &aiconfig.StreamEvent{
+		event := &ai.StreamEvent{
 			Data: sseData,
 		}
 
-		var chatResponse aiconfig.ChatResponse
+		var chatResponse ai.ChatResponse
 		json.Unmarshal([]byte(event.Data), &chatResponse)
 	}
 }

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
-	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 // FormatFromStruct 从Go结构体自动生成JSON Schema格式
@@ -543,7 +541,7 @@ func FormatArrayOfType[T any]() (map[string]interface{}, error) {
 
 // SetFormatFromStruct 从结构体自动生成并设置Format
 // 便捷方法：直接为请求设置从结构体生成的格式
-func SetFormatFromStruct(req *aiconfig.ChatRequest, v interface{}) (*aiconfig.ChatRequest, error) {
+func SetFormatFromStruct(req *ChatRequest, v interface{}) (*ChatRequest, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -556,7 +554,7 @@ func SetFormatFromStruct(req *aiconfig.ChatRequest, v interface{}) (*aiconfig.Ch
 }
 
 // SetFormatFromJSON 从JSON字符串自动生成并设置Format
-func SetFormatFromJSON(req *aiconfig.ChatRequest, jsonStr string) (*aiconfig.ChatRequest, error) {
+func SetFormatFromJSON(req *ChatRequest, jsonStr string) (*ChatRequest, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -569,27 +567,27 @@ func SetFormatFromJSON(req *aiconfig.ChatRequest, jsonStr string) (*aiconfig.Cha
 }
 
 // WithFormatFrom 链式调用构建器
-func WithFormatFrom(req *aiconfig.ChatRequest) *FormatFromBuilder {
+func WithFormatFrom(req *ChatRequest) *FormatFromBuilder {
 	return &FormatFromBuilder{req: req}
 }
 
 // FormatFromBuilder 格式自动生成构建器
 type FormatFromBuilder struct {
-	req *aiconfig.ChatRequest
+	req *ChatRequest
 }
 
 // Struct 从结构体设置格式
-func (b *FormatFromBuilder) Struct(v interface{}) (*aiconfig.ChatRequest, error) {
+func (b *FormatFromBuilder) Struct(v interface{}) (*ChatRequest, error) {
 	return SetFormatFromStruct(b.req, v)
 }
 
 // JSON 从JSON字符串设置格式
-func (b *FormatFromBuilder) JSON(jsonStr string) (*aiconfig.ChatRequest, error) {
+func (b *FormatFromBuilder) JSON(jsonStr string) (*ChatRequest, error) {
 	return SetFormatFromJSON(b.req, jsonStr)
 }
 
 // Value 从值设置格式
-func (b *FormatFromBuilder) Value(v interface{}) (*aiconfig.ChatRequest, error) {
+func (b *FormatFromBuilder) Value(v interface{}) (*ChatRequest, error) {
 	if b.req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}

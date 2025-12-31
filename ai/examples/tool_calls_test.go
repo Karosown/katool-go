@@ -4,24 +4,24 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/ai"
 	"github.com/karosown/katool-go/ai/providers"
 )
 
 // TestToolCallsBasic 测试基本Tool Calls功能
 func TestToolCallsBasic(t *testing.T) {
 	// 创建OpenAI兼容提供者
-	config := &aiconfig.Config{
+	config := &ai.Config{
 		BaseURL: "http://localhost:11434/v1", // 使用Ollama进行测试
 	}
 
 	client := providers.NewOllamaProvider(config)
 
 	// 定义工具
-	tools := []aiconfig.Tool{
+	tools := []ai.Tool{
 		{
 			Type: "function",
-			Function: aiconfig.ToolFunction{
+			Function: ai.ToolFunction{
 				Name:        "get_weather",
 				Description: "获取指定城市的天气信息",
 				Parameters: map[string]interface{}{
@@ -39,9 +39,9 @@ func TestToolCallsBasic(t *testing.T) {
 	}
 
 	// 创建聊天请求
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model: "llama3.1",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{
 				Role:    "user",
 				Content: "北京今天天气怎么样？",
@@ -99,17 +99,17 @@ func TestToolCallsBasic(t *testing.T) {
 
 // TestToolCallsMultiple 测试多工具调用
 func TestToolCallsMultiple(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &ai.Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
 	client := providers.NewOllamaProvider(config)
 
 	// 定义多个工具
-	tools := []aiconfig.Tool{
+	tools := []ai.Tool{
 		{
 			Type: "function",
-			Function: aiconfig.ToolFunction{
+			Function: ai.ToolFunction{
 				Name:        "get_weather",
 				Description: "获取天气信息",
 				Parameters: map[string]interface{}{
@@ -125,7 +125,7 @@ func TestToolCallsMultiple(t *testing.T) {
 		},
 		{
 			Type: "function",
-			Function: aiconfig.ToolFunction{
+			Function: ai.ToolFunction{
 				Name:        "calculate",
 				Description: "执行数学计算",
 				Parameters: map[string]interface{}{
@@ -141,9 +141,9 @@ func TestToolCallsMultiple(t *testing.T) {
 		},
 	}
 
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model: "llama3.1",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{
 				Role:    "user",
 				Content: "请查询北京天气并计算 2+2",
@@ -173,16 +173,16 @@ func TestToolCallsMultiple(t *testing.T) {
 
 // TestToolCallsConversation 测试工具调用对话
 func TestToolCallsConversation(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &ai.Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
 	client := providers.NewOllamaProvider(config)
 
-	tools := []aiconfig.Tool{
+	tools := []ai.Tool{
 		{
 			Type: "function",
-			Function: aiconfig.ToolFunction{
+			Function: ai.ToolFunction{
 				Name:        "get_user_info",
 				Description: "获取用户信息",
 				Parameters: map[string]interface{}{
@@ -199,9 +199,9 @@ func TestToolCallsConversation(t *testing.T) {
 	}
 
 	// 第一轮对话
-	req1 := &aiconfig.ChatRequest{
+	req1 := &ai.ChatRequest{
 		Model: "deepseek-r1",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{
 				Role:    "user",
 				Content: "查询用户123的信息",
@@ -227,9 +227,9 @@ func TestToolCallsConversation(t *testing.T) {
 			toolResult := `{"user_id": "123", "name": "张三", "email": "zhangsan@example.com"}`
 
 			// 第二轮对话
-			req2 := &aiconfig.ChatRequest{
+			req2 := &ai.ChatRequest{
 				Model: "deepseek-r1",
-				Messages: []aiconfig.Message{
+				Messages: []ai.Message{
 					{
 						Role:    "user",
 						Content: "查询用户123的信息",
@@ -263,16 +263,16 @@ func TestToolCallsConversation(t *testing.T) {
 
 // TestToolCallsStreaming 测试流式工具调用
 func TestToolCallsStreaming(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &ai.Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
 	client := providers.NewOllamaProvider(config)
 
-	tools := []aiconfig.Tool{
+	tools := []ai.Tool{
 		{
 			Type: "function",
-			Function: aiconfig.ToolFunction{
+			Function: ai.ToolFunction{
 				Name:        "generate_image",
 				Description: "生成图片",
 				Parameters: map[string]interface{}{
@@ -288,9 +288,9 @@ func TestToolCallsStreaming(t *testing.T) {
 		},
 	}
 
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model: "deepseek-r1",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{
 				Role:    "user",
 				Content: "生成一张猫的图片",
@@ -332,9 +332,9 @@ func TestToolCallsStreaming(t *testing.T) {
 // TestToolCallsStructure 测试Tool Calls结构
 func TestToolCallsStructure(t *testing.T) {
 	// 测试Tool结构
-	tool := aiconfig.Tool{
+	tool := ai.Tool{
 		Type: "function",
-		Function: aiconfig.ToolFunction{
+		Function: ai.ToolFunction{
 			Name:        "test_function",
 			Description: "测试函数",
 			Parameters: map[string]interface{}{
@@ -359,10 +359,10 @@ func TestToolCallsStructure(t *testing.T) {
 	}
 
 	// 测试ToolCall结构
-	toolCall := aiconfig.ToolCall{
+	toolCall := ai.ToolCall{
 		ID:   "call_123",
 		Type: "function",
-		Function: aiconfig.ToolCallFunction{
+		Function: ai.ToolCallFunction{
 			Name:      "test_function",
 			Arguments: `{"param1": "value1"}`,
 		},
@@ -393,18 +393,18 @@ func TestToolCallsStructure(t *testing.T) {
 // TestToolCallsJSON 测试Tool Calls JSON序列化
 func TestToolCallsJSON(t *testing.T) {
 	// 创建完整的聊天请求
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model: "gpt-4o",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{
 				Role:    "user",
 				Content: "测试消息",
 			},
 		},
-		Tools: []aiconfig.Tool{
+		Tools: []ai.Tool{
 			{
 				Type: "function",
-				Function: aiconfig.ToolFunction{
+				Function: ai.ToolFunction{
 					Name:        "test_tool",
 					Description: "测试工具",
 					Parameters: map[string]interface{}{
@@ -428,7 +428,7 @@ func TestToolCallsJSON(t *testing.T) {
 	}
 
 	// 反序列化
-	var req2 aiconfig.ChatRequest
+	var req2 ai.ChatRequest
 	if err := json.Unmarshal(jsonData, &req2); err != nil {
 		t.Fatalf("Failed to unmarshal ChatRequest: %v", err)
 	}
@@ -452,10 +452,10 @@ func TestToolCallsJSON(t *testing.T) {
 
 // BenchmarkToolCallsParsing 基准测试Tool Calls解析性能
 func BenchmarkToolCallsParsing(b *testing.B) {
-	toolCall := aiconfig.ToolCall{
+	toolCall := ai.ToolCall{
 		ID:   "call_123",
 		Type: "function",
-		Function: aiconfig.ToolCallFunction{
+		Function: ai.ToolCallFunction{
 			Name:      "test_function",
 			Arguments: `{"param1": "value1", "param2": 123, "param3": true}`,
 		},

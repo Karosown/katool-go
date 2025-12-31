@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/ai"
 )
 
 func TestConfig(t *testing.T) {
-	config := &aiconfig.Config{
+	config := &ai.Config{
 		APIKey:     "test-key",
 		BaseURL:    "https://api.test.com/v1",
 		Timeout:    30 * time.Second,
@@ -40,9 +40,9 @@ func TestConfig(t *testing.T) {
 }
 
 func TestChatRequest(t *testing.T) {
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model: "test-model",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{Role: "user", Content: "Hello"},
 		},
 		Temperature:      0.7,
@@ -83,22 +83,22 @@ func TestChatRequest(t *testing.T) {
 }
 
 func TestChatResponse(t *testing.T) {
-	response := &aiconfig.ChatResponse{
+	response := &ai.ChatResponse{
 		ID:      "test-id",
 		Object:  "chat.completion",
 		Created: 1234567890,
 		Model:   "test-model",
-		Choices: []aiconfig.Choice{
+		Choices: []ai.Choice{
 			{
 				Index: 0,
-				Message: aiconfig.Message{
+				Message: ai.Message{
 					Role:    "assistant",
 					Content: "Hello! How can I help you?",
 				},
 				FinishReason: "stop",
 			},
 		},
-		Usage: &aiconfig.Usage{
+		Usage: &ai.Usage{
 			PromptTokens:     10,
 			CompletionTokens: 20,
 			TotalTokens:      30,
@@ -155,12 +155,12 @@ func TestChatResponse(t *testing.T) {
 }
 
 func TestProviderType(t *testing.T) {
-	providers := []aiconfig.ProviderType{
-		aiconfig.ProviderOpenAI,
-		aiconfig.ProviderDeepSeek,
-		aiconfig.ProviderClaude,
-		aiconfig.ProviderQwen,
-		aiconfig.ProviderERNIE,
+	providers := []ai.ProviderType{
+		ai.ProviderOpenAI,
+		ai.ProviderDeepSeek,
+		ai.ProviderClaude,
+		ai.ProviderQwen,
+		ai.ProviderERNIE,
 	}
 
 	expected := []string{
@@ -179,7 +179,7 @@ func TestProviderType(t *testing.T) {
 }
 
 func TestModelInfo(t *testing.T) {
-	modelInfo := &aiconfig.ModelInfo{
+	modelInfo := &ai.ModelInfo{
 		ID:          "gpt-3.5-turbo",
 		Name:        "GPT-3.5 Turbo",
 		Provider:    "openai",
@@ -221,7 +221,7 @@ func TestModelInfo(t *testing.T) {
 }
 
 func TestStreamEvent(t *testing.T) {
-	event := &aiconfig.StreamEvent{
+	event := &ai.StreamEvent{
 		Data:  "Hello, world!",
 		Event: "message",
 		ID:    "event-123",
@@ -246,7 +246,7 @@ func TestStreamEvent(t *testing.T) {
 }
 
 func TestErrorResponse(t *testing.T) {
-	errorResp := &aiconfig.ErrorResponse{
+	errorResp := &ai.ErrorResponse{
 		Error: struct {
 			Message string `json:"message"`
 			Type    string `json:"type"`
@@ -274,9 +274,9 @@ func TestErrorResponse(t *testing.T) {
 // 基准测试
 func BenchmarkChatRequestCreation(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = &aiconfig.ChatRequest{
+		_ = &ai.ChatRequest{
 			Model: "test-model",
-			Messages: []aiconfig.Message{
+			Messages: []ai.Message{
 				{Role: "user", Content: "Hello"},
 			},
 			Temperature: 0.7,
@@ -287,22 +287,22 @@ func BenchmarkChatRequestCreation(b *testing.B) {
 
 func BenchmarkChatResponseCreation(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = &aiconfig.ChatResponse{
+		_ = &ai.ChatResponse{
 			ID:      "test-id",
 			Object:  "chat.completion",
 			Created: 1234567890,
 			Model:   "test-model",
-			Choices: []aiconfig.Choice{
+			Choices: []ai.Choice{
 				{
 					Index: 0,
-					Message: aiconfig.Message{
+					Message: ai.Message{
 						Role:    "assistant",
 						Content: "Hello! How can I help you?",
 					},
 					FinishReason: "stop",
 				},
 			},
-			Usage: &aiconfig.Usage{
+			Usage: &ai.Usage{
 				PromptTokens:     10,
 				CompletionTokens: 20,
 				TotalTokens:      30,

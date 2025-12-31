@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/karosown/katool-go/ai/aiconfig"
+	"github.com/karosown/katool-go/ai"
 )
 
 // Function 函数调用客户端
 type Function struct {
-	provider aiconfig.AIProvider
+	provider ai.AIProvider
 	registry *FunctionRegistry
 }
 
 // NewFunctionClient 创建新的函数调用客户端
-func NewFunctionClient(provider aiconfig.AIProvider) *Function {
+func NewFunctionClient(provider ai.AIProvider) *Function {
 	return &Function{
 		provider: provider,
 		registry: NewFunctionRegistry(),
@@ -23,7 +23,7 @@ func NewFunctionClient(provider aiconfig.AIProvider) *Function {
 }
 
 // SetProvider 设置AI提供者
-func (c *Function) SetProvider(provider aiconfig.AIProvider) {
+func (c *Function) SetProvider(provider ai.AIProvider) {
 	c.provider = provider
 }
 
@@ -33,7 +33,7 @@ func (c *Function) RegisterFunction(name, description string, fn interface{}) er
 }
 
 // ChatWithFunctions 使用函数进行聊天
-func (c *Function) ChatWithFunctions(req *aiconfig.ChatRequest) (*aiconfig.ChatResponse, error) {
+func (c *Function) ChatWithFunctions(req *ai.ChatRequest) (*ai.ChatResponse, error) {
 	// 获取注册的工具
 	tools := c.registry.GetTools()
 	if len(tools) == 0 {
@@ -77,7 +77,7 @@ func (c *Function) ChatWithFunctions(req *aiconfig.ChatRequest) (*aiconfig.ChatR
 }
 
 // ChatWithFunctionsStream 使用函数进行流式聊天
-func (c *Function) ChatWithFunctionsStream(req *aiconfig.ChatRequest) (<-chan *aiconfig.ChatResponse, error) {
+func (c *Function) ChatWithFunctionsStream(req *ai.ChatRequest) (<-chan *ai.ChatResponse, error) {
 	// 获取注册的工具
 	tools := c.registry.GetTools()
 	if len(tools) == 0 {
@@ -94,7 +94,7 @@ func (c *Function) ChatWithFunctionsStream(req *aiconfig.ChatRequest) (<-chan *a
 	}
 
 	// 创建新的通道来处理工具调用
-	resultChan := make(chan *aiconfig.ChatResponse, 100)
+	resultChan := make(chan *ai.ChatResponse, 100)
 
 	go func() {
 		defer close(resultChan)
@@ -137,7 +137,7 @@ func (c *Function) ChatWithFunctionsStream(req *aiconfig.ChatRequest) (<-chan *a
 }
 
 // ChatWithFunctionsConversation 使用函数进行完整对话
-func (c *Function) ChatWithFunctionsConversation(req *aiconfig.ChatRequest) (*aiconfig.ChatResponse, error) {
+func (c *Function) ChatWithFunctionsConversation(req *ai.ChatRequest) (*ai.ChatResponse, error) {
 	// 获取注册的工具
 	tools := c.registry.GetTools()
 	if len(tools) == 0 {
@@ -158,7 +158,7 @@ func (c *Function) ChatWithFunctionsConversation(req *aiconfig.ChatRequest) (*ai
 		choice := response.Choices[0]
 		if len(choice.Message.ToolCalls) > 0 {
 			// 创建新的消息列表，包含工具调用结果
-			newMessages := make([]aiconfig.Message, len(req.Messages))
+			newMessages := make([]ai.Message, len(req.Messages))
 			copy(newMessages, req.Messages)
 
 			// 添加AI的响应（包含工具调用）
@@ -180,7 +180,7 @@ func (c *Function) ChatWithFunctionsConversation(req *aiconfig.ChatRequest) (*ai
 				}
 
 				// 添加工具结果消息
-				toolMessage := aiconfig.Message{
+				toolMessage := ai.Message{
 					Role:       "tool",
 					Content:    string(resultJSON),
 					ToolCallID: toolCall.ID,
@@ -189,7 +189,7 @@ func (c *Function) ChatWithFunctionsConversation(req *aiconfig.ChatRequest) (*ai
 			}
 
 			// 创建新的请求，包含工具调用结果
-			followUpReq := &aiconfig.ChatRequest{
+			followUpReq := &ai.ChatRequest{
 				Model:    req.Model,
 				Messages: newMessages,
 				Tools:    tools,
@@ -220,7 +220,7 @@ func (c *Function) HasFunction(name string) bool {
 }
 
 // GetTools 获取工具定义
-func (c *Function) GetTools() []aiconfig.Tool {
+func (c *Function) GetTools() []ai.Tool {
 	return c.registry.GetTools()
 }
 
@@ -232,7 +232,7 @@ func (c *Function) CallFunctionDirectly(name string, arguments string) (interfac
 // ... existing code ...
 
 // ChatWithFunctionsConversationStream 使用函数进行流式完整对话
-func (c *Function) ChatWithFunctionsConversationStream(req *aiconfig.ChatRequest) (<-chan *aiconfig.ChatResponse, error) {
+func (c *Function) ChatWithFunctionsConversationStream(req *ai.ChatRequest) (<-chan *ai.ChatResponse, error) {
 	// 获取注册的工具
 	tools := c.registry.GetTools()
 	if len(tools) == 0 {
@@ -249,12 +249,12 @@ func (c *Function) ChatWithFunctionsConversationStream(req *aiconfig.ChatRequest
 	}
 
 	// 创建新的通道来处理工具调用和后续对话
-	resultChan := make(chan *aiconfig.ChatResponse, 100)
+	resultChan := make(chan *ai.ChatResponse, 100)
 
 	go func() {
 		defer close(resultChan)
 
-		var accumulatedToolCalls []aiconfig.ToolCall
+		var accumulatedToolCalls []ai.ToolCall
 		var hasToolCalls bool
 
 		for response := range stream {
@@ -279,11 +279,11 @@ func (c *Function) ChatWithFunctionsConversationStream(req *aiconfig.ChatRequest
 		// 如果有工具调用，执行它们并发送后续请求
 		if hasToolCalls && len(accumulatedToolCalls) > 0 {
 			// 创建新的消息列表，包含工具调用结果
-			newMessages := make([]aiconfig.Message, len(req.Messages))
+			newMessages := make([]ai.Message, len(req.Messages))
 			copy(newMessages, req.Messages)
 
 			// 创建包含工具调用的消息
-			toolCallMessage := aiconfig.Message{
+			toolCallMessage := ai.Message{
 				Role:      "assistant",
 				Content:   "",
 				ToolCalls: accumulatedToolCalls,
@@ -306,17 +306,17 @@ func (c *Function) ChatWithFunctionsConversationStream(req *aiconfig.ChatRequest
 				}
 
 				// 添加工具结果消息
-				toolMessage := aiconfig.Message{
+				toolMessage := ai.Message{
 					Role:       "tool",
 					Content:    string(resultJSON),
 					ToolCallID: toolCall.ID,
 				}
-				resultChan <- &aiconfig.ChatResponse{
+				resultChan <- &ai.ChatResponse{
 					ID:      "",
 					Object:  "",
 					Created: 0,
 					Model:   "",
-					Choices: []aiconfig.Choice{
+					Choices: []ai.Choice{
 						{Message: toolMessage},
 					},
 					Usage: nil,
@@ -325,7 +325,7 @@ func (c *Function) ChatWithFunctionsConversationStream(req *aiconfig.ChatRequest
 			}
 
 			// 创建新的请求，包含工具调用结果
-			followUpReq := &aiconfig.ChatRequest{
+			followUpReq := &ai.ChatRequest{
 				Model:    req.Model,
 				Messages: newMessages,
 				Tools:    tools,

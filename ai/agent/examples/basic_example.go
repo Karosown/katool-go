@@ -8,18 +8,17 @@ import (
 
 	"github.com/karosown/katool-go/ai"
 	"github.com/karosown/katool-go/ai/agent"
-	"github.com/karosown/katool-go/ai/aiconfig"
 	"github.com/karosown/katool-go/xlog"
 )
 
 // 基本使用示例：使用Client控制流程
 func ExampleBasic() {
 
-	config := &aiconfig.Config{
+	config := &ai.Config{
 		BaseURL: "http://localhost:11434/v1",
 	}
 
-	aiClient, err := ai.NewClientWithProvider(aiconfig.ProviderOllama, config)
+	aiClient, err := ai.NewClientWithProvider(ai.ProviderOllama, config)
 	// 创建AI客户端
 	//aiClient, err := ai.NewClient()
 	if err != nil {
@@ -46,7 +45,7 @@ func ExampleBasic() {
 
 	// 业务层控制流程
 	ctx := context.Background()
-	messages := []aiconfig.Message{
+	messages := []ai.Message{
 		{Role: "user", Content: "请查询北京的天气"},
 	}
 
@@ -54,7 +53,7 @@ func ExampleBasic() {
 	tools := client.GetAllTools()
 
 	// 发送请求
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model:    "Qwen2",
 		Messages: messages,
 		Tools:    tools,
@@ -108,7 +107,7 @@ func exampleMultiRound() {
 	})
 
 	ctx := context.Background()
-	messages := []aiconfig.Message{
+	messages := []ai.Message{
 		{Role: "user", Content: "计算 2 + 2"},
 	}
 	tools := client.GetAllTools()
@@ -116,7 +115,7 @@ func exampleMultiRound() {
 
 	for round := 0; round < maxRounds; round++ {
 		// 发送请求
-		resp, _ := client.Chat(ctx, &aiconfig.ChatRequest{
+		resp, _ := client.Chat(ctx, &ai.ChatRequest{
 			Model:    "Qwen2",
 			Messages: messages,
 			Tools:    tools,
@@ -174,9 +173,9 @@ func exampleStreaming() {
 	client, _ := agent.NewClient(aiClient)
 
 	ctx := context.Background()
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model: "Qwen2",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{Role: "user", Content: "介绍一下Go语言"},
 		},
 		Stream: true,
@@ -241,11 +240,11 @@ func exampleWithMCP() {
 
 	// 使用
 	ctx := context.Background()
-	messages := []aiconfig.Message{
+	messages := []ai.Message{
 		{Role: "user", Content: "计算 15 * 23"},
 	}
 
-	resp, _ := client.Chat(ctx, &aiconfig.ChatRequest{
+	resp, _ := client.Chat(ctx, &ai.ChatRequest{
 		Model:    "Qwen2",
 		Messages: messages,
 		Tools:    client.GetAllTools(),

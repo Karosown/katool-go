@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/karosown/katool-go/ai"
-	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 func main() {
@@ -19,9 +18,9 @@ func main() {
 	}
 
 	// 发送消息
-	response, err := client.Chat(&aiconfig.ChatRequest{
+	response, err := client.Chat(&ai.ChatRequest{
 		Model: "gpt-3.5-turbo",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{Role: "user", Content: "你好，请用一句话介绍自己"},
 		},
 	})
@@ -37,14 +36,14 @@ func main() {
 	// ========================================
 	fmt.Println("=== 示例2: 指定提供者 ===")
 	// 从环境变量创建指定提供者
-	openaiClient, err := ai.NewClientFromEnv(aiconfig.ProviderOpenAI)
+	openaiClient, err := ai.NewClientFromEnv(ai.ProviderOpenAI)
 	if err != nil {
 		fmt.Printf("OpenAI客户端创建失败: %v\n", err)
 	} else {
 		fmt.Println("OpenAI客户端创建成功")
 		// 可以切换提供者
-		if openaiClient.HasProvider(aiconfig.ProviderDeepSeek) {
-			openaiClient.SetProvider(aiconfig.ProviderDeepSeek)
+		if openaiClient.HasProvider(ai.ProviderDeepSeek) {
+			openaiClient.SetProvider(ai.ProviderDeepSeek)
 			fmt.Println("已切换到DeepSeek")
 		}
 	}
@@ -53,9 +52,9 @@ func main() {
 	// 流式响应
 	// ========================================
 	fmt.Println("\n=== 示例3: 流式响应 ===")
-	stream, err := client.ChatStream(&aiconfig.ChatRequest{
+	stream, err := client.ChatStream(&ai.ChatRequest{
 		Model: "gpt-3.5-turbo",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{Role: "user", Content: "请写一首关于春天的短诗"},
 		},
 	})
@@ -76,15 +75,15 @@ func main() {
 	// 多提供者自动降级
 	// ========================================
 	fmt.Println("=== 示例4: 多提供者自动降级 ===")
-	providers := []aiconfig.ProviderType{
-		aiconfig.ProviderOpenAI,
-		aiconfig.ProviderDeepSeek,
-		aiconfig.ProviderOllama,
+	providers := []ai.ProviderType{
+		ai.ProviderOpenAI,
+		ai.ProviderDeepSeek,
+		ai.ProviderOllama,
 	}
 
-	response, err = client.ChatWithFallback(providers, &aiconfig.ChatRequest{
+	response, err = client.ChatWithFallback(providers, &ai.ChatRequest{
 		Model: "gpt-3.5-turbo",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{Role: "user", Content: "1+1等于几？"},
 		},
 	})
@@ -109,9 +108,9 @@ func main() {
 		log.Printf("注册函数失败: %v", err)
 	} else {
 		// 使用工具调用
-		response, err = client.ChatWithTools(&aiconfig.ChatRequest{
+		response, err = client.ChatWithTools(&ai.ChatRequest{
 			Model: "gpt-3.5-turbo",
-			Messages: []aiconfig.Message{
+			Messages: []ai.Message{
 				{Role: "user", Content: "北京今天天气怎么样？"},
 			},
 		})
@@ -133,7 +132,7 @@ func main() {
 	currentProvider := client.GetProvider()
 	fmt.Printf("当前使用: %s\n", currentProvider)
 
-	if client.HasProvider(aiconfig.ProviderOpenAI) {
+	if client.HasProvider(ai.ProviderOpenAI) {
 		fmt.Println("OpenAI可用")
 	}
 }

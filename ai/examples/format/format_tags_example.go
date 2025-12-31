@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/karosown/katool-go/ai"
-	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 // User 用户信息（展示各种 tag 的使用）
@@ -74,9 +73,9 @@ func example1(client *ai.Client) {
 	fmt.Println(string(schemaJSON))
 
 	// 使用 schema 发送请求
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model: "gpt-4o-mini",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{Role: "user", Content: "生成一个中国用户的信息"},
 		},
 		Format: schema,
@@ -115,9 +114,9 @@ func example2(client *ai.Client) {
 	schemaJSON, _ := json.MarshalIndent(schema, "", "  ")
 	fmt.Println(string(schemaJSON))
 
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model: "gpt-4o-mini",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{Role: "user", Content: "生成一个电子产品的信息"},
 		},
 		Format: schema,
@@ -155,9 +154,9 @@ func example3(client *ai.Client) {
 	schemaJSON, _ := json.MarshalIndent(schema, "", "  ")
 	fmt.Println(string(schemaJSON))
 
-	req := &aiconfig.ChatRequest{
+	req := &ai.ChatRequest{
 		Model: "gpt-4o-mini",
-		Messages: []aiconfig.Message{
+		Messages: []ai.Message{
 			{Role: "user", Content: "生成一个包含2个商品的订单"},
 		},
 		Format: schema,

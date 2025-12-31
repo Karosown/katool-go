@@ -10,7 +10,6 @@ import (
 	"github.com/karosown/katool-go/ai"
 	"github.com/karosown/katool-go/ai/agent"
 	"github.com/karosown/katool-go/ai/agent/adapters"
-	"github.com/karosown/katool-go/ai/aiconfig"
 	"github.com/karosown/katool-go/xlog"
 	mcpclient "github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -133,10 +132,10 @@ func testMultipleMCPServers(logger xlog.Logger) {
 	// ============================================================================
 	// 4. 创建AI客户端和Agent客户端
 	// ============================================================================
-	config := &aiconfig.Config{
+	config := &ai.Config{
 		BaseURL: getEnv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
 	}
-	aiClient, err := ai.NewClientWithProvider(aiconfig.ProviderOllama, config)
+	aiClient, err := ai.NewClientWithProvider(ai.ProviderOllama, config)
 	if err != nil {
 		logger.Warnf("Failed to create Ollama client, using default: %v", err)
 		aiClient, err = ai.NewClient()
@@ -156,7 +155,7 @@ func testMultipleMCPServers(logger xlog.Logger) {
 	// ============================================================================
 	tools := agentClient.GetAllTools()
 	fmt.Printf("\n✅ 所有可用工具: %d 个\n", len(tools))
-	
+
 	// 按来源分组显示
 	toolCountByAdapter := multiAdapter.GetToolCountByAdapter()
 	fmt.Println("\n工具分布：")
@@ -205,7 +204,7 @@ func testMultiMCPToolCalls(ctx context.Context, client *agent.Client, multiAdapt
 	adapters := multiAdapter.GetAdapters()
 	for adapterIndex, adapter := range adapters {
 		fmt.Printf("\n📋 测试 MCP 服务器 %d 的工具:\n", adapterIndex+1)
-		
+
 		adapterTools := adapter.GetTools()
 		if len(adapterTools) == 0 {
 			fmt.Printf("  ⚠️  没有可用工具\n")
@@ -216,7 +215,7 @@ func testMultiMCPToolCalls(ctx context.Context, client *agent.Client, multiAdapt
 		if len(adapterTools) > 0 {
 			firstTool := adapterTools[0]
 			fmt.Printf("  测试工具: %s\n", firstTool.Function.Name)
-			
+
 			result, err := client.CallTool(ctx, firstTool.Function.Name, `{}`)
 			if err != nil {
 				log.Printf("  ❌ 工具调用失败: %v", err)
