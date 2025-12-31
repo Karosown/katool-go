@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/Tangerg/lynx/pkg/sync"
-	"github.com/karosown/katool-go/ai/providers"
 	"github.com/karosown/katool-go/ai/types"
 
 	"os"
@@ -22,11 +21,11 @@ import (
 type OpenAICompatibleProvider struct {
 	config       *Config
 	logger       xlog.Logger
-	providerType providers.ProviderType
+	providerType ProviderType
 }
 
 // NewOpenAICompatibleProvider 创建OpenAI兼容提供者
-func NewOpenAICompatibleProvider(providerType providers.ProviderType, config *Config) *OpenAICompatibleProvider {
+func NewOpenAICompatibleProvider(providerType ProviderType, config *Config) *OpenAICompatibleProvider {
 	if config == nil {
 		config = &Config{}
 	}
@@ -41,26 +40,26 @@ func NewOpenAICompatibleProvider(providerType providers.ProviderType, config *Co
 
 	// 根据提供者类型设置默认配置
 	switch providerType {
-	case providers.ProviderOpenAI:
+	case ProviderOpenAI:
 		if config.BaseURL == "" {
 			config.BaseURL = "https://api.openai.com/v1"
 		}
 		if config.APIKey == "" {
 			config.APIKey = os.Getenv("OPENAI_API_KEY")
 		}
-	case providers.ProviderDeepSeek:
+	case ProviderDeepSeek:
 		if config.BaseURL == "" {
 			config.BaseURL = "https://api.deepseek.com/v1"
 		}
 		if config.APIKey == "" {
 			config.APIKey = os.Getenv("DEEPSEEK_API_KEY")
 		}
-	case providers.ProviderOllama:
+	case ProviderOllama:
 		if config.BaseURL == "" {
 			config.BaseURL = "http://localhost:11434/v1"
 		}
 		// Ollama通常不需要API密钥
-	case providers.ProviderLocalAI:
+	case ProviderLocalAI:
 		if config.BaseURL == "" {
 			config.BaseURL = "http://localhost:8080/v1"
 		}
@@ -84,7 +83,7 @@ func (p *OpenAICompatibleProvider) GetName() string {
 // GetModels 获取支持的模型列表
 func (p *OpenAICompatibleProvider) GetModels() []string {
 	switch p.providerType {
-	case providers.ProviderOpenAI:
+	case ProviderOpenAI:
 		return []string{
 			"gpt-4o",
 			"gpt-4o-mini",
@@ -93,13 +92,13 @@ func (p *OpenAICompatibleProvider) GetModels() []string {
 			"gpt-3.5-turbo",
 			"gpt-3.5-turbo-16k",
 		}
-	case providers.ProviderDeepSeek:
+	case ProviderDeepSeek:
 		return []string{
 			"deepseek-chat",
 			"deepseek-coder",
 			"deepseek-reasoner",
 		}
-	case providers.ProviderOllama:
+	case ProviderOllama:
 		return []string{
 			"llama2",
 			"llama3",
@@ -109,7 +108,7 @@ func (p *OpenAICompatibleProvider) GetModels() []string {
 			"starling-lm",
 			"vicuna",
 		}
-	case providers.ProviderLocalAI:
+	case ProviderLocalAI:
 		return []string{
 			"gpt-3.5-turbo",
 			"gpt-4",
@@ -128,7 +127,7 @@ func (p *OpenAICompatibleProvider) ValidateConfig() error {
 	}
 
 	// 某些提供者需要API密钥
-	if p.providerType == providers.ProviderOpenAI || p.providerType == providers.ProviderDeepSeek {
+	if p.providerType == ProviderOpenAI || p.providerType == ProviderDeepSeek {
 		if p.config.APIKey == "" {
 			return fmt.Errorf("%s API key is required", p.providerType)
 		}
@@ -382,6 +381,6 @@ func (p *OpenAICompatibleProvider) SetConfig(config *Config) {
 }
 
 // GetProviderType 获取提供者类型
-func (p *OpenAICompatibleProvider) GetProviderType() providers.ProviderType {
+func (p *OpenAICompatibleProvider) GetProviderType() ProviderType {
 	return p.providerType
 }

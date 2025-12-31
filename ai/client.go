@@ -16,10 +16,10 @@ import (
 // Client 统一的AI客户端，整合所有功能
 type Client struct {
 	// 当前使用的提供者类型
-	currentProvider providers.ProviderType
+	currentProvider aiconfig.ProviderType
 
 	// 所有可用的提供者
-	providers map[providers.ProviderType]types.AIProvider
+	providers map[aiconfig.ProviderType]types.AIProvider
 
 	// 函数调用客户端
 	functionClient *tool.Function
@@ -38,7 +38,7 @@ type Client struct {
 // 会自动尝试加载所有可用的提供者
 func NewClient() (*Client, error) {
 	client := &Client{
-		providers: make(map[providers.ProviderType]types.AIProvider),
+		providers: make(map[aiconfig.ProviderType]types.AIProvider),
 		logger:    &xlog.LogrusAdapter{},
 	}
 
@@ -50,8 +50,8 @@ func NewClient() (*Client, error) {
 	}
 
 	// 设置默认提供者（优先使用OpenAI，否则使用第一个可用的）
-	if client.HasProvider(providers.ProviderOpenAI) {
-		client.currentProvider = providers.ProviderOpenAI
+	if client.HasProvider(aiconfig.ProviderOpenAI) {
+		client.currentProvider = aiconfig.ProviderOpenAI
 	} else {
 		for providerType := range client.providers {
 			client.currentProvider = providerType
@@ -66,9 +66,9 @@ func NewClient() (*Client, error) {
 }
 
 // NewClientWithProvider 创建指定提供者的AI客户端
-func NewClientWithProvider(providerType providers.ProviderType, config *aiconfig.Config) (*Client, error) {
+func NewClientWithProvider(providerType aiconfig.ProviderType, config *aiconfig.Config) (*Client, error) {
 	client := &Client{
-		providers:       make(map[providers.ProviderType]types.AIProvider),
+		providers:       make(map[aiconfig.ProviderType]types.AIProvider),
 		currentProvider: providerType,
 		logger:          &xlog.LogrusAdapter{},
 	}
@@ -95,19 +95,19 @@ func NewClientWithProvider(providerType providers.ProviderType, config *aiconfig
 }
 
 // NewClientFromEnv 从环境变量创建指定提供者的客户端
-func NewClientFromEnv(providerType providers.ProviderType) (*Client, error) {
+func NewClientFromEnv(providerType aiconfig.ProviderType) (*Client, error) {
 	config := getConfigFromEnv(providerType)
 	return NewClientWithProvider(providerType, config)
 }
 
 // loadProvidersFromEnv 从环境变量加载所有可用的提供者
 func (c *Client) loadProvidersFromEnv() {
-	providerTypes := []providers.ProviderType{
-		providers.ProviderOpenAI,
-		providers.ProviderDeepSeek,
-		providers.ProviderClaude,
-		providers.ProviderOllama,
-		providers.ProviderLocalAI,
+	providerTypes := []aiconfig.ProviderType{
+		aiconfig.ProviderOpenAI,
+		aiconfig.ProviderDeepSeek,
+		aiconfig.ProviderClaude,
+		aiconfig.ProviderOllama,
+		aiconfig.ProviderLocalAI,
 	}
 
 	for _, providerType := range providerTypes {
@@ -117,7 +117,7 @@ func (c *Client) loadProvidersFromEnv() {
 		}
 
 		// 验证必要的配置
-		if providerType != providers.ProviderOllama && config.APIKey == "" {
+		if providerType != aiconfig.ProviderOllama && config.APIKey == "" {
 			continue
 		}
 
@@ -138,17 +138,17 @@ func (c *Client) loadProvidersFromEnv() {
 }
 
 // createProvider 创建提供者实例
-func createProvider(providerType providers.ProviderType, config *aiconfig.Config) (types.AIProvider, error) {
+func createProvider(providerType aiconfig.ProviderType, config *aiconfig.Config) (types.AIProvider, error) {
 	switch providerType {
-	case providers.ProviderOpenAI:
+	case aiconfig.ProviderOpenAI:
 		return providers.NewOpenAIProvider(config), nil
-	case providers.ProviderDeepSeek:
+	case aiconfig.ProviderDeepSeek:
 		return providers.NewDeepSeekProvider(config), nil
-	case providers.ProviderClaude:
+	case aiconfig.ProviderClaude:
 		return providers.NewClaudeProvider(config), nil
-	case providers.ProviderOllama:
+	case aiconfig.ProviderOllama:
 		return providers.NewOllamaProvider(config), nil
-	case providers.ProviderLocalAI:
+	case aiconfig.ProviderLocalAI:
 		return providers.NewLocalAIProvider(config), nil
 	default:
 		return nil, fmt.Errorf("unsupported provider type: %s", providerType)
@@ -156,7 +156,7 @@ func createProvider(providerType providers.ProviderType, config *aiconfig.Config
 }
 
 // getConfigFromEnv 从环境变量获取配置
-func getConfigFromEnv(providerType providers.ProviderType) *aiconfig.Config {
+func getConfigFromEnv(providerType aiconfig.ProviderType) *aiconfig.Config {
 	config := &aiconfig.Config{
 		Timeout:    30 * time.Second,
 		MaxRetries: 3,
@@ -164,32 +164,32 @@ func getConfigFromEnv(providerType providers.ProviderType) *aiconfig.Config {
 	}
 
 	switch providerType {
-	case providers.ProviderOpenAI:
+	case aiconfig.ProviderOpenAI:
 		if apiKey := os.Getenv("OPENAI_API_KEY"); apiKey != "" {
 			config.APIKey = apiKey
 			config.BaseURL = getEnvOrDefault("OPENAI_BASE_URL", "https://api.openai.com/v1")
 			return config
 		}
-	case providers.ProviderDeepSeek:
+	case aiconfig.ProviderDeepSeek:
 		if apiKey := os.Getenv("DEEPSEEK_API_KEY"); apiKey != "" {
 			config.APIKey = apiKey
 			config.BaseURL = getEnvOrDefault("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
 			return config
 		}
-	case providers.ProviderClaude:
+	case aiconfig.ProviderClaude:
 		if apiKey := os.Getenv("CLAUDE_API_KEY"); apiKey != "" {
 			config.APIKey = apiKey
 			config.BaseURL = getEnvOrDefault("CLAUDE_BASE_URL", "https://api.anthropic.com/v1")
 			return config
 		}
-	case providers.ProviderOllama:
+	case aiconfig.ProviderOllama:
 		if baseURL := os.Getenv("OLLAMA_BASE_URL"); baseURL != "" {
 			config.BaseURL = baseURL
 		} else {
 			config.BaseURL = "http://localhost:11434/v1"
 		}
 		return config
-	case providers.ProviderLocalAI:
+	case aiconfig.ProviderLocalAI:
 		if baseURL := os.Getenv("LOCALAI_BASE_URL"); baseURL != "" {
 			config.BaseURL = baseURL
 			config.APIKey = os.Getenv("LOCALAI_API_KEY") // 可选
@@ -208,7 +208,7 @@ func getEnvOrDefault(key, defaultValue string) string {
 }
 
 // SetProvider 切换当前使用的提供者
-func (c *Client) SetProvider(providerType providers.ProviderType) error {
+func (c *Client) SetProvider(providerType aiconfig.ProviderType) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -223,14 +223,14 @@ func (c *Client) SetProvider(providerType providers.ProviderType) error {
 }
 
 // GetProvider 获取当前提供者类型
-func (c *Client) GetProvider() providers.ProviderType {
+func (c *Client) GetProvider() aiconfig.ProviderType {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.currentProvider
 }
 
 // HasProvider 检查是否有指定的提供者
-func (c *Client) HasProvider(providerType providers.ProviderType) bool {
+func (c *Client) HasProvider(providerType aiconfig.ProviderType) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	_, exists := c.providers[providerType]
@@ -238,11 +238,11 @@ func (c *Client) HasProvider(providerType providers.ProviderType) bool {
 }
 
 // ListProviders 列出所有可用的提供者
-func (c *Client) ListProviders() []providers.ProviderType {
+func (c *Client) ListProviders() []aiconfig.ProviderType {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	providers := make([]providers.ProviderType, 0, len(c.providers))
+	providers := make([]aiconfig.ProviderType, 0, len(c.providers))
 	for providerType := range c.providers {
 		providers = append(providers, providerType)
 	}
@@ -280,7 +280,7 @@ func (c *Client) ChatStream(req *types.ChatRequest) (<-chan *types.ChatResponse,
 }
 
 // ChatWithProvider 使用指定提供者发送聊天请求
-func (c *Client) ChatWithProvider(providerType providers.ProviderType, req *types.ChatRequest) (*types.ChatResponse, error) {
+func (c *Client) ChatWithProvider(providerType aiconfig.ProviderType, req *types.ChatRequest) (*types.ChatResponse, error) {
 	c.mu.RLock()
 	provider, exists := c.providers[providerType]
 	c.mu.RUnlock()
@@ -293,7 +293,7 @@ func (c *Client) ChatWithProvider(providerType providers.ProviderType, req *type
 }
 
 // ChatWithFallback 使用多个提供者发送聊天请求（带自动降级）
-func (c *Client) ChatWithFallback(providerTypes []providers.ProviderType, req *types.ChatRequest) (*types.ChatResponse, error) {
+func (c *Client) ChatWithFallback(providerTypes []aiconfig.ProviderType, req *types.ChatRequest) (*types.ChatResponse, error) {
 	var lastErr error
 
 	for _, providerType := range providerTypes {

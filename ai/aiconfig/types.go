@@ -1,4 +1,4 @@
-package providers
+package aiconfig
 
 // ProviderType 提供者类型
 type ProviderType string

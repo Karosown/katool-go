@@ -7,5 +7,5 @@ import (
 
 // NewOllamaProvider 创建Ollama提供者
 func NewOllamaProvider(config *aiconfig.Config) types.AIProvider {
-	return aiconfig.NewOpenAICompatibleProvider(ProviderOllama, config)
+	return aiconfig.NewOpenAICompatibleProvider(aiconfig.ProviderOllama, config)
 }

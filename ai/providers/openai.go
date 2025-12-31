@@ -7,5 +7,5 @@ import (
 
 // NewOpenAIProvider 创建OpenAI提供者
 func NewOpenAIProvider(config *aiconfig.Config) types.AIProvider {
-	return aiconfig.NewOpenAICompatibleProvider(ProviderOpenAI, config)
+	return aiconfig.NewOpenAICompatibleProvider(aiconfig.ProviderOpenAI, config)
 }
