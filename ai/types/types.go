@@ -1,5 +1,9 @@
 package types
 
+import (
+	"github.com/karosown/katool-go/container/cutil"
+)
+
 // Message 表示聊天消息
 type Message struct {
 	Role       Role       `json:"role"`                   // user, assistant, system, tool
@@ -62,7 +66,7 @@ func (s *ChatResponse) IsError() bool {
 }
 
 func (s *ChatResponse) IsComplete() bool {
-	return s == nil
+	return s == nil || cutil.IsBlank(s)
 }
 
 // Choice 选择项
