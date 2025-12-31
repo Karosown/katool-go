@@ -17,7 +17,7 @@ func main() {
 
 	fmt.Println("=== 示例1: 使用翻译角色 ===")
 	// 使用翻译角色
-	req := ai.NewChatRequestWithRole("gpt-3.5-turbo", ai.RoleTranslator, "请将以下英文翻译成中文：Hello, how are you?")
+	req := types.NewChatRequestWithRole("gpt-3.5-turbo", types.RoleTranslator, "请将以下英文翻译成中文：Hello, how are you?")
 	response, err := client.Chat(req)
 	if err != nil {
 		log.Printf("翻译失败: %v", err)
@@ -27,7 +27,7 @@ func main() {
 
 	fmt.Println("=== 示例2: 使用代码助手角色 ===")
 	// 使用代码助手角色
-	response, err = client.ChatWithRole("gpt-3.5-turbo", ai.RoleCodeAssistant, "如何在Go语言中读取文件？")
+	response, err = client.ChatWithRole("gpt-3.5-turbo", types.RoleCodeAssistant, "如何在Go语言中读取文件？")
 	if err != nil {
 		log.Printf("代码助手失败: %v", err)
 	} else {
@@ -44,7 +44,7 @@ func main() {
 	}
 
 	// 添加创意写作角色
-	req2 = ai.AddRole(req2, ai.RoleCreativeWriter)
+	req2 = types.AddRole(req2, types.RoleCreativeWriter)
 	response, err = client.Chat(req2)
 	if err != nil {
 		log.Printf("创作失败: %v", err)
@@ -53,7 +53,7 @@ func main() {
 	}
 
 	fmt.Println("=== 示例4: 使用流式响应 + 角色 ===")
-	stream, err := client.ChatStreamWithRole("gpt-3.5-turbo", ai.RoleTeacher, "请解释什么是递归？")
+	stream, err := client.ChatStreamWithRole("gpt-3.5-turbo", types.RoleTeacher, "请解释什么是递归？")
 	if err != nil {
 		log.Printf("流式响应失败: %v", err)
 	} else {
@@ -68,8 +68,8 @@ func main() {
 
 	fmt.Println("=== 示例5: 列出所有可用角色 ===")
 	fmt.Println("可用角色:")
-	for role := range ai.RolePresets {
-		fmt.Printf("  - %s: %s\n", role, ai.GetRole(role)[:50]+"...")
+	for role := range types.RolePresets {
+		fmt.Printf("  - %s: %s\n", role, types.GetRole(role)[:50]+"...")
 	}
 
 	fmt.Println("\n=== 示例6: 使用自定义角色提示词 ===")

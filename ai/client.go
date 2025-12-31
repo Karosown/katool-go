@@ -378,14 +378,14 @@ func (c *Client) GetLogger() xlog.Logger {
 }
 
 // ChatWithRole 使用指定角色发送聊天请求
-func (c *Client) ChatWithRole(model string, role Role, userMessage string) (*types.ChatResponse, error) {
-	req := NewChatRequestWithRole(model, role, userMessage)
+func (c *Client) ChatWithRole(model string, role types.Role, userMessage string) (*types.ChatResponse, error) {
+	req := types.NewChatRequestWithRole(model, role, userMessage)
 	return c.Chat(req)
 }
 
 // ChatStreamWithRole 使用指定角色发送流式聊天请求
-func (c *Client) ChatStreamWithRole(model string, role Role, userMessage string) (<-chan *types.ChatResponse, error) {
-	req := NewChatRequestWithRole(model, role, userMessage)
+func (c *Client) ChatStreamWithRole(model string, role types.Role, userMessage string) (<-chan *types.ChatResponse, error) {
+	req := types.NewChatRequestWithRole(model, role, userMessage)
 	return c.ChatStream(req)
 }
 
@@ -497,7 +497,7 @@ func chatStreamWithFormatAsFunction(provider types.AIProvider, req *types.ChatRe
 
 func NewMessage[R ~string](role R, msg string) types.Message {
 	return types.Message{
-		Role:    Role(role),
+		Role:    types.Role(role),
 		Content: msg,
 	}
 }

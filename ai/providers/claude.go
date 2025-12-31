@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/karosown/katool-go/ai"
 	"github.com/karosown/katool-go/ai/aiconfig"
 	"github.com/karosown/katool-go/ai/types"
 	"github.com/karosown/katool-go/net/format/baseformat"
@@ -239,8 +238,8 @@ type ClaudeRequest struct {
 
 // ClaudeMessage Claude消息格式
 type ClaudeMessage struct {
-	Role    ai.Role `json:"role"`
-	Content string  `json:"content"`
+	Role    types.Role `json:"role"`
+	Content string     `json:"content"`
 }
 
 // ClaudeResponse Claude API响应格式

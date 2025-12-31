@@ -325,11 +325,11 @@ func TestChatRes(t *testing.T) {
 		//Model: "llama3.1",
 		Model: "Qwen2",
 		Messages: []types.Message{
-			NewMessage(RoleSystem, `你是一个智能的研究人员。我给你一个关键词，请你返回给我可能找到结果的网址。注意一定要高相关性！可以是二级域名返回给我，格式如下
+			NewMessage(types.RoleSystem, `你是一个智能的研究人员。我给你一个关键词，请你返回给我可能找到结果的网址。注意一定要高相关性！可以是二级域名返回给我，格式如下
 `+jsonhp.ToJSON([]struct {
 				Link string `json:"Link" description:"Link"`
 			}{{}})),
-			NewMessage(RoleUser, "电子科大计算机考研通知"),
+			NewMessage(types.RoleUser, "电子科大计算机考研通知"),
 		},
 		Format: optional.Must(FormatArrayOf([]struct {
 			A string `json:"a" description:"Link"`

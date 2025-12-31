@@ -1,8 +1,4 @@
-package ai
-
-import (
-	"github.com/karosown/katool-go/ai/types"
-)
+package types
 
 // Role 系统角色类型
 type Role string
@@ -126,10 +122,10 @@ func GetRole(role Role) string {
 }
 
 // NewChatRequestWithRole 使用指定角色创建聊天请求
-func NewChatRequestWithRole(model string, role Role, userMessage string) *types.ChatRequest {
-	return &types.ChatRequest{
+func NewChatRequestWithRole(model string, role Role, userMessage string) *ChatRequest {
+	return &ChatRequest{
 		Model: model,
-		Messages: []types.Message{
+		Messages: []Message{
 			{
 				Role:    "system",
 				Content: GetRole(role),
@@ -143,7 +139,7 @@ func NewChatRequestWithRole(model string, role Role, userMessage string) *types.
 }
 
 // AddRole 为现有请求添加系统角色
-func AddRole(req *types.ChatRequest, role Role) *types.ChatRequest {
+func AddRole(req *ChatRequest, role Role) *ChatRequest {
 	// 检查是否已有系统消息
 	hasSystem := false
 	for i, msg := range req.Messages {
@@ -157,11 +153,11 @@ func AddRole(req *types.ChatRequest, role Role) *types.ChatRequest {
 
 	// 如果没有系统消息，在开头添加
 	if !hasSystem {
-		systemMsg := types.Message{
+		systemMsg := Message{
 			Role:    "system",
 			Content: GetRole(role),
 		}
-		req.Messages = append([]types.Message{systemMsg}, req.Messages...)
+		req.Messages = append([]Message{systemMsg}, req.Messages...)
 	}
 
 	return req
