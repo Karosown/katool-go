@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/karosown/katool-go/ai/aiclient"
 	"github.com/karosown/katool-go/ai/aiconfig"
 	"github.com/karosown/katool-go/ai/providers"
+	"github.com/karosown/katool-go/ai/tool"
 	"github.com/karosown/katool-go/xlog"
 )
 
@@ -21,7 +21,7 @@ type Client struct {
 	providers map[aiconfig.ProviderType]aiconfig.AIProvider
 
 	// 函数调用客户端
-	functionClient *aiclient.Function
+	functionClient *tool.Function
 
 	// 配置
 	config *aiconfig.Config
@@ -59,7 +59,7 @@ func NewClient() (*Client, error) {
 	}
 
 	// 创建函数客户端
-	client.functionClient = aiclient.NewFunctionClient(client.providers[client.currentProvider])
+	client.functionClient = tool.NewFunctionClient(client.providers[client.currentProvider])
 
 	return client, nil
 }
@@ -88,7 +88,7 @@ func NewClientWithProvider(providerType aiconfig.ProviderType, config *aiconfig.
 
 	client.providers[providerType] = provider
 	client.config = config
-	client.functionClient = aiclient.NewFunctionClient(provider)
+	client.functionClient = tool.NewFunctionClient(provider)
 
 	return client, nil
 }

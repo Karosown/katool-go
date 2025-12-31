@@ -1,10 +1,11 @@
-package aiclient
+package tool
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/karosown/katool-go/ai/aiconfig"
 	"log"
+
+	"github.com/karosown/katool-go/ai/aiconfig"
 )
 
 // Function 函数调用客户端

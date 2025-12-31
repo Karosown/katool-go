@@ -1,6 +1,7 @@
 package file_downloader
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -33,25 +34,29 @@ func (fd *FileDownloader) DownloadFile(url, destPath string) error {
 	}
 	defer out.Close()
 
-	// 发送 GET 请求
-	resp, err := fd.Client.Get(url)
-	if err != nil {
-		return fmt.Errorf("下载文件失败: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// 检查响应状态
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("下载文件失败，服务器返回状态码: %d", resp.StatusCode)
-	}
+	byties, err := fd.DownloadFileBytes(url)
 
 	// 将响应体写入文件
-	_, err = io.Copy(out, resp.Body)
+	_, err = io.Copy(out, bytes.NewReader(byties))
 	if err != nil {
 		return fmt.Errorf("写入文件失败: %v", err)
 	}
 
 	return nil
+}
+func (fd *FileDownloader) DownloadFileBytes(url string) ([]byte, error) {
+	resp, err := fd.Client.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("下载文件失败: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// 检查响应状态
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("下载文件失败，服务器返回状态码: %d", resp.StatusCode)
+	}
+
+	return io.ReadAll(resp.Body)
 }
 
 // DownloadFiles 并发下载多个文件，请自行保证url不同，保证并发安全

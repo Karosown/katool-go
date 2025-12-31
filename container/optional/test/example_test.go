@@ -1,6 +1,7 @@
 package test
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
@@ -162,4 +163,13 @@ func TestIsNillable(t *testing.T) {
 		A string
 	}{}
 	print(optional.ToNillable(A) == nil)
+}
+
+func TestMust(t *testing.T) {
+	must := optional.Must("A", errors.New("123"), errors.New("123"), errors.New("123"), errors.New("123"))
+	t.Log(must)
+	must = optional.Must(func() (string, error, error) {
+		return "B", errors.New("123"), errors.New("123")
+	}())
+	t.Log(must)
 }

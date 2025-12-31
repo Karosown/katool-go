@@ -221,7 +221,7 @@ func In[T cmp.Ordered](item T, arr ...T) bool {
 	return search
 }
 
-func Must[T any](value T, err error) T {
+func Must[T any](value T, err ...error) T {
 	return value
 }
 

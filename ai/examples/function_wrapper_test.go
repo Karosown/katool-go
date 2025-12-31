@@ -1,7 +1,6 @@
 package examples
 
 import (
-	"github.com/karosown/katool-go/ai/aiclient"
 	"testing"
 
 	"github.com/karosown/katool-go/ai/aiconfig"
@@ -10,7 +9,7 @@ import (
 
 // TestFunctionRegistry 测试函数注册表
 func TestFunctionRegistry(t *testing.T) {
-	registry := aiclient.NewFunctionRegistry()
+	registry := tool.NewFunctionRegistry()
 
 	// 测试注册简单函数
 	err := registry.RegisterFunction("add", "两数相加", func(a, b int) int {
@@ -62,7 +61,7 @@ func TestFunctionRegistry(t *testing.T) {
 
 // TestFunctionCall 测试函数调用
 func TestFunctionCall(t *testing.T) {
-	registry := aiclient.NewFunctionRegistry()
+	registry := tool.NewFunctionRegistry()
 
 	// 注册函数
 	err := registry.RegisterFunction("add", "两数相加", func(a, b int) int {
@@ -86,7 +85,7 @@ func TestFunctionCall(t *testing.T) {
 
 // TestFunctionCallWithString 测试字符串函数调用
 func TestFunctionCallWithString(t *testing.T) {
-	registry := aiclient.NewFunctionRegistry()
+	registry := tool.NewFunctionRegistry()
 
 	// 注册字符串函数
 	err := registry.RegisterFunction("greet", "问候函数", func(name string) string {
@@ -111,7 +110,7 @@ func TestFunctionCallWithString(t *testing.T) {
 
 // TestFunctionCallWithMap 测试返回map的函数调用
 func TestFunctionCallWithMap(t *testing.T) {
-	registry := aiclient.NewFunctionRegistry()
+	registry := tool.NewFunctionRegistry()
 
 	// 注册返回map的函数
 	err := registry.RegisterFunction("get_info", "获取信息", func(name string) map[string]interface{} {
@@ -150,7 +149,7 @@ func TestFunctionCallWithMap(t *testing.T) {
 
 // TestFunctionCallWithMultipleParams 测试多参数函数调用
 func TestFunctionCallWithMultipleParams(t *testing.T) {
-	registry := aiclient.NewFunctionRegistry()
+	registry := tool.NewFunctionRegistry()
 
 	// 注册多参数函数
 	err := registry.RegisterFunction("calculate", "计算函数", func(a, b int, operation string) map[string]interface{} {
@@ -219,7 +218,7 @@ func TestFunctionClient(t *testing.T) {
 	client := providers.NewOllamaProvider(config)
 
 	// 创建函数客户端
-	functionClient := aiclient.NewFunctionClient(client)
+	functionClient := tool.NewFunctionClient(client)
 
 	// 注册函数
 	err := functionClient.RegisterFunction("add", "两数相加", func(a, b int) int {
@@ -269,7 +268,7 @@ func TestFunctionClientWithChat(t *testing.T) {
 	client := providers.NewOllamaProvider(config)
 
 	// 创建函数客户端
-	functionClient := aiclient.NewFunctionClient(client)
+	functionClient := tool.NewFunctionClient(client)
 
 	// 注册函数
 	err := functionClient.RegisterFunction("get_weather", "获取天气信息", func(city string) map[string]interface{} {
@@ -309,7 +308,7 @@ func TestFunctionClientWithChat(t *testing.T) {
 
 // TestFunctionRegistryErrorHandling 测试函数注册表错误处理
 func TestFunctionRegistryErrorHandling(t *testing.T) {
-	registry := aiclient.NewFunctionRegistry()
+	registry := tool.NewFunctionRegistry()
 
 	// 测试注册非函数类型
 	err := registry.RegisterFunction("invalid", "无效函数", "not a function")
@@ -345,7 +344,7 @@ func TestFunctionRegistryErrorHandling(t *testing.T) {
 
 // TestFunctionParameterConversion 测试函数参数转换
 func TestFunctionParameterConversion(t *testing.T) {
-	registry := aiclient.NewFunctionRegistry()
+	registry := tool.NewFunctionRegistry()
 
 	// 注册接受不同类型参数的函数
 	err := registry.RegisterFunction("test_types", "类型测试函数", func(
@@ -391,7 +390,7 @@ func TestFunctionParameterConversion(t *testing.T) {
 
 // BenchmarkFunctionCall 基准测试函数调用性能
 func BenchmarkFunctionCall(b *testing.B) {
-	registry := aiclient.NewFunctionRegistry()
+	registry := tool.NewFunctionRegistry()
 
 	err := registry.RegisterFunction("add", "两数相加", func(a, b int) int {
 		return a + b
@@ -411,7 +410,7 @@ func BenchmarkFunctionCall(b *testing.B) {
 
 // TestSearchTool 测试搜索功能
 func TestSearchTool(t *testing.T) {
-	registry := aiclient.NewFunctionRegistry()
+	registry := tool.NewFunctionRegistry()
 
 	// 注册搜索函数
 	err := registry.RegisterFunction("search", "Web搜索", func(query string) map[string]interface{} {

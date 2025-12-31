@@ -123,7 +123,7 @@ func ExampleChatStreamWithDeserialize() {
 		}
 
 		// 如果完成，显示反序列化后的数据
-		if result.IsComplete {
+		if result.IsComplete() {
 			fmt.Printf("\n=== Final Result ===\n")
 			jsonData, _ := json.MarshalIndent(result.Data, "", "  ")
 			fmt.Printf("%s\n", jsonData)
