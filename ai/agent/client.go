@@ -321,7 +321,7 @@ func (c *Client) ChatWithToolsStream(ctx context.Context, req *types.ChatRequest
 				if len(response.Choices) > 0 {
 					choice := response.Choices[0]
 					if len(choice.Delta.ToolCalls) > 0 {
-						accumulatedToolCalls = append(accumulatedToolCalls, choice.Delta.ToolCalls...)
+						accumulatedToolCalls = mergeToolCalls(accumulatedToolCalls, choice.Delta.ToolCalls)
 					}
 				}
 
@@ -456,6 +456,55 @@ func (c *Client) ChatWithToolsStreamManual(ctx context.Context, req *types.ChatR
 	}
 
 	return c.aiClient.ChatWithToolsStream(req)
+}
+
+// mergeToolCalls merges streamed tool call deltas by ID and concatenates arguments.
+func mergeToolCalls(existing []types.ToolCall, deltas []types.ToolCall) []types.ToolCall {
+	for _, delta := range deltas {
+		if delta.ID == "" {
+			if len(existing) == 0 {
+				existing = append(existing, delta)
+				continue
+			}
+
+			last := len(existing) - 1
+			if existing[last].Type == "" {
+				existing[last].Type = delta.Type
+			}
+			if existing[last].Function.Name == "" {
+				existing[last].Function.Name = delta.Function.Name
+			}
+			if delta.Function.Arguments != "" {
+				existing[last].Function.Arguments += delta.Function.Arguments
+			}
+			continue
+		}
+
+		merged := false
+		for i := range existing {
+			if existing[i].ID != delta.ID {
+				continue
+			}
+
+			if existing[i].Type == "" {
+				existing[i].Type = delta.Type
+			}
+			if existing[i].Function.Name == "" {
+				existing[i].Function.Name = delta.Function.Name
+			}
+			if delta.Function.Arguments != "" {
+				existing[i].Function.Arguments += delta.Function.Arguments
+			}
+			merged = true
+			break
+		}
+
+		if !merged {
+			existing = append(existing, delta)
+		}
+	}
+
+	return existing
 }
 
 // ============================================================================
