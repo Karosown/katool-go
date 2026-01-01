@@ -237,6 +237,8 @@ func (c *Client) ChatStream(ctx context.Context, req *types.ChatRequest) (<-chan
 
 	return c.aiClient.ChatStream(req)
 }
+
+// ChatWithTools 发送聊天请求（自动执行工具调用并继续对话）
 func (c *Client) ChatWithTools(ctx context.Context, req *types.ChatRequest) (*types.ChatResponse, error) {
 	const maxToolCallRounds = 10
 
@@ -283,7 +285,7 @@ func (c *Client) ChatWithTools(ctx context.Context, req *types.ChatRequest) (*ty
 	return response, nil
 }
 
-// ChatStream 发送流式聊天请求
+// ChatWithToolsStream 发送流式聊天请求（自动执行工具调用并继续对话）
 func (c *Client) ChatWithToolsStream(ctx context.Context, req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	const maxToolCallRounds = 10
 
@@ -362,6 +364,98 @@ func (c *Client) ChatWithToolsStream(ctx context.Context, req *types.ChatRequest
 	}()
 
 	return resultChan, nil
+}
+
+// ChatWithToolsDetailed 发送聊天请求（自动执行工具调用并返回完整过程）
+func (c *Client) ChatWithToolsDetailed(ctx context.Context, req *types.ChatRequest) ([]*types.ChatResponse, error) {
+	const maxToolCallRounds = 10
+
+	// 如果没有指定工具，自动添加所有可用工具
+	reqCopy := *req
+	if len(reqCopy.Tools) == 0 {
+		reqCopy.Tools = c.GetAllTools()
+	}
+
+	messages := make([]types.Message, len(reqCopy.Messages))
+	copy(messages, reqCopy.Messages)
+
+	reqCopy.Messages = messages
+	response, err := c.aiClient.Chat(&reqCopy)
+	if err != nil {
+		return nil, err
+	}
+
+	responses := []*types.ChatResponse{response}
+
+	for rounds := 0; rounds < maxToolCallRounds; rounds++ {
+		if len(response.Choices) == 0 {
+			return responses, nil
+		}
+
+		choice := response.Choices[0]
+		if len(choice.Message.ToolCalls) == 0 {
+			return responses, nil
+		}
+
+		toolResults, err := c.ExecuteToolCalls(ctx, choice.Message.ToolCalls)
+		if err != nil {
+			return responses, err
+		}
+
+		messages = append(messages, choice.Message)
+		for _, toolMessage := range toolResults {
+			responses = append(responses, &types.ChatResponse{
+				Choices: []types.Choice{{Message: toolMessage}},
+			})
+		}
+		messages = append(messages, toolResults...)
+
+		reqCopy.Messages = messages
+		response, err = c.aiClient.Chat(&reqCopy)
+		if err != nil {
+			return responses, err
+		}
+		responses = append(responses, response)
+	}
+
+	return responses, nil
+}
+
+// ChatWithToolsCallback 发送聊天请求（自动执行工具调用并通过回调返回过程）
+func (c *Client) ChatWithToolsCallback(ctx context.Context, req *types.ChatRequest, cb func(*types.ChatResponse)) (*types.ChatResponse, error) {
+	responses, err := c.ChatWithToolsDetailed(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var last *types.ChatResponse
+	for _, resp := range responses {
+		if cb != nil {
+			cb(resp)
+		}
+		last = resp
+	}
+
+	return last, nil
+}
+
+// ChatWithToolsManual 发送聊天请求（仅返回模型响应，不自动执行工具）
+func (c *Client) ChatWithToolsManual(ctx context.Context, req *types.ChatRequest) (*types.ChatResponse, error) {
+	// 如果没有指定工具，自动添加所有可用工具
+	if len(req.Tools) == 0 {
+		req.Tools = c.GetAllTools()
+	}
+	return c.aiClient.ChatWithTools(req)
+}
+
+// ChatWithToolsStreamManual 发送流式聊天请求（仅返回模型响应，不自动执行工具）
+func (c *Client) ChatWithToolsStreamManual(ctx context.Context, req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
+	// 如果没有指定工具，自动添加所有可用工具
+	if len(req.Tools) == 0 {
+		req.Tools = c.GetAllTools()
+	}
+
+	return c.aiClient.ChatWithToolsStream(req)
 }
 
 // ============================================================================
