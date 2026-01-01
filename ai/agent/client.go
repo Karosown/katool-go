@@ -238,21 +238,130 @@ func (c *Client) ChatStream(ctx context.Context, req *types.ChatRequest) (<-chan
 	return c.aiClient.ChatStream(req)
 }
 func (c *Client) ChatWithTools(ctx context.Context, req *types.ChatRequest) (*types.ChatResponse, error) {
+	const maxToolCallRounds = 10
+
 	// 如果没有指定工具，自动添加所有可用工具
-	if len(req.Tools) == 0 {
-		req.Tools = c.GetAllTools()
+	reqCopy := *req
+	if len(reqCopy.Tools) == 0 {
+		reqCopy.Tools = c.GetAllTools()
 	}
-	return c.aiClient.ChatWithTools(req)
+
+	messages := make([]types.Message, len(reqCopy.Messages))
+	copy(messages, reqCopy.Messages)
+
+	reqCopy.Messages = messages
+	response, err := c.aiClient.Chat(&reqCopy)
+	if err != nil {
+		return nil, err
+	}
+
+	for rounds := 0; rounds < maxToolCallRounds; rounds++ {
+		if len(response.Choices) == 0 {
+			return response, nil
+		}
+
+		choice := response.Choices[0]
+		if len(choice.Message.ToolCalls) == 0 {
+			return response, nil
+		}
+
+		toolResults, err := c.ExecuteToolCalls(ctx, choice.Message.ToolCalls)
+		if err != nil {
+			return nil, err
+		}
+
+		messages = append(messages, choice.Message)
+		messages = append(messages, toolResults...)
+
+		reqCopy.Messages = messages
+		response, err = c.aiClient.Chat(&reqCopy)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return response, nil
 }
 
 // ChatStream 发送流式聊天请求
 func (c *Client) ChatWithToolsStream(ctx context.Context, req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
+	const maxToolCallRounds = 10
+
 	// 如果没有指定工具，自动添加所有可用工具
-	if len(req.Tools) == 0 {
-		req.Tools = c.GetAllTools()
+	reqCopy := *req
+	if len(reqCopy.Tools) == 0 {
+		reqCopy.Tools = c.GetAllTools()
 	}
 
-	return c.aiClient.ChatWithToolsStream(req)
+	resultChan := make(chan *types.ChatResponse, 100)
+	go func() {
+		defer close(resultChan)
+
+		messages := make([]types.Message, len(reqCopy.Messages))
+		copy(messages, reqCopy.Messages)
+
+		for rounds := 0; rounds < maxToolCallRounds; rounds++ {
+			reqCopy.Messages = messages
+			stream, err := c.aiClient.ChatStream(&reqCopy)
+			if err != nil {
+				resultChan <- (&types.ChatResponse{}).SetError(err)
+				return
+			}
+
+			var accumulatedToolCalls []types.ToolCall
+
+			for response := range stream {
+				if response.IsError() {
+					resultChan <- response
+					return
+				}
+
+				if len(response.Choices) > 0 {
+					choice := response.Choices[0]
+					if len(choice.Delta.ToolCalls) > 0 {
+						accumulatedToolCalls = append(accumulatedToolCalls, choice.Delta.ToolCalls...)
+					}
+				}
+
+				select {
+				case resultChan <- response:
+				default:
+					c.logger.Warnf("Result channel is full, dropping response")
+				}
+			}
+
+			if len(accumulatedToolCalls) == 0 {
+				return
+			}
+
+			toolCallMessage := types.Message{
+				Role:      "assistant",
+				Content:   "",
+				ToolCalls: accumulatedToolCalls,
+			}
+			messages = append(messages, toolCallMessage)
+
+			toolResults, err := c.ExecuteToolCalls(ctx, accumulatedToolCalls)
+			if err != nil {
+				resultChan <- (&types.ChatResponse{}).SetError(err)
+				return
+			}
+
+			for _, toolMessage := range toolResults {
+				select {
+				case resultChan <- &types.ChatResponse{
+					Choices: []types.Choice{{Message: toolMessage}},
+				}:
+				default:
+					c.logger.Warnf("Result channel is full, dropping tool response")
+				}
+			}
+
+			messages = append(messages, toolResults...)
+		}
+	}()
+
+	return resultChan, nil
 }
 
 // ============================================================================
@@ -364,6 +473,7 @@ func (c *Client) injectMCPToolsLocked() {
 	case c.multiMCPAdapter != nil:
 		tools = c.multiMCPAdapter.GetTools()
 		caller = c.multiMCPAdapter.CallTool
+		fallthrough
 	case c.mcpAdapter != nil:
 		tools = c.mcpAdapter.GetTools()
 		caller = c.mcpAdapter.CallTool

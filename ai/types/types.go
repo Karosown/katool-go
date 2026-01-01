@@ -56,6 +56,10 @@ type ChatResponse struct {
 	error
 }
 
+func (s *ChatResponse) SetError(err error) *ChatResponse {
+	s.error = err
+	return s
+}
 func (s *ChatResponse) Error() error {
 	return s.error
 }
