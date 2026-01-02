@@ -267,7 +267,8 @@ func (c *Client) ChatWithTools(ctx context.Context, req *types.ChatRequest) (*ty
 			return response, nil
 		}
 
-		toolResults, err := c.ExecuteToolCalls(ctx, choice.Message.ToolCalls)
+		toolCtx := context.WithoutCancel(ctx)
+		toolResults, err := c.ExecuteToolCalls(toolCtx, choice.Message.ToolCalls)
 		if err != nil {
 			return nil, err
 		}
@@ -398,7 +399,8 @@ func (c *Client) ChatWithToolsDetailed(ctx context.Context, req *types.ChatReque
 			return responses, nil
 		}
 
-		toolResults, err := c.ExecuteToolCalls(ctx, choice.Message.ToolCalls)
+		toolCtx := context.WithoutCancel(ctx)
+		toolResults, err := c.ExecuteToolCalls(toolCtx, choice.Message.ToolCalls)
 		if err != nil {
 			return responses, err
 		}
