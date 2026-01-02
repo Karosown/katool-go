@@ -343,7 +343,8 @@ func (c *Client) ChatWithToolsStream(ctx context.Context, req *types.ChatRequest
 			}
 			messages = append(messages, toolCallMessage)
 
-			toolResults, err := c.ExecuteToolCalls(ctx, accumulatedToolCalls)
+			toolCtx := context.WithoutCancel(ctx)
+			toolResults, err := c.ExecuteToolCalls(toolCtx, accumulatedToolCalls)
 			if err != nil {
 				resultChan <- (&types.ChatResponse{}).SetError(err)
 				return

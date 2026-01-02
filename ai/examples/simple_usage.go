@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/aiconfig"
 	"github.com/karosown/katool-go/ai/types"
 )
 
@@ -37,14 +38,14 @@ func main() {
 	// ========================================
 	fmt.Println("=== 示例2: 指定提供者 ===")
 	// 从环境变量创建指定提供者
-	openaiClient, err := ai.NewClientFromEnv(ai.ProviderOpenAI)
+	openaiClient, err := ai.NewClientFromEnv(aiconfig.ProviderOpenAI)
 	if err != nil {
 		fmt.Printf("OpenAI客户端创建失败: %v\n", err)
 	} else {
 		fmt.Println("OpenAI客户端创建成功")
 		// 可以切换提供者
-		if openaiClient.HasProvider(ai.ProviderDeepSeek) {
-			openaiClient.SetProvider(ai.ProviderDeepSeek)
+		if openaiClient.HasProvider(aiconfig.ProviderDeepSeek) {
+			openaiClient.SetProvider(aiconfig.ProviderDeepSeek)
 			fmt.Println("已切换到DeepSeek")
 		}
 	}
@@ -76,10 +77,10 @@ func main() {
 	// 多提供者自动降级
 	// ========================================
 	fmt.Println("=== 示例4: 多提供者自动降级 ===")
-	providers := []ai.ProviderType{
-		ai.ProviderOpenAI,
-		ai.ProviderDeepSeek,
-		ai.ProviderOllama,
+	providers := []aiconfig.ProviderType{
+		aiconfig.ProviderOpenAI,
+		aiconfig.ProviderDeepSeek,
+		aiconfig.ProviderOllama,
 	}
 
 	response, err = client.ChatWithFallback(providers, &types.ChatRequest{
@@ -133,7 +134,7 @@ func main() {
 	currentProvider := client.GetProvider()
 	fmt.Printf("当前使用: %s\n", currentProvider)
 
-	if client.HasProvider(ai.ProviderOpenAI) {
+	if client.HasProvider(aiconfig.ProviderOpenAI) {
 		fmt.Println("OpenAI可用")
 	}
 }
