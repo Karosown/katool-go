@@ -260,16 +260,18 @@ func (c *Function) ChatWithFunctionsConversationStream(req *types.ChatRequest) (
 		defer close(resultChan)
 
 		var accumulatedToolCalls []types.ToolCall
-		var hasToolCalls bool
 
 		for response := range stream {
 			// 检查是否有工具调用
 			if len(response.Choices) > 0 {
 				choice := response.Choices[0]
+				// 合并流式 delta 的工具调用（多次增量会被拼接为一次完整调用）
 				if len(choice.Delta.ToolCalls) > 0 {
-					hasToolCalls = true
-					// 累积工具调用
-					accumulatedToolCalls = append(accumulatedToolCalls, choice.Delta.ToolCalls...)
+					accumulatedToolCalls = mergeToolCalls(accumulatedToolCalls, choice.Delta.ToolCalls)
+				}
+				// 某些提供方可能在最终消息中携带完整的 ToolCalls
+				if len(choice.Message.ToolCalls) > 0 {
+					accumulatedToolCalls = mergeToolCalls(accumulatedToolCalls, choice.Message.ToolCalls)
 				}
 			}
 
@@ -282,7 +284,7 @@ func (c *Function) ChatWithFunctionsConversationStream(req *types.ChatRequest) (
 		}
 
 		// 如果有工具调用，执行它们并发送后续请求
-		if hasToolCalls && len(accumulatedToolCalls) > 0 {
+		if len(accumulatedToolCalls) > 0 {
 			// 创建新的消息列表，包含工具调用结果
 			newMessages := make([]types.Message, len(req.Messages))
 			copy(newMessages, req.Messages)
@@ -355,4 +357,55 @@ func (c *Function) ChatWithFunctionsConversationStream(req *types.ChatRequest) (
 	}()
 
 	return resultChan, nil
+}
+
+// mergeToolCalls merges streamed tool call deltas by ID and concatenates arguments.
+// This mirrors the logic in ai/agent/client.go to ensure streaming tool calls
+// are executed with complete arguments.
+func mergeToolCalls(existing []types.ToolCall, deltas []types.ToolCall) []types.ToolCall {
+	for _, delta := range deltas {
+		if delta.ID == "" {
+			if len(existing) == 0 {
+				existing = append(existing, delta)
+				continue
+			}
+
+			last := len(existing) - 1
+			if existing[last].Type == "" {
+				existing[last].Type = delta.Type
+			}
+			if existing[last].Function.Name == "" {
+				existing[last].Function.Name = delta.Function.Name
+			}
+			if delta.Function.Arguments != "" {
+				existing[last].Function.Arguments += delta.Function.Arguments
+			}
+			continue
+		}
+
+		merged := false
+		for i := range existing {
+			if existing[i].ID != delta.ID {
+				continue
+			}
+
+			if existing[i].Type == "" {
+				existing[i].Type = delta.Type
+			}
+			if existing[i].Function.Name == "" {
+				existing[i].Function.Name = delta.Function.Name
+			}
+			if delta.Function.Arguments != "" {
+				existing[i].Function.Arguments += delta.Function.Arguments
+			}
+			merged = true
+			break
+		}
+
+		if !merged {
+			existing = append(existing, delta)
+		}
+	}
+
+	return existing
 }
