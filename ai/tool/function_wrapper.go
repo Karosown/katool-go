@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -42,9 +43,14 @@ func (r *FunctionRegistry) RegisterFunction(name, description string, fn interfa
 		return fmt.Errorf("failed to generate parameters for function %s: %v", name, err)
 	}
 
-	paramOrder := make([]string, fnType.NumIn())
+	paramOrder := make([]string, 0)
+	paramIdx := 1
 	for i := 0; i < fnType.NumIn(); i++ {
-		paramOrder[i] = fmt.Sprintf("param%d", i+1)
+		if isContextType(fnType.In(i)) {
+			continue
+		}
+		paramOrder = append(paramOrder, fmt.Sprintf("param%d", paramIdx))
+		paramIdx++
 	}
 
 	r.functions[name] = &FunctionWrapper{
@@ -69,14 +75,15 @@ func (r *FunctionRegistry) RegisterFunctionWith(name, description string, parame
 		return fmt.Errorf("function must be a Go function, got %s", fnType.Kind())
 	}
 
+	nonCtxArgs := countNonContextArgs(fnType)
 	if len(paramOrder) == 0 {
-		paramOrder = make([]string, fnType.NumIn())
-		for i := 0; i < fnType.NumIn(); i++ {
+		paramOrder = make([]string, nonCtxArgs)
+		for i := 0; i < nonCtxArgs; i++ {
 			paramOrder[i] = fmt.Sprintf("param%d", i+1)
 		}
 	}
-	if len(paramOrder) != fnType.NumIn() {
-		return fmt.Errorf("paramOrder length (%d) does not match function args (%d)", len(paramOrder), fnType.NumIn())
+	if len(paramOrder) != nonCtxArgs {
+		return fmt.Errorf("paramOrder length (%d) does not match non-context function args (%d)", len(paramOrder), nonCtxArgs)
 	}
 
 	r.functions[name] = &FunctionWrapper{
@@ -100,9 +107,15 @@ func (r *FunctionRegistry) generateParameters(fnType reflect.Type) (map[string]i
 	properties := parameters["properties"].(map[string]interface{})
 	required := parameters["required"].([]string)
 
+	paramIdx := 1
 	for i := 0; i < fnType.NumIn(); i++ {
 		paramType := fnType.In(i)
-		paramName := fmt.Sprintf("param%d", i+1)
+		if isContextType(paramType) {
+			// 不暴露 context 给模型
+			continue
+		}
+		paramName := fmt.Sprintf("param%d", paramIdx)
+		paramIdx++
 
 		paramDef, err := r.generateParameterDefinition(paramType)
 		if err != nil {
@@ -202,8 +215,13 @@ func (r *FunctionRegistry) GetTools() []types.Tool {
 	return tools
 }
 
-// CallFunction 调用函数。
+// CallFunction 调用函数（无显式 context，使用 Background）。
 func (r *FunctionRegistry) CallFunction(name string, arguments string) (interface{}, error) {
+	return r.CallFunctionWithContext(context.Background(), name, arguments)
+}
+
+// CallFunctionWithContext 调用函数，必要时自动注入 context 参数。
+func (r *FunctionRegistry) CallFunctionWithContext(ctx context.Context, name string, arguments string) (interface{}, error) {
 	wrapper, exists := r.functions[name]
 	if !exists {
 		return nil, fmt.Errorf("function %s not found", name)
@@ -217,36 +235,80 @@ func (r *FunctionRegistry) CallFunction(name string, arguments string) (interfac
 	fnType := reflect.TypeOf(wrapper.Function)
 	fnValue := reflect.ValueOf(wrapper.Function)
 
-	// 单参数且为 map：直接把完整参数对象传入
-	if fnType.NumIn() == 1 && fnType.In(0).Kind() == reflect.Map {
-		convertedValue, err := r.convertParameter(params, fnType.In(0))
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert map parameter: %v", err)
-		}
-		results := fnValue.Call([]reflect.Value{convertedValue})
-		switch len(results) {
-		case 0:
-			return nil, nil
-		case 1:
-			return results[0].Interface(), nil
-		default:
-			values := make([]interface{}, len(results))
-			for i, result := range results {
-				values[i] = result.Interface()
+	// 如果非 context 参数只有一个且为 map，直接传入完整参数对象（支持 context 存在或不存在）
+	nonCtxArgs := countNonContextArgs(fnType)
+	if nonCtxArgs == 1 {
+		mapParamIndex := -1
+		for i := 0; i < fnType.NumIn(); i++ {
+			if isContextType(fnType.In(i)) {
+				continue
 			}
-			return values, nil
+			if fnType.In(i).Kind() == reflect.Map {
+				mapParamIndex = i
+			}
+			break
+		}
+
+		if mapParamIndex >= 0 {
+			convertedValue, err := r.convertParameter(params, fnType.In(mapParamIndex))
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert map parameter: %v", err)
+			}
+
+			args := make([]reflect.Value, fnType.NumIn())
+			for i := 0; i < fnType.NumIn(); i++ {
+				if isContextType(fnType.In(i)) {
+					useCtx := ctx
+					if useCtx == nil {
+						useCtx = context.Background()
+					}
+					args[i] = reflect.ValueOf(useCtx)
+				} else {
+					args[i] = convertedValue
+				}
+			}
+
+			results := fnValue.Call(args)
+			switch len(results) {
+			case 0:
+				return nil, nil
+			case 1:
+				return results[0].Interface(), nil
+			default:
+				values := make([]interface{}, len(results))
+				for i, result := range results {
+					values[i] = result.Interface()
+				}
+				return values, nil
+			}
 		}
 	}
 
-	// 按参数顺序准备参数
+	// 通用参数准备（支持 context 注入）
 	args := make([]reflect.Value, fnType.NumIn())
+	paramIdx := 0 // 索引 ParamOrder（仅非 context 参数）
+
 	for i := 0; i < fnType.NumIn(); i++ {
 		paramType := fnType.In(i)
-		defaultParamName := fmt.Sprintf("param%d", i+1)
-		paramName := defaultParamName
-		if len(wrapper.ParamOrder) > i && wrapper.ParamOrder[i] != "" {
-			paramName = wrapper.ParamOrder[i]
+		if isContextType(paramType) {
+			useCtx := ctx
+			if useCtx == nil {
+				useCtx = context.Background()
+			}
+			args[i] = reflect.ValueOf(useCtx)
+			continue
 		}
+
+		if paramIdx >= len(wrapper.ParamOrder) {
+			return nil, fmt.Errorf("parameter order mismatch for function %s", name)
+		}
+
+		defaultParamName := fmt.Sprintf("param%d", paramIdx+1)
+		paramName := defaultParamName
+		if wrapper.ParamOrder[paramIdx] != "" {
+			paramName = wrapper.ParamOrder[paramIdx]
+		}
+		paramIdx++
 
 		paramValue, exists := params[paramName]
 		if !exists && paramName != defaultParamName {
@@ -282,6 +344,33 @@ func (r *FunctionRegistry) CallFunction(name string, arguments string) (interfac
 		values[i] = result.Interface()
 	}
 	return values, nil
+}
+
+// hasContextParam 判断函数是否包含 context.Context 参数
+func hasContextParam(fnType reflect.Type) bool {
+	for i := 0; i < fnType.NumIn(); i++ {
+		if isContextType(fnType.In(i)) {
+			return true
+		}
+	}
+	return false
+}
+
+// countNonContextArgs 统计非 context 参数数量
+func countNonContextArgs(fnType reflect.Type) int {
+	count := 0
+	for i := 0; i < fnType.NumIn(); i++ {
+		if !isContextType(fnType.In(i)) {
+			count++
+		}
+	}
+	return count
+}
+
+// isContextType 判断是否为 context.Context 类型
+func isContextType(t reflect.Type) bool {
+	ctxType := reflect.TypeOf((*context.Context)(nil)).Elem()
+	return t == ctxType
 }
 
 // convertParameter 将参数转换为目标类型。

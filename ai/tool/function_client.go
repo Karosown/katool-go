@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -231,7 +232,12 @@ func (c *Function) GetTools() []types.Tool {
 
 // CallFunctionDirectly 直接调用函数
 func (c *Function) CallFunctionDirectly(name string, arguments string) (interface{}, error) {
-	return c.registry.CallFunction(name, arguments)
+	return c.registry.CallFunctionWithContext(context.Background(), name, arguments)
+}
+
+// CallFunctionDirectlyWithContext 直接调用函数（支持上下文注入）
+func (c *Function) CallFunctionDirectlyWithContext(ctx context.Context, name string, arguments string) (interface{}, error) {
+	return c.registry.CallFunctionWithContext(ctx, name, arguments)
 }
 
 // ... existing code ...

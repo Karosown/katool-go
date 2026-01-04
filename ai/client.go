@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sync"
@@ -359,6 +360,11 @@ func (c *Client) HasFunction(name string) bool {
 // CallFunctionDirectly 直接调用函数
 func (c *Client) CallFunctionDirectly(name string, arguments string) (interface{}, error) {
 	return c.functionClient.CallFunctionDirectly(name, arguments)
+}
+
+// CallFunctionDirectlyWithContext 直接调用函数（支持上下文注入）
+func (c *Client) CallFunctionDirectlyWithContext(ctx context.Context, name string, arguments string) (interface{}, error) {
+	return c.functionClient.CallFunctionDirectlyWithContext(ctx, name, arguments)
 }
 
 // GetTools 获取所有已注册的工具定义

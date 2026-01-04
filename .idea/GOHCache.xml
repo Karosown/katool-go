@@ -3,13 +3,6 @@
   <component name="GoORMHelperCache">
     <option name="schemaMapping">
       <map>
-        <entry key="AIClientManager">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/aiclient/client.go" />
-            </set>
-          </value>
-        </entry>
         <entry key="Agent">
           <value>
             <set>
@@ -56,13 +49,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/web_reader.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="ArticleCollectWorker">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/article_collect.go" />
             </set>
           </value>
         </entry>
@@ -150,6 +136,13 @@
             </set>
           </value>
         </entry>
+        <entry key="BrowserMeta">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/core/contain.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="BytesDecodeFormatValid">
           <value>
             <set>
@@ -209,28 +202,21 @@
         <entry key="ChatRequest">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="ChatRequestBuilder">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/aiclient/ai_framework.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
         <entry key="ChatResponse">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
         <entry key="Choice">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
@@ -286,7 +272,6 @@
         <entry key="Client">
           <value>
             <set>
-              <option value="file://$USER_HOME$/go/pkg/mod/github.com/karosown/katool-go@v0.0.0-20251231100756-ac020e3652b2/ai/agent/client.go" />
               <option value="file://$PROJECT_DIR$/ai/agent/client.go" />
               <option value="file://$PROJECT_DIR$/ai/client.go" />
               <option value="file://$PROJECT_DIR$/db/xmongo/options/client.go" />
@@ -335,8 +320,7 @@
         <entry key="Config">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/worker.go" />
+              <option value="file://$PROJECT_DIR$/ai/aiconfig/config.go" />
             </set>
           </value>
         </entry>
@@ -358,13 +342,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/core/contain.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="ConversationManager">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/aiclient/ai_framework.go" />
             </set>
           </value>
         </entry>
@@ -434,7 +411,7 @@
         <entry key="ErrorResponse">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
@@ -515,31 +492,24 @@
             </set>
           </value>
         </entry>
-        <entry key="Framework">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/aiclient/ai_framework.go" />
-            </set>
-          </value>
-        </entry>
         <entry key="Function">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiclient/function_client.go" />
+              <option value="file://$PROJECT_DIR$/ai/tool/function_client.go" />
             </set>
           </value>
         </entry>
         <entry key="FunctionRegistry">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiclient/function_wrapper.go" />
+              <option value="file://$PROJECT_DIR$/ai/tool/function_wrapper.go" />
             </set>
           </value>
         </entry>
         <entry key="FunctionWrapper">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiclient/function_wrapper.go" />
+              <option value="file://$PROJECT_DIR$/ai/tool/function_wrapper.go" />
             </set>
           </value>
         </entry>
@@ -568,6 +538,13 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/container/xheap/heap.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="HookResult">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/web_crawler/core/contain.go" />
             </set>
           </value>
         </entry>
@@ -613,9 +590,17 @@
             </set>
           </value>
         </entry>
+        <entry key="KMap">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/container/xmap/kmap.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="KV">
           <value>
             <set>
+              <option value="file://$PROJECT_DIR$/container/xmap/kmap.go" />
               <option value="file://$PROJECT_DIR$/util/similarity/util.go" />
             </set>
           </value>
@@ -714,7 +699,7 @@
         <entry key="Message">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
@@ -728,7 +713,7 @@
         <entry key="ModelInfo">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
@@ -819,7 +804,7 @@
         <entry key="ProviderConfig">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
@@ -949,15 +934,6 @@
             </set>
           </value>
         </entry>
-        <entry key="Runner">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/article_collect.go" />
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/simple.go" />
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/source_collect.go" />
-            </set>
-          </value>
-        </entry>
         <entry key="SMSAdapter">
           <value>
             <set>
@@ -975,7 +951,7 @@
         <entry key="SSERawEvent">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
@@ -1007,25 +983,10 @@
             </set>
           </value>
         </entry>
-        <entry key="SimpleAIClient">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/ai/aiclient/client.go" />
-            </set>
-          </value>
-        </entry>
         <entry key="SimpleMCPClient">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/ai/agent/mcp_adapter.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="SimpleWorker">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/simple.go" />
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/source_collect.go" />
             </set>
           </value>
         </entry>
@@ -1047,13 +1008,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/source_code.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="SourceWorker">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/source_collect.go" />
             </set>
           </value>
         </entry>
@@ -1088,7 +1042,7 @@
         <entry key="StreamEvent">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
@@ -1151,35 +1105,35 @@
         <entry key="Tool">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
         <entry key="ToolCall">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
         <entry key="ToolCallFunction">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
         <entry key="ToolFunction">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
         <entry key="Usage">
           <value>
             <set>
-              <option value="file://$PROJECT_DIR$/ai/aiconfig/types.go" />
+              <option value="file://$PROJECT_DIR$/ai/types/types.go" />
             </set>
           </value>
         </entry>
@@ -1215,13 +1169,6 @@
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/web_crawler/web_reader.go" />
-            </set>
-          </value>
-        </entry>
-        <entry key="WorkerLoader">
-          <value>
-            <set>
-              <option value="file://$PROJECT_DIR$/../template/internal/cron/worker.go" />
             </set>
           </value>
         </entry>
@@ -1446,25 +1393,6 @@
     </option>
     <option name="scannedPathMapping">
       <map>
-        <entry key="file://$USER_HOME$/GolandProjects/awesomeProject5/main.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1767187285534" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$USER_HOME$/go/pkg/mod/github.com/karosown/katool-go@v0.0.0-20251231100756-ac020e3652b2/ai/agent/client.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1767186749671" />
-              <option name="schema">
-                <list>
-                  <option value="Client" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_adapter.go">
           <value>
             <ScannedPath>
@@ -1559,7 +1487,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767187633120" />
+              <option name="lastModified" value="1767189554206" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -1571,7 +1499,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/executor.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765709968182" />
+              <option name="lastModified" value="1767186766272" />
               <option name="schema">
                 <list>
                   <option value="Agent" />
@@ -1585,7 +1513,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/mcp_adapter.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765711485721" />
+              <option name="lastModified" value="1767186766272" />
               <option name="schema">
                 <list>
                   <option value="MCPAdapter" />
@@ -1599,7 +1527,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/multi_mcp_adapter.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765727345287" />
+              <option name="lastModified" value="1767186766273" />
               <option name="schema">
                 <list>
                   <option value="MultiMCPAdapter" />
@@ -1608,64 +1536,13 @@
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/ai/aiclient/ai_framework.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1757878589095" />
-              <option name="schema">
-                <list>
-                  <option value="Framework" />
-                  <option value="ChatRequestBuilder" />
-                  <option value="ConversationManager" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/aiclient/client.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1757844017086" />
-              <option name="schema">
-                <list>
-                  <option value="SimpleAIClient" />
-                  <option value="AIClientManager" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/aiclient/function_client.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1757878537045" />
-              <option name="schema">
-                <list>
-                  <option value="Function" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/aiclient/function_wrapper.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1757844017121" />
-              <option name="schema">
-                <list>
-                  <option value="FunctionWrapper" />
-                  <option value="FunctionRegistry" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
         <entry key="file://$PROJECT_DIR$/ai/aiconfig/config.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765429717017" />
+              <option name="lastModified" value="1767186766273" />
               <option name="schema">
                 <list>
+                  <option value="Config" />
                   <option value="ConfigManager" />
                 </list>
               </option>
@@ -1675,7 +1552,7 @@
         <entry key="file://$PROJECT_DIR$/ai/aiconfig/openai_compatible.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765819743337" />
+              <option name="lastModified" value="1767186766273" />
               <option name="schema">
                 <list>
                   <option value="OpenAICompatibleProvider" />
@@ -1687,33 +1564,14 @@
         <entry key="file://$PROJECT_DIR$/ai/aiconfig/types.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765478180821" />
-              <option name="schema">
-                <list>
-                  <option value="Message" />
-                  <option value="ChatRequest" />
-                  <option value="ChatResponse" />
-                  <option value="Choice" />
-                  <option value="Usage" />
-                  <option value="Tool" />
-                  <option value="ToolFunction" />
-                  <option value="ToolCall" />
-                  <option value="ToolCallFunction" />
-                  <option value="Config" />
-                  <option value="StreamEvent" />
-                  <option value="SSERawEvent" />
-                  <option value="ErrorResponse" />
-                  <option value="ModelInfo" />
-                  <option value="ProviderConfig" />
-                </list>
-              </option>
+              <option name="lastModified" value="1767186766275" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/ai/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765696320890" />
+              <option name="lastModified" value="1767188966041" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -1725,7 +1583,7 @@
         <entry key="file://$PROJECT_DIR$/ai/client_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765547021204" />
+              <option name="lastModified" value="1767186766276" />
               <option name="schema">
                 <list>
                   <option value="mockProvider" />
@@ -1740,7 +1598,7 @@
         <entry key="file://$PROJECT_DIR$/ai/deserialize.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765479109233" />
+              <option name="lastModified" value="1767186766277" />
               <option name="schema">
                 <list>
                   <option value="StreamResult" />
@@ -1752,7 +1610,7 @@
         <entry key="file://$PROJECT_DIR$/ai/deserialize_test.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765479066699" />
+              <option name="lastModified" value="1767186766277" />
               <option name="schema">
                 <list>
                   <option value="mockDeserializeProvider" />
@@ -1766,7 +1624,7 @@
         <entry key="file://$PROJECT_DIR$/ai/format.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765603955512" />
+              <option name="lastModified" value="1767186766283" />
               <option name="schema">
                 <list>
                   <option value="FormatBuilder" />
@@ -1778,7 +1636,7 @@
         <entry key="file://$PROJECT_DIR$/ai/format_auto.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765604133238" />
+              <option name="lastModified" value="1767186766285" />
               <option name="schema">
                 <list>
                   <option value="FormatFromBuilder" />
@@ -1790,7 +1648,7 @@
         <entry key="file://$PROJECT_DIR$/ai/providers/claude.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765819743371" />
+              <option name="lastModified" value="1767186766286" />
               <option name="schema">
                 <list>
                   <option value="ClaudeProvider" />
@@ -1808,42 +1666,92 @@
         <entry key="file://$PROJECT_DIR$/ai/providers/deepseek.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1757844017046" />
+              <option name="lastModified" value="1767186766286" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/ai/providers/localai.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1757844017055" />
+              <option name="lastModified" value="1767186766287" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/ai/providers/ollama.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1757844017107" />
+              <option name="lastModified" value="1767186766287" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/ai/providers/openai.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1757844017070" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/roles.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1765463640594" />
+              <option name="lastModified" value="1767186766287" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/ai/structured_output_helper.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765603955513" />
+              <option name="lastModified" value="1767186766287" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/tool/function_client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767188966233" />
+              <option name="schema">
+                <list>
+                  <option value="Function" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/tool/function_wrapper.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767189501778" />
+              <option name="schema">
+                <list>
+                  <option value="FunctionWrapper" />
+                  <option value="FunctionRegistry" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/types/roles.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767186766289" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/types/types.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767186766289" />
+              <option name="schema">
+                <list>
+                  <option value="Message" />
+                  <option value="ChatRequest" />
+                  <option value="ChatResponse" />
+                  <option value="Choice" />
+                  <option value="Usage" />
+                  <option value="Tool" />
+                  <option value="ToolFunction" />
+                  <option value="ToolCall" />
+                  <option value="ToolCallFunction" />
+                  <option value="StreamEvent" />
+                  <option value="SSERawEvent" />
+                  <option value="ErrorResponse" />
+                  <option value="ModelInfo" />
+                  <option value="ProviderConfig" />
+                </list>
+              </option>
             </ScannedPath>
           </value>
         </entry>
@@ -1969,7 +1877,7 @@
         <entry key="file://$PROJECT_DIR$/container/optional/optional.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765813694548" />
+              <option name="lastModified" value="1767186766290" />
               <option name="schema">
                 <list>
                   <option value="Optional" />
@@ -2083,10 +1991,23 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/container/xmap/kmap.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767101036838" />
+              <option name="schema">
+                <list>
+                  <option value="KV" />
+                  <option value="KMap" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/container/xmap/map.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1754667542767" />
+              <option name="lastModified" value="1767101036839" />
             </ScannedPath>
           </value>
         </entry>
@@ -2301,7 +2222,7 @@
         <entry key="file://$PROJECT_DIR$/file/file_downloader/file_downloader.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1754667542775" />
+              <option name="lastModified" value="1767186766291" />
               <option name="schema">
                 <list>
                   <option value="FileDownloader" />
@@ -3005,7 +2926,7 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/article.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767034094723" />
+              <option name="lastModified" value="1767101018946" />
             </ScannedPath>
           </value>
         </entry>
@@ -3074,10 +2995,12 @@
         <entry key="file://$PROJECT_DIR$/web_crawler/core/contain.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767034079040" />
+              <option name="lastModified" value="1767115512894" />
               <option name="schema">
                 <list>
                   <option value="Contain" />
+                  <option value="HookResult" />
+                  <option value="BrowserMeta" />
                   <option value="ContainOptions" />
                 </list>
               </option>
@@ -3345,77 +3268,17 @@
             </ScannedPath>
           </value>
         </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/clients/logic.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1767117363354" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/cron/article_collect.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1767117628767" />
-              <option name="schema">
-                <list>
-                  <option value="ArticleCollectWorker" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/cron/simple.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1767117490769" />
-              <option name="schema">
-                <list>
-                  <option value="SimpleWorker" />
-                  <option value="Runner" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/cron/source_collect.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1767117894018" />
-              <option name="schema">
-                <list>
-                  <option value="SourceWorker" />
-                  <option value="Runner" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/../template/internal/cron/worker.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1767117796846" />
-              <option name="schema">
-                <list>
-                  <option value="Config" />
-                  <option value="WorkerLoader" />
-                </list>
-              </option>
-            </ScannedPath>
-          </value>
-        </entry>
       </map>
     </option>
     <option name="tableStructMapping">
       <map>
         <entry key="agent" value="Agent" />
         <entry key="agent_config" value="AgentConfig" />
-        <entry key="ai_client_manager" value="AIClientManager" />
         <entry key="anchor_article" value="AnchorArticle" />
         <entry key="anchor_article_value" value="AnchorArticleValue" />
         <entry key="anti_bot_config" value="AntiBotConfig" />
         <entry key="anti_bot_transport" value="AntiBotTransport" />
         <entry key="article" value="Article" />
-        <entry key="article_collect_worker" value="ArticleCollectWorker" />
         <entry key="article_link" value="ArticleLink" />
         <entry key="article_link_value" value="ArticleLinkValue" />
         <entry key="atom_author" value="AtomAuthor" />
@@ -3428,6 +3291,7 @@
         <entry key="avatar_generator" value="AvatarGenerator" />
         <entry key="avatar_result" value="AvatarResult" />
         <entry key="batch" value="Batch" />
+        <entry key="browser_meta" value="BrowserMeta" />
         <entry key="bytes_decode_format_valid" value="BytesDecodeFormatValid" />
         <entry key="bytes_serializer" value="BytesSerializer" />
         <entry key="bytes_value_codec" value="bytesValueCodec" />
@@ -3437,7 +3301,6 @@
         <entry key="chan_message" value="chanMessage" />
         <entry key="channel" value="Channel" />
         <entry key="chat_request" value="ChatRequest" />
-        <entry key="chat_request_builder" value="ChatRequestBuilder" />
         <entry key="chat_response" value="ChatResponse" />
         <entry key="choice" value="Choice" />
         <entry key="claude_content" value="ClaudeContent" />
@@ -3458,7 +3321,6 @@
         <entry key="consumer_group" value="consumerGroup" />
         <entry key="contain" value="Contain" />
         <entry key="contain_options" value="ContainOptions" />
-        <entry key="conversation_manager" value="ConversationManager" />
         <entry key="csv_en_decode_format" value="CSVEnDecodeFormat" />
         <entry key="csv_serializer" value="CSVSerializer" />
         <entry key="default_en_de_code_format" value="DefaultEnDeCodeFormat" />
@@ -3483,7 +3345,6 @@
         <entry key="font_registry" value="FontRegistry" />
         <entry key="format_builder" value="FormatBuilder" />
         <entry key="format_from_builder" value="FormatFromBuilder" />
-        <entry key="framework" value="Framework" />
         <entry key="function" value="Function" />
         <entry key="function_registry" value="FunctionRegistry" />
         <entry key="function_wrapper" value="FunctionWrapper" />
@@ -3497,12 +3358,14 @@
         <entry key="har_request" value="harRequest" />
         <entry key="hash_based_map" value="HashBasedMap" />
         <entry key="heap" value="Heap" />
+        <entry key="hook_result" value="HookResult" />
         <entry key="item" value="Item" />
         <entry key="json_array_en_de_code_format" value="JSONArrayEnDeCodeFormat" />
         <entry key="json_codec" value="JSONCodec" />
         <entry key="json_en_de_code_format" value="JSONEnDeCodeFormat" />
         <entry key="json_serializer" value="JSONSerializer" />
         <entry key="json_value" value="JsonValue" />
+        <entry key="k_map" value="KMap" />
         <entry key="kafka_client" value="KafkaClient" />
         <entry key="kafka_message" value="kafkaMessage" />
         <entry key="kv" value="KV" />
@@ -3563,18 +3426,14 @@
         <entry key="rule_tree" value="RuleTree" />
         <entry key="run_back_err_worker" value="RunBackErrWorker" />
         <entry key="run_worker" value="RunWorker" />
-        <entry key="runner" value="Runner" />
         <entry key="safe_heap" value="SafeHeap" />
         <entry key="safe_map" value="SafeMap" />
         <entry key="segment" value="Segment" />
-        <entry key="simple_ai_client" value="SimpleAIClient" />
         <entry key="simple_mcp_client" value="SimpleMCPClient" />
-        <entry key="simple_worker" value="SimpleWorker" />
         <entry key="sms_adapter" value="SMSAdapter" />
         <entry key="sort" value="Sort" />
         <entry key="sorted_map" value="SortedMap" />
         <entry key="source_code" value="SourceCode" />
-        <entry key="source_worker" value="SourceWorker" />
         <entry key="spec_num_util" value="SpecNumUtil" />
         <entry key="spec_time_util" value="SpecTimeUtil" />
         <entry key="split_dump_task" value="SplitDumpTask" />
@@ -3606,12 +3465,11 @@
         <entry key="viant_mcp_adapter" value="ViantMCPAdapter" />
         <entry key="viant_mcp_client_impl" value="viantMCPClientImpl" />
         <entry key="web_reader_error" value="WebReaderError" />
-        <entry key="worker_loader" value="WorkerLoader" />
         <entry key="wrapper" value="Wrapper" />
         <entry key="xml_en_de_code_format" value="XMLEnDeCodeFormat" />
         <entry key="zip_info" value="ZipInfo" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1767100479060" />
+    <option name="lastTimeChecked" value="1767539402501" />
   </component>
 </project>

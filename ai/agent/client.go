@@ -184,7 +184,7 @@ func (c *Client) CallTool(ctx context.Context, name string, arguments string) (i
 	if c.aiClient.HasFunction(name) {
 		// 本地函数
 		c.mu.RUnlock()
-		return c.aiClient.CallFunctionDirectly(name, arguments)
+		return c.aiClient.CallFunctionDirectlyWithContext(ctx, name, arguments)
 	}
 
 	// 检查MCP工具（优先使用多MCP适配器）
@@ -267,7 +267,11 @@ func (c *Client) ChatWithTools(ctx context.Context, req *types.ChatRequest) (*ty
 			return response, nil
 		}
 
-		toolCtx := context.WithoutCancel(ctx)
+		toolCtx := ctx
+		if toolCtx == nil {
+			toolCtx = context.Background()
+		}
+		toolCtx = context.WithoutCancel(toolCtx)
 		toolResults, err := c.ExecuteToolCalls(toolCtx, choice.Message.ToolCalls)
 		if err != nil {
 			return nil, err
@@ -324,6 +328,10 @@ func (c *Client) ChatWithToolsStream(ctx context.Context, req *types.ChatRequest
 					if len(choice.Delta.ToolCalls) > 0 {
 						accumulatedToolCalls = mergeToolCalls(accumulatedToolCalls, choice.Delta.ToolCalls)
 					}
+					// 部分提供方只在完整消息里返回 tool_calls，需要兼容
+					if len(choice.Message.ToolCalls) > 0 {
+						accumulatedToolCalls = mergeToolCalls(accumulatedToolCalls, choice.Message.ToolCalls)
+					}
 				}
 
 				select {
@@ -344,7 +352,11 @@ func (c *Client) ChatWithToolsStream(ctx context.Context, req *types.ChatRequest
 			}
 			messages = append(messages, toolCallMessage)
 
-			toolCtx := context.WithoutCancel(ctx)
+			toolCtx := ctx
+			if toolCtx == nil {
+				toolCtx = context.Background()
+			}
+			toolCtx = context.WithoutCancel(toolCtx)
 			toolResults, err := c.ExecuteToolCalls(toolCtx, accumulatedToolCalls)
 			if err != nil {
 				resultChan <- (&types.ChatResponse{}).SetError(err)
@@ -516,6 +528,11 @@ func mergeToolCalls(existing []types.ToolCall, deltas []types.ToolCall) []types.
 
 // ExecuteToolCalls 执行工具调用列表，返回工具结果消息
 func (c *Client) ExecuteToolCalls(ctx context.Context, toolCalls []types.ToolCall) ([]types.Message, error) {
+	if len(toolCalls) > 0 && ctx == nil {
+		// 只有需要调用工具时才兜底 context，避免无意义的 Background 传递
+		ctx = context.Background()
+	}
+
 	toolResults := make([]types.Message, 0, len(toolCalls))
 
 	for _, toolCall := range toolCalls {
@@ -619,7 +636,6 @@ func (c *Client) injectMCPToolsLocked() {
 	case c.multiMCPAdapter != nil:
 		tools = c.multiMCPAdapter.GetTools()
 		caller = c.multiMCPAdapter.CallTool
-		fallthrough
 	case c.mcpAdapter != nil:
 		tools = c.mcpAdapter.GetTools()
 		caller = c.mcpAdapter.CallTool
