@@ -20,7 +20,7 @@ type ClaudeProvider struct {
 }
 
 // NewClaudeProvider 创建Claude提供者
-func NewClaudeProvider(config *aiconfig.Config) *ClaudeProvider {
+func NewClaudeProvider(config *aiconfig.Config, logger xlog.Logger) *ClaudeProvider {
 	if config == nil {
 		config = &aiconfig.Config{}
 	}
@@ -43,7 +43,7 @@ func NewClaudeProvider(config *aiconfig.Config) *ClaudeProvider {
 
 	return &ClaudeProvider{
 		config: config,
-		logger: &xlog.LogrusAdapter{},
+		logger: logger,
 	}
 }
 

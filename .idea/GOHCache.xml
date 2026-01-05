@@ -1393,6 +1393,13 @@
     </option>
     <option name="scannedPathMapping">
       <map>
+        <entry key="file://$USER_HOME$/GolandProjects/awesomeProject5/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767623042541" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_adapter.go">
           <value>
             <ScannedPath>
@@ -1409,7 +1416,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_adapter_impl.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765722259716" />
+              <option name="lastModified" value="1767621825979" />
               <option name="schema">
                 <list>
                   <option value="mark3LabsClientImpl" />
@@ -1487,7 +1494,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767189554206" />
+              <option name="lastModified" value="1767622200523" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -1552,7 +1559,7 @@
         <entry key="file://$PROJECT_DIR$/ai/aiconfig/openai_compatible.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767186766273" />
+              <option name="lastModified" value="1767624051316" />
               <option name="schema">
                 <list>
                   <option value="OpenAICompatibleProvider" />
@@ -1571,7 +1578,7 @@
         <entry key="file://$PROJECT_DIR$/ai/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767188966041" />
+              <option name="lastModified" value="1767624278870" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -1621,6 +1628,20 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/function_wrapper_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767624122592" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/ai/examples/tool_calls_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767624122612" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/ai/format.go">
           <value>
             <ScannedPath>
@@ -1648,7 +1669,7 @@
         <entry key="file://$PROJECT_DIR$/ai/providers/claude.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767186766286" />
+              <option name="lastModified" value="1767624122582" />
               <option name="schema">
                 <list>
                   <option value="ClaudeProvider" />
@@ -1666,28 +1687,28 @@
         <entry key="file://$PROJECT_DIR$/ai/providers/deepseek.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767186766286" />
+              <option name="lastModified" value="1767624065822" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/ai/providers/localai.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767186766287" />
+              <option name="lastModified" value="1767624132386" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/ai/providers/ollama.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767186766287" />
+              <option name="lastModified" value="1767624141456" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/ai/providers/openai.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767186766287" />
+              <option name="lastModified" value="1767624104228" />
             </ScannedPath>
           </value>
         </entry>
@@ -1701,7 +1722,7 @@
         <entry key="file://$PROJECT_DIR$/ai/tool/function_client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767188966233" />
+              <option name="lastModified" value="1767625218891" />
               <option name="schema">
                 <list>
                   <option value="Function" />

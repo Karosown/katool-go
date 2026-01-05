@@ -25,7 +25,7 @@ type OpenAICompatibleProvider struct {
 }
 
 // NewOpenAICompatibleProvider 创建OpenAI兼容提供者
-func NewOpenAICompatibleProvider(providerType ProviderType, config *Config) *OpenAICompatibleProvider {
+func NewOpenAICompatibleProvider(providerType ProviderType, config *Config, logger xlog.Logger) *OpenAICompatibleProvider {
 	if config == nil {
 		config = &Config{}
 	}
@@ -70,7 +70,7 @@ func NewOpenAICompatibleProvider(providerType ProviderType, config *Config) *Ope
 
 	return &OpenAICompatibleProvider{
 		config:       config,
-		logger:       &xlog.LogrusAdapter{},
+		logger:       logger,
 		providerType: providerType,
 	}
 }

@@ -3,9 +3,10 @@ package providers
 import (
 	"github.com/karosown/katool-go/ai/aiconfig"
 	"github.com/karosown/katool-go/ai/types"
+	"github.com/karosown/katool-go/xlog"
 )
 
 // NewOpenAIProvider 创建OpenAI提供者
-func NewOpenAIProvider(config *aiconfig.Config) types.AIProvider {
-	return aiconfig.NewOpenAICompatibleProvider(aiconfig.ProviderOpenAI, config)
+func NewOpenAIProvider(config *aiconfig.Config, logger xlog.Logger) types.AIProvider {
+	return aiconfig.NewOpenAICompatibleProvider(aiconfig.ProviderOpenAI, config, logger)
 }

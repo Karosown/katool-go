@@ -4,22 +4,26 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-
 	"github.com/karosown/katool-go/ai/types"
+	"github.com/karosown/katool-go/xlog"
 )
 
 // Function 函数调用客户端
 type Function struct {
 	provider types.AIProvider
 	registry *FunctionRegistry
+	logger   xlog.Logger
 }
 
 // NewFunctionClient 创建新的函数调用客户端
-func NewFunctionClient(provider types.AIProvider) *Function {
+func NewFunctionClient(provider types.AIProvider, logger xlog.Logger) *Function {
+	if logger == nil {
+		panic("logger is nil")
+	}
 	return &Function{
 		provider: provider,
 		registry: NewFunctionRegistry(),
+		logger:   logger,
 	}
 }
 
@@ -39,7 +43,7 @@ func (c *Function) RegisterFunctionWith(name, description string, parameters map
 }
 
 // ChatWithFunctions 使用函数进行聊天
-func (c *Function) ChatWithFunctions(req *types.ChatRequest) (*types.ChatResponse, error) {
+func (c *Function) ChatWithFunctions(ctx context.Context, req *types.ChatRequest) (*types.ChatResponse, error) {
 	// 获取注册的工具
 	tools := c.registry.GetTools()
 	if len(tools) == 0 {
@@ -61,20 +65,19 @@ func (c *Function) ChatWithFunctions(req *types.ChatRequest) (*types.ChatRespons
 		if len(choice.Message.ToolCalls) > 0 {
 			// 执行工具调用
 			for _, toolCall := range choice.Message.ToolCalls {
-				result, err := c.registry.CallFunction(toolCall.Function.Name, toolCall.Function.Arguments)
+				result, err := c.registry.CallFunctionWithContext(ctx, toolCall.Function.Name, toolCall.Function.Arguments)
 				if err != nil {
-					log.Printf("Function call failed: %v", err)
+					c.logger.Errorf("Function call failed: %v", err)
 					continue
 				}
 
 				// 将结果转换为JSON字符串
 				resultJSON, err := json.Marshal(result)
 				if err != nil {
-					log.Printf("Failed to marshal function result: %v", err)
+					c.logger.Errorf("Failed to marshal function result: %v", err)
 					continue
 				}
-
-				log.Printf("Function %s result: %s", toolCall.Function.Name, string(resultJSON))
+				c.logger.Errorf("Function %s result: %s", toolCall.Function.Name, string(resultJSON))
 			}
 		}
 	}
@@ -83,7 +86,7 @@ func (c *Function) ChatWithFunctions(req *types.ChatRequest) (*types.ChatRespons
 }
 
 // ChatWithFunctionsStream 使用函数进行流式聊天
-func (c *Function) ChatWithFunctionsStream(req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
+func (c *Function) ChatWithFunctionsStream(ctx context.Context, req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	// 获取注册的工具
 	tools := c.registry.GetTools()
 	if len(tools) == 0 {
@@ -100,7 +103,7 @@ func (c *Function) ChatWithFunctionsStream(req *types.ChatRequest) (<-chan *type
 	}
 
 	// 创建新的通道来处理工具调用
-	resultChan := make(chan *types.ChatResponse, 100)
+	resultChan := make(chan *types.ChatResponse, 1000)
 
 	go func() {
 		defer close(resultChan)
@@ -112,20 +115,20 @@ func (c *Function) ChatWithFunctionsStream(req *types.ChatRequest) (<-chan *type
 				if len(choice.Delta.ToolCalls) > 0 {
 					// 执行工具调用
 					for _, toolCall := range choice.Delta.ToolCalls {
-						result, err := c.registry.CallFunction(toolCall.Function.Name, toolCall.Function.Arguments)
+						result, err := c.registry.CallFunctionWithContext(ctx, toolCall.Function.Name, toolCall.Function.Arguments)
 						if err != nil {
-							log.Printf("Function call failed: %v", err)
+							c.logger.Errorf("Function call failed: %v", err)
 							continue
 						}
 
 						// 将结果转换为JSON字符串
 						resultJSON, err := json.Marshal(result)
 						if err != nil {
-							log.Printf("Failed to marshal function result: %v", err)
+							c.logger.Errorf("Failed to marshal function result: %v", err)
 							continue
 						}
 
-						log.Printf("Function %s result: %s", toolCall.Function.Name, string(resultJSON))
+						c.logger.Infof("Function %s result: %s", toolCall.Function.Name, string(resultJSON))
 					}
 				}
 			}
@@ -134,7 +137,7 @@ func (c *Function) ChatWithFunctionsStream(req *types.ChatRequest) (<-chan *type
 			select {
 			case resultChan <- response:
 			default:
-				log.Printf("Result channel is full, dropping response")
+				c.logger.Info("Result channel is full, dropping response")
 			}
 		}
 	}()
@@ -174,14 +177,14 @@ func (c *Function) ChatWithFunctionsConversation(req *types.ChatRequest) (*types
 			for _, toolCall := range choice.Message.ToolCalls {
 				result, err := c.registry.CallFunction(toolCall.Function.Name, toolCall.Function.Arguments)
 				if err != nil {
-					log.Printf("Function call failed: %v", err)
+					c.logger.Errorf("Function call failed: %v", err)
 					continue
 				}
 
 				// 将结果转换为JSON字符串
 				resultJSON, err := json.Marshal(result)
 				if err != nil {
-					log.Printf("Failed to marshal function result: %v", err)
+					c.logger.Errorf("Failed to marshal function result: %v", err)
 					continue
 				}
 
@@ -204,7 +207,7 @@ func (c *Function) ChatWithFunctionsConversation(req *types.ChatRequest) (*types
 			// 发送后续请求
 			finalResponse, err := c.provider.Chat(followUpReq)
 			if err != nil {
-				log.Printf("Follow-up request failed: %v", err)
+				c.logger.Errorf("Follow-up request failed: %v", err)
 				return response, nil // 返回原始响应
 			}
 
@@ -243,7 +246,7 @@ func (c *Function) CallFunctionDirectlyWithContext(ctx context.Context, name str
 // ... existing code ...
 
 // ChatWithFunctionsConversationStream 使用函数进行流式完整对话
-func (c *Function) ChatWithFunctionsConversationStream(req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
+func (c *Function) ChatWithFunctionsConversationStream(ctx context.Context, req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	// 获取注册的工具
 	tools := c.registry.GetTools()
 	if len(tools) == 0 {
@@ -285,7 +288,7 @@ func (c *Function) ChatWithFunctionsConversationStream(req *types.ChatRequest) (
 			select {
 			case resultChan <- response:
 			default:
-				log.Printf("Result channel is full, dropping response")
+				c.logger.Errorf("Result channel is full, dropping response")
 			}
 		}
 
@@ -305,16 +308,16 @@ func (c *Function) ChatWithFunctionsConversationStream(req *types.ChatRequest) (
 
 			// 执行所有工具调用并添加结果
 			for _, toolCall := range accumulatedToolCalls {
-				result, err := c.registry.CallFunction(toolCall.Function.Name, toolCall.Function.Arguments)
+				result, err := c.registry.CallFunctionWithContext(ctx, toolCall.Function.Name, toolCall.Function.Arguments)
 				if err != nil {
-					log.Printf("Function call failed: %v", err)
+					c.logger.Errorf("Function call failed: %v", err)
 					continue
 				}
 
 				// 将结果转换为JSON字符串
 				resultJSON, err := json.Marshal(result)
 				if err != nil {
-					log.Printf("Failed to marshal function result: %v", err)
+					c.logger.Errorf("Failed to marshal function result: %v", err)
 					continue
 				}
 
@@ -347,7 +350,7 @@ func (c *Function) ChatWithFunctionsConversationStream(req *types.ChatRequest) (
 			// 发送后续流式请求
 			followUpStream, err := c.provider.ChatStream(followUpReq)
 			if err != nil {
-				log.Printf("Follow-up stream request failed: %v", err)
+				c.logger.Errorf("Follow-up stream request failed: %v", err)
 				return
 			}
 
@@ -356,7 +359,7 @@ func (c *Function) ChatWithFunctionsConversationStream(req *types.ChatRequest) (
 				select {
 				case resultChan <- response:
 				default:
-					log.Printf("Result channel is full, dropping follow-up response")
+					c.logger.Infof("Result channel is full, dropping follow-up response")
 				}
 			}
 		}

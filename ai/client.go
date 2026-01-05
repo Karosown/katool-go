@@ -37,14 +37,17 @@ type Client struct {
 
 // NewClient 创建新的AI客户端（从环境变量自动加载）
 // 会自动尝试加载所有可用的提供者
-func NewClient() (*Client, error) {
+func NewClient(logger ...xlog.Logger) (*Client, error) {
+	if len(logger) == 0 {
+		panic("No logger provided")
+	}
 	client := &Client{
 		providers: make(map[aiconfig.ProviderType]types.AIProvider),
-		logger:    &xlog.LogrusAdapter{},
+		logger:    logger[0],
 	}
 
 	// 尝试从环境变量加载所有可用的提供者
-	client.loadProvidersFromEnv()
+	client.loadProvidersFromEnv(logger[0])
 
 	if len(client.providers) == 0 {
 		return nil, fmt.Errorf("no AI providers found in environment variables")
@@ -67,11 +70,11 @@ func NewClient() (*Client, error) {
 }
 
 // NewClientWithProvider 创建指定提供者的AI客户端
-func NewClientWithProvider(providerType aiconfig.ProviderType, config *aiconfig.Config) (*Client, error) {
+func NewClientWithProvider(providerType aiconfig.ProviderType, config *aiconfig.Config, logger xlog.Logger) (*Client, error) {
 	client := &Client{
 		providers:       make(map[aiconfig.ProviderType]types.AIProvider),
 		currentProvider: providerType,
-		logger:          &xlog.LogrusAdapter{},
+		logger:          logger,
 	}
 
 	if config == nil {
@@ -83,7 +86,7 @@ func NewClientWithProvider(providerType aiconfig.ProviderType, config *aiconfig.
 	}
 
 	// 创建提供者
-	provider, err := createProvider(providerType, config)
+	provider, err := createProvider(providerType, config, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -96,13 +99,13 @@ func NewClientWithProvider(providerType aiconfig.ProviderType, config *aiconfig.
 }
 
 // NewClientFromEnv 从环境变量创建指定提供者的客户端
-func NewClientFromEnv(providerType aiconfig.ProviderType) (*Client, error) {
+func NewClientFromEnv(providerType aiconfig.ProviderType, logger xlog.Logger) (*Client, error) {
 	config := getConfigFromEnv(providerType)
-	return NewClientWithProvider(providerType, config)
+	return NewClientWithProvider(providerType, config, logger)
 }
 
 // loadProvidersFromEnv 从环境变量加载所有可用的提供者
-func (c *Client) loadProvidersFromEnv() {
+func (c *Client) loadProvidersFromEnv(logger xlog.Logger) {
 	providerTypes := []aiconfig.ProviderType{
 		aiconfig.ProviderOpenAI,
 		aiconfig.ProviderDeepSeek,
@@ -122,7 +125,7 @@ func (c *Client) loadProvidersFromEnv() {
 			continue
 		}
 
-		provider, err := createProvider(providerType, config)
+		provider, err := createProvider(providerType, config, logger)
 		if err != nil {
 			c.logger.Warnf("Failed to create provider %s: %v", providerType, err)
 			continue
@@ -139,18 +142,18 @@ func (c *Client) loadProvidersFromEnv() {
 }
 
 // createProvider 创建提供者实例
-func createProvider(providerType aiconfig.ProviderType, config *aiconfig.Config) (types.AIProvider, error) {
+func createProvider(providerType aiconfig.ProviderType, config *aiconfig.Config, logger xlog.Logger) (types.AIProvider, error) {
 	switch providerType {
 	case aiconfig.ProviderOpenAI:
-		return providers.NewOpenAIProvider(config), nil
+		return providers.NewOpenAIProvider(config, logger), nil
 	case aiconfig.ProviderDeepSeek:
-		return providers.NewDeepSeekProvider(config), nil
+		return providers.NewDeepSeekProvider(config, logger), nil
 	case aiconfig.ProviderClaude:
-		return providers.NewClaudeProvider(config), nil
+		return providers.NewClaudeProvider(config, logger), nil
 	case aiconfig.ProviderOllama:
-		return providers.NewOllamaProvider(config), nil
+		return providers.NewOllamaProvider(config, logger), nil
 	case aiconfig.ProviderLocalAI:
-		return providers.NewLocalAIProvider(config), nil
+		return providers.NewLocalAIProvider(config, logger), nil
 	default:
 		return nil, fmt.Errorf("unsupported provider type: %s", providerType)
 	}
@@ -339,12 +342,12 @@ func (c *Client) ChatWithTools(req *types.ChatRequest) (*types.ChatResponse, err
 }
 
 // ChatWithToolsStream 使用工具调用发送流式聊天请求
-func (c *Client) ChatWithToolsStream(req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
+func (c *Client) ChatWithToolsStream(ctx context.Context, req *types.ChatRequest) (<-chan *types.ChatResponse, error) {
 	c.mu.RLock()
 	c.functionClient.SetProvider(c.providers[c.currentProvider])
 	c.mu.RUnlock()
 
-	return c.functionClient.ChatWithFunctionsConversationStream(req)
+	return c.functionClient.ChatWithFunctionsConversationStream(ctx, req)
 }
 
 // GetRegisteredFunctions 获取已注册的函数列表

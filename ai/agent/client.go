@@ -470,7 +470,7 @@ func (c *Client) ChatWithToolsStreamManual(ctx context.Context, req *types.ChatR
 		req.Tools = c.GetAllTools()
 	}
 
-	return c.aiClient.ChatWithToolsStream(req)
+	return c.aiClient.ChatWithToolsStream(ctx, req)
 }
 
 // mergeToolCalls merges streamed tool call deltas by ID and concatenates arguments.
