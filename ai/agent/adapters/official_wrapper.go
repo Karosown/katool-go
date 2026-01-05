@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/karosown/katool-go/ai/agent"
@@ -18,8 +19,8 @@ import (
 //
 //	import "github.com/modelcontextprotocol/go-sdk/mcp"
 //	session, _ := client.Connect(ctx, transport, nil)
-//	adapter, _ := adapters.NewOfficialMCPAdapterFromSession(session, logger)
-func NewOfficialMCPAdapterFromSession(session interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
+//	adapter, _ := adapters.NewOfficialMCPAdapterFromSession(ctx,session, logger)
+func NewOfficialMCPAdapterFromSession(ctx context.Context, session interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
 	if session == nil {
 		return nil, fmt.Errorf("MCP session cannot be nil")
 	}
@@ -31,5 +32,5 @@ func NewOfficialMCPAdapterFromSession(session interface{}, logger xlog.Logger) (
 	}
 
 	// 使用接口类型创建适配器
-	return NewOfficialMCPAdapter(mcpClient, logger)
+	return NewOfficialMCPAdapter(ctx, mcpClient, logger)
 }
