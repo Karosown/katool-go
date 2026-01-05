@@ -28,7 +28,7 @@ func NewMark3LabsAdapterFromClient(ctx context.Context, client interface{}, logg
 	// 优先尝试使用类型安全的实现（如果可用，需要 build tags mark3labs）
 	// 这个函数在 mark3labs_adapter_impl.go 中定义（需要 build tags mark3labs）
 	// 如果函数不存在（未使用 build tags），会返回错误，继续尝试通用接口
-	if adapter, err := tryNewMark3LabsAdapterTyped(client, logger); err == nil && adapter != nil {
+	if adapter, err := tryNewMark3LabsAdapterTyped(ctx, client, logger); err == nil && adapter != nil {
 		return adapter, nil
 	}
 

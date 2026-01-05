@@ -7,6 +7,7 @@
 package adapters
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/karosown/katool-go/ai/agent"
@@ -15,7 +16,7 @@ import (
 
 // tryNewMark3LabsAdapterTyped 默认实现（不使用 build tags 时）
 // 当使用 build tags mark3labs 时，这个函数会被 mark3labs_adapter_impl.go 中的实现覆盖
-func tryNewMark3LabsAdapterTyped(client interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
+func tryNewMark3LabsAdapterTyped(ctx context.Context, client interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
 	// 不使用 build tags 时，返回错误，让调用者尝试通用接口
 	return nil, fmt.Errorf("type-safe implementation not available, use build tags: go build -tags mark3labs")
 }
