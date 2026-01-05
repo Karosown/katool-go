@@ -64,17 +64,20 @@ func NewClient(logger ...xlog.Logger) (*Client, error) {
 	}
 
 	// 创建函数客户端
-	client.functionClient = tool.NewFunctionClient(client.providers[client.currentProvider])
+	client.functionClient = tool.NewFunctionClient(client.providers[client.currentProvider], logger[0])
 
 	return client, nil
 }
 
 // NewClientWithProvider 创建指定提供者的AI客户端
-func NewClientWithProvider(providerType aiconfig.ProviderType, config *aiconfig.Config, logger xlog.Logger) (*Client, error) {
+func NewClientWithProvider(providerType aiconfig.ProviderType, config *aiconfig.Config, logger ...xlog.Logger) (*Client, error) {
+	if logger == nil {
+		panic("No logger provided")
+	}
 	client := &Client{
 		providers:       make(map[aiconfig.ProviderType]types.AIProvider),
 		currentProvider: providerType,
-		logger:          logger,
+		logger:          logger[0],
 	}
 
 	if config == nil {
@@ -86,14 +89,14 @@ func NewClientWithProvider(providerType aiconfig.ProviderType, config *aiconfig.
 	}
 
 	// 创建提供者
-	provider, err := createProvider(providerType, config, logger)
+	provider, err := createProvider(providerType, config, logger[0])
 	if err != nil {
 		return nil, err
 	}
 
 	client.providers[providerType] = provider
 	client.config = config
-	client.functionClient = tool.NewFunctionClient(provider)
+	client.functionClient = tool.NewFunctionClient(provider, logger[0])
 
 	return client, nil
 }
