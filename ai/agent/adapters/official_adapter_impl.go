@@ -22,7 +22,7 @@ import (
 
 // newOfficialMCPAdapterFromSessionTyped 从真实的官方SDK ClientSession创建适配器（类型安全版本）
 // 这是内部实现，外部应该使用 NewOfficialMCPAdapterFromSession
-func newOfficialMCPAdapterFromSessionTyped(session *mcp.ClientSession, logger xlog.Logger) (*agent.MCPAdapter, error) {
+func newOfficialMCPAdapterFromSessionTyped(ctx context.Context, impl *mcp.ClientSession, logger xlog.Logger) (*agent.MCPAdapter, error) {
 	if session == nil {
 		return nil, fmt.Errorf("MCP session cannot be nil")
 	}
@@ -32,7 +32,7 @@ func newOfficialMCPAdapterFromSessionTyped(session *mcp.ClientSession, logger xl
 		logger:  logger,
 	}
 
-	return agent.NewMCPAdapter(impl, logger)
+	return agent.NewMCPAdapter(ctx, impl, logger)
 }
 
 // officialMCPClientImpl 使用真实官方SDK类型的实现

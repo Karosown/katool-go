@@ -1393,17 +1393,10 @@
     </option>
     <option name="scannedPathMapping">
       <map>
-        <entry key="file://$USER_HOME$/GolandProjects/awesomeProject5/main.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1767625362839" />
-            </ScannedPath>
-          </value>
-        </entry>
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_adapter.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765720575497" />
+              <option name="lastModified" value="1767630844235" />
               <option name="schema">
                 <list>
                   <option value="Mark3LabsAdapter" />
@@ -1416,7 +1409,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_adapter_impl.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767621825979" />
+              <option name="lastModified" value="1767630855707" />
               <option name="schema">
                 <list>
                   <option value="mark3LabsClientImpl" />
@@ -1442,7 +1435,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/official_adapter.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765711486287" />
+              <option name="lastModified" value="1767630821694" />
               <option name="schema">
                 <list>
                   <option value="OfficialMCPAdapter" />
@@ -1455,7 +1448,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/official_adapter_impl.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765711486287" />
+              <option name="lastModified" value="1767630876469" />
               <option name="schema">
                 <list>
                   <option value="officialMCPClientImpl" />
@@ -1474,7 +1467,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/viant_adapter.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765711486288" />
+              <option name="lastModified" value="1767630893777" />
               <option name="schema">
                 <list>
                   <option value="ViantMCPAdapter" />
@@ -1494,7 +1487,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767622200523" />
+              <option name="lastModified" value="1767630983929" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -1520,7 +1513,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/mcp_adapter.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767186766272" />
+              <option name="lastModified" value="1767630800166" />
               <option name="schema">
                 <list>
                   <option value="MCPAdapter" />
@@ -1534,7 +1527,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/multi_mcp_adapter.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767186766273" />
+              <option name="lastModified" value="1767630751509" />
               <option name="schema">
                 <list>
                   <option value="MultiMCPAdapter" />
@@ -1578,7 +1571,7 @@
         <entry key="file://$PROJECT_DIR$/ai/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767625450064" />
+              <option name="lastModified" value="1767630975830" />
               <option name="schema">
                 <list>
                   <option value="Client" />
@@ -1625,20 +1618,6 @@
                   <option value="qa" />
                 </list>
               </option>
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/function_wrapper_test.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1767624122592" />
-            </ScannedPath>
-          </value>
-        </entry>
-        <entry key="file://$PROJECT_DIR$/ai/examples/tool_calls_test.go">
-          <value>
-            <ScannedPath>
-              <option name="lastModified" value="1767624122612" />
             </ScannedPath>
           </value>
         </entry>
@@ -1734,7 +1713,7 @@
         <entry key="file://$PROJECT_DIR$/ai/tool/function_wrapper.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767189501778" />
+              <option name="lastModified" value="1767549416222" />
               <option name="schema">
                 <list>
                   <option value="FunctionWrapper" />
@@ -1754,7 +1733,7 @@
         <entry key="file://$PROJECT_DIR$/ai/types/types.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767186766289" />
+              <option name="lastModified" value="1767546200719" />
               <option name="schema">
                 <list>
                   <option value="Message" />
@@ -3491,6 +3470,6 @@
         <entry key="zip_info" value="ZipInfo" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1767539402501" />
+    <option name="lastTimeChecked" value="1767629564107" />
   </component>
 </project>

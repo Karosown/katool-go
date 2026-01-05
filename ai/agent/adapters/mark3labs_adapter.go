@@ -56,7 +56,7 @@ type Mark3LabsClient interface {
 //
 // client 应该实现 Mark3LabsClient 接口
 // 如果传入的是 *mcpclient.Client，可以使用 NewMark3LabsAdapterFromClient
-func NewMark3LabsAdapter(client Mark3LabsClient, logger xlog.Logger) (*agent.MCPAdapter, error) {
+func NewMark3LabsAdapter(ctx context.Context, client Mark3LabsClient, logger xlog.Logger) (*agent.MCPAdapter, error) {
 	if client == nil {
 		return nil, fmt.Errorf("MCP client cannot be nil")
 	}
@@ -72,7 +72,7 @@ func NewMark3LabsAdapter(client Mark3LabsClient, logger xlog.Logger) (*agent.MCP
 	}
 
 	// 创建MCPAdapter
-	return agent.NewMCPAdapter(mcpClient, logger)
+	return agent.NewMCPAdapter(ctx, mcpClient, logger)
 }
 
 // mark3LabsMCPClient 实现 agent.MCPClient 接口

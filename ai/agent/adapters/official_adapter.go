@@ -35,7 +35,7 @@ type OfficialMCPClient interface {
 //
 // client 应该实现 OfficialMCPClient 接口
 // 如果传入的是 *mcp.ClientSession，可以使用 NewOfficialMCPAdapterFromSession
-func NewOfficialMCPAdapter(client OfficialMCPClient, logger xlog.Logger) (*agent.MCPAdapter, error) {
+func NewOfficialMCPAdapter(ctx context.Context, client OfficialMCPClient, logger xlog.Logger) (*agent.MCPAdapter, error) {
 	if client == nil {
 		return nil, fmt.Errorf("MCP client cannot be nil")
 	}
@@ -49,7 +49,7 @@ func NewOfficialMCPAdapter(client OfficialMCPClient, logger xlog.Logger) (*agent
 		adapter: adapter,
 	}
 
-	return agent.NewMCPAdapter(mcpClient, logger)
+	return agent.NewMCPAdapter(ctx, mcpClient, logger)
 }
 
 // officialMCPClientImplWrapper 实现 agent.MCPClient 接口（包装器，用于接口适配）

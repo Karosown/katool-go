@@ -30,7 +30,7 @@ type ViantMCPClient interface {
 }
 
 // NewViantMCPAdapter 创建 Viant MCP 适配器
-func NewViantMCPAdapter(client interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
+func NewViantMCPAdapter(ctx context.Context, client interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
 	if client == nil {
 		return nil, fmt.Errorf("MCP client cannot be nil")
 	}
@@ -44,7 +44,7 @@ func NewViantMCPAdapter(client interface{}, logger xlog.Logger) (*agent.MCPAdapt
 		adapter: adapter,
 	}
 
-	return agent.NewMCPAdapter(mcpClient, logger)
+	return agent.NewMCPAdapter(ctx, mcpClient, logger)
 }
 
 // viantMCPClientImpl 实现 agent.MCPClient 接口

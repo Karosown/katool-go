@@ -23,17 +23,26 @@ type MultiMCPAdapter struct {
 	logger xlog.Logger
 
 	// 互斥锁
-	mu sync.RWMutex
+	mu  sync.RWMutex
+	ctx context.Context
+}
+
+func (m *MultiMCPAdapter) Context() context.Context {
+	return m.ctx
+}
+func (m *MultiMCPAdapter) SetContext(ctx context.Context) {
+	m.ctx = ctx
 }
 
 // NewMultiMCPAdapter 创建多MCP适配器
-func NewMultiMCPAdapter(logger xlog.Logger) *MultiMCPAdapter {
+func NewMultiMCPAdapter(ctx context.Context, logger xlog.Logger) *MultiMCPAdapter {
 	return &MultiMCPAdapter{
 		adapters:   make([]*MCPAdapter, 0),
 		toolsCache: make([]types.Tool, 0),
 		toolsMap:   make(map[string]*types.Tool),
 		toolSource: make(map[string]int),
 		logger:     logger,
+		ctx:        ctx,
 	}
 }
 

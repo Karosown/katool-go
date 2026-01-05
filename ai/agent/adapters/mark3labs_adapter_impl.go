@@ -25,7 +25,7 @@ import (
 
 // tryNewMark3LabsAdapterTyped 尝试使用类型安全的实现
 // 这个函数实现了 wrapper.go 中声明的函数
-func tryNewMark3LabsAdapterTyped(client interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
+func tryNewMark3LabsAdapterTyped(ctx context.Context, client interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
 	// 尝试类型断言为 *mcpclient.Client
 	mcpClient, ok := client.(*mcpclient.Client)
 	if !ok {
@@ -41,7 +41,7 @@ func tryNewMark3LabsAdapterTyped(client interface{}, logger xlog.Logger) (*agent
 		logger: logger,
 	}
 
-	return agent.NewMCPAdapter(impl, logger)
+	return agent.NewMCPAdapter(ctx, impl, logger)
 }
 
 // mark3LabsClientImpl 使用真实 mcp-go 类型的实现

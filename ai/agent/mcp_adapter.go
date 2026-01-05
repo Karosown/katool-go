@@ -23,7 +23,15 @@ type MCPAdapter struct {
 	logger xlog.Logger
 
 	// 互斥锁
-	mu sync.RWMutex
+	mu  sync.RWMutex
+	ctx context.Context
+}
+
+func (m *MCPAdapter) Context() context.Context {
+	return m.ctx
+}
+func (m *MCPAdapter) SetContext(ctx context.Context) {
+	m.ctx = ctx
 }
 
 // MCPClient MCP客户端接口（用于抽象MCP服务器连接）
@@ -43,7 +51,7 @@ type MCPTool struct {
 }
 
 // NewMCPAdapter 创建新的MCP适配器
-func NewMCPAdapter(client MCPClient, logger xlog.Logger) (*MCPAdapter, error) {
+func NewMCPAdapter(ctx context.Context, client MCPClient, logger xlog.Logger) (*MCPAdapter, error) {
 	if client == nil {
 		return nil, fmt.Errorf("MCP client cannot be nil")
 	}
@@ -53,6 +61,7 @@ func NewMCPAdapter(client MCPClient, logger xlog.Logger) (*MCPAdapter, error) {
 		toolsCache: make([]types.Tool, 0),
 		toolsMap:   make(map[string]*types.Tool),
 		logger:     logger,
+		ctx:        ctx,
 	}
 
 	// 初始化时加载工具列表

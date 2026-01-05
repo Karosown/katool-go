@@ -60,7 +60,7 @@ type ClientOption func(*Client)
 func WithMCPAdapter(adapter *MCPAdapter) ClientOption {
 	return func(c *Client) {
 		c.mcpAdapter = adapter
-		c.injectMCPToolsLocked()
+		c.injectMCPToolsLocked(adapter.Context())
 	}
 }
 
@@ -68,7 +68,7 @@ func WithMCPAdapter(adapter *MCPAdapter) ClientOption {
 func WithMultiMCPAdapter(adapter *MultiMCPAdapter) ClientOption {
 	return func(c *Client) {
 		c.multiMCPAdapter = adapter
-		c.injectMCPToolsLocked()
+		c.injectMCPToolsLocked(adapter.Context())
 	}
 }
 
@@ -588,11 +588,11 @@ func (c *Client) GetMCPAdapter() *MCPAdapter {
 }
 
 // SetMCPAdapter 设置MCP适配器（单个）
-func (c *Client) SetMCPAdapter(adapter *MCPAdapter) {
+func (c *Client) SetMCPAdapter(adapter *MCPAdapter, ctx context.Context) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.mcpAdapter = adapter
-	c.injectMCPToolsLocked()
+	c.injectMCPToolsLocked(ctx)
 }
 
 // GetMultiMCPAdapter 获取多MCP适配器
@@ -607,7 +607,7 @@ func (c *Client) SetMultiMCPAdapter(adapter *MultiMCPAdapter) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.multiMCPAdapter = adapter
-	c.injectMCPToolsLocked()
+	c.injectMCPToolsLocked(adapter.Context())
 }
 
 // GetLogger 获取日志记录器
@@ -618,14 +618,14 @@ func (c *Client) GetLogger() xlog.Logger {
 }
 
 // InjectMCPTools 将当前 MCP 工具注入为本地函数代理（可显式调用）。
-func (c *Client) InjectMCPTools() {
+func (c *Client) InjectMCPTools(ctx context.Context) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.injectMCPToolsLocked()
+	c.injectMCPToolsLocked(ctx)
 }
 
 // injectMCPToolsLocked 在持锁情况下执行注入。
-func (c *Client) injectMCPToolsLocked() {
+func (c *Client) injectMCPToolsLocked(ctx context.Context) {
 	if c.mcpProxyRegistered == nil {
 		c.mcpProxyRegistered = make(map[string]bool)
 	}
@@ -662,7 +662,7 @@ func (c *Client) injectMCPToolsLocked() {
 			if err != nil {
 				return nil, err
 			}
-			return caller(context.Background(), name, string(argsBytes))
+			return caller(ctx, name, string(argsBytes))
 		}
 
 		if err := c.aiClient.RegisterFunctionWith(name, t.Function.Description, params, nil, handler); err != nil {
