@@ -588,11 +588,11 @@ func (c *Client) GetMCPAdapter() *MCPAdapter {
 }
 
 // SetMCPAdapter 设置MCP适配器（单个）
-func (c *Client) SetMCPAdapter(adapter *MCPAdapter, ctx context.Context) {
+func (c *Client) SetMCPAdapter(adapter *MCPAdapter) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.mcpAdapter = adapter
-	c.injectMCPToolsLocked(ctx)
+	c.injectMCPToolsLocked(adapter.Context())
 }
 
 // GetMultiMCPAdapter 获取多MCP适配器

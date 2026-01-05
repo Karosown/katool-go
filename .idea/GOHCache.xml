@@ -1393,6 +1393,13 @@
     </option>
     <option name="scannedPathMapping">
       <map>
+        <entry key="file://$USER_HOME$/GolandProjects/awesomeProject5/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1767632208530" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_adapter.go">
           <value>
             <ScannedPath>
@@ -1421,7 +1428,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/adapters/mark3labs_wrapper.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1765722259716" />
+              <option name="lastModified" value="1767632279031" />
             </ScannedPath>
           </value>
         </entry>
@@ -1487,7 +1494,7 @@
         <entry key="file://$PROJECT_DIR$/ai/agent/client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767630983929" />
+              <option name="lastModified" value="1767632303301" />
               <option name="schema">
                 <list>
                   <option value="Client" />

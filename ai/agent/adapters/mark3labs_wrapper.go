@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/karosown/katool-go/ai/agent"
@@ -19,7 +20,7 @@ import (
 //	import mcpclient "github.com/mark3labs/mcp-go/client"
 //	client := mcpclient.New(...)
 //	adapter, _ := adapters.NewMark3LabsAdapterFromClient(client, logger)
-func NewMark3LabsAdapterFromClient(client interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
+func NewMark3LabsAdapterFromClient(ctx context.Context, client interface{}, logger xlog.Logger) (*agent.MCPAdapter, error) {
 	if client == nil {
 		return nil, fmt.Errorf("MCP client cannot be nil")
 	}
@@ -40,5 +41,5 @@ func NewMark3LabsAdapterFromClient(client interface{}, logger xlog.Logger) (*age
 	}
 
 	// 使用接口类型创建适配器
-	return NewMark3LabsAdapter(mcpClient, logger)
+	return NewMark3LabsAdapter(ctx, mcpClient, logger)
 }
