@@ -350,7 +350,7 @@ func (c *Function) ChatWithFunctionsConversationStream(ctx context.Context, req 
 			}
 
 			// 发送后续流式请求
-			followUpStream, err := c.provider.ChatStream(followUpReq)
+			followUpStream, err := c.ChatWithFunctionsConversationStream(ctx, followUpReq)
 			if err != nil {
 				c.logger.Errorf("Follow-up stream request failed: %v", err)
 				return
