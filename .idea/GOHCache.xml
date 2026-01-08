@@ -1396,7 +1396,7 @@
         <entry key="file://$USER_HOME$/GolandProjects/awesomeProject5/main.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767632586358" />
+              <option name="lastModified" value="1767886788657" />
             </ScannedPath>
           </value>
         </entry>
@@ -1708,7 +1708,7 @@
         <entry key="file://$PROJECT_DIR$/ai/tool/function_client.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1767625218891" />
+              <option name="lastModified" value="1767887400121" />
               <option name="schema">
                 <list>
                   <option value="Function" />
@@ -3477,6 +3477,6 @@
         <entry key="zip_info" value="ZipInfo" />
       </map>
     </option>
-    <option name="lastTimeChecked" value="1767629564107" />
+    <option name="lastTimeChecked" value="1767884913283" />
   </component>
 </project>

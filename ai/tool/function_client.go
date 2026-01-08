@@ -284,11 +284,13 @@ func (c *Function) ChatWithFunctionsConversationStream(ctx context.Context, req 
 				}
 			}
 
-			// 转发响应
-			select {
-			case resultChan <- response:
-			default:
-				c.logger.Errorf("Result channel is full, dropping response")
+			if !response.IsComplete() {
+				// 转发响应
+				select {
+				case resultChan <- response:
+				default:
+					c.logger.Errorf("Result channel is full, dropping response")
+				}
 			}
 		}
 
