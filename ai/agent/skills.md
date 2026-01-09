@@ -130,3 +130,84 @@ skills:
 ### 使用建议
 - 系统提示词可直接引用上述技能名称与职责范围，用于约束 Agent 行为。
 - 技能裁剪应与业务场景对应，例如“优惠券采集”可重点使用：工具能力发现与选择 / 参数组装与校验 / 工具调用与结果整合 / 多轮工具调用编排 / MCP 工具接入能力。
+
+### Mark3Labs MCP 最小可用流程（示例）
+以下流程从 Mark3Labs MCP 客户端创建开始，展示**可直接运行的最小链路**（需替换为真实 MCP Server 启动命令）。
+
+1. 创建 MCP Client（Stdio）。
+2. 启动并初始化 MCP Client。
+3. 创建 MCP Adapter 并注入到 Agent Client。
+4. 使用 Agent 或 Client 发起带工具的对话。
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/karosown/katool-go/ai"
+	"github.com/karosown/katool-go/ai/agent"
+	"github.com/karosown/katool-go/ai/agent/adapters"
+	"github.com/karosown/katool-go/ai/types"
+	"github.com/karosown/katool-go/xlog"
+	mcpclient "github.com/mark3labs/mcp-go/client"
+	"github.com/mark3labs/mcp-go/mcp"
+)
+
+func main() {
+	ctx := context.Background()
+
+	// 1) 创建 MCP Client（使用你自己的 MCP Server 启动命令）
+	mcpStd, err := mcpclient.NewStdioMCPClient(
+		"cmd",
+		nil,
+		"/c",
+		"npx",
+		"-y",
+		"your-mcp-server",
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer mcpStd.Close()
+
+	// 2) 启动并初始化 MCP Client
+	if err := mcpStd.Start(ctx); err != nil {
+		panic(err)
+	}
+	initReq := mcp.InitializeRequest{}
+	initReq.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
+	initReq.Params.ClientInfo = mcp.Implementation{Name: "Agent Demo", Version: "1.0.0"}
+	if _, err := mcpStd.Initialize(ctx, initReq); err != nil {
+		panic(err)
+	}
+
+	// 3) 创建 Agent Client 并注入 MCP Adapter
+	logger := xlog.LogrusAdapter{}
+	aiClient, err := ai.NewClient()
+	if err != nil {
+		panic(err)
+	}
+	agentClient, err := agent.NewClient(aiClient)
+	if err != nil {
+		panic(err)
+	}
+	adapter, err := adapters.NewMark3LabsAdapterFromClient(ctx, mcpStd, logger)
+	if err != nil {
+		panic(err)
+	}
+	agentClient.SetMCPAdapter(adapter)
+
+	// 4) 发起带工具调用的对话（可替换为 Agent.Execute）
+	resp, err := agentClient.Chat(ctx, &types.ChatRequest{
+		Model:    "Qwen2",
+		Messages: []types.Message{{Role: types.RoleUser, Content: "调用工具完成任务"}},
+		Tools:    agentClient.GetAllTools(),
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(resp.Choices[0].Message.Content)
+}
+```
